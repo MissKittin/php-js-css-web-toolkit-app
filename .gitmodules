@@ -1,0 +1,4 @@
+[submodule "tk"]
+	path = tk
+	url = ../php-js-css-web-toolkit.git
+	branch = master
