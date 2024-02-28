@@ -7,5 +7,6 @@
 		<link rel="stylesheet" href="/assets/default_bright.css">
 		<noscript><link rel="stylesheet" href="/assets/default_bright_noscript.css"></noscript>
 		<meta name="viewport" content="width=device-width,initial-scale=1">
+		<?php if(is_file(__DIR__.'/favicon.html')) readfile(__DIR__.'/favicon.html'); ?>
 	</head>
 	<body>

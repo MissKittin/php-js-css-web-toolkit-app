@@ -70,6 +70,9 @@
 				$entrypoint
 			)
 		);
+		$entrypoint=file_get_contents('./entrypoint.php');
+		$entrypoint=str_replace("\n\n\t".'error_log(basename(__FILE__).\' finished\');', '', $entrypoint);;
+		file_put_contents('./entrypoint.php', $entrypoint);
 		unset($entrypoint);
 	echo ' [ OK ]'.PHP_EOL;
 
