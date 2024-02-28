@@ -37,8 +37,8 @@
 		'./templates/samples/default/assets/default_dark.css'=>'./assets/default_dark.css',
 		'./templates/samples/default/assets/default.js'=>'./assets/default.js',
 		'../tk/lib/sendNotification.js'=>'./assets/sendNotification.js',
-		'../tk/com/login/assets/login_bright.css'=>'./assets/login_bright.css',
-		'../tk/com/login/assets/login_dark.css'=>'./assets/login_dark.css',
+		'../tk/com/login/templates/default/assets/login_default_bright.css'=>'./assets/login_default_bright.css',
+		'../tk/com/login/templates/default/assets/login_default_dark.css'=>'./assets/login_default_dark.css',
 		'../tk/com/middleware_form/assets/middleware_form_bright.css'=>'./assets/middleware_form_bright.css',
 		'../tk/com/middleware_form/assets/middleware_form_dark.css'=>'./assets/middleware_form_dark.css'
 	];
@@ -47,8 +47,8 @@
 		'../templates/samples/default/assets/default_dark.css'=>'./assets/default_dark.css',
 		'../templates/samples/default/assets/default.js'=>'./assets/default.js',
 		'../../tk/lib/sendNotification.js'=>'./assets/sendNotification.js',
-		'../../tk/com/login/assets/login_bright.css'=>'./assets/login_bright.css',
-		'../../tk/com/login/assets/login_dark.css'=>'./assets/login_dark.css',
+		'../../tk/com/login/templates/default/assets/login_default_bright.css'=>'./assets/login_default_bright.css',
+		'../../tk/com/login/templates/default/assets/login_default_dark.css'=>'./assets/login_default_dark.css',
 		'../../tk/com/middleware_form/assets/middleware_form_bright.css'=>'./assets/middleware_form_bright.css',
 		'../../tk/com/middleware_form/assets/middleware_form_dark.css'=>'./assets/middleware_form_dark.css'
 	];
@@ -57,8 +57,8 @@
 		'.\\assets\\default_dark.css'=>'..\\templates\\samples\\default\\assets\\default_dark.css',
 		'.\\assets\\default.js'=>'..\\templates\\samples\\default\\assets\\default.js',
 		'.\\assets\\sendNotification.js'=>'..\\..\\tk\\lib\\sendNotification.js',
-		'.\\assets\\login_bright.css'=>'..\\..\\tk\\com\\login\\assets\\login_bright.css',
-		'.\\assets\\login_dark.css'=>'..\\..\\tk\\com\\login\\assets\\login_dark.css',
+		'.\\assets\\login_default_bright.css'=>'..\\..\\tk\\com\\login\\templates\\default\\assets\\login_default_bright.css',
+		'.\\assets\\login_default_dark.css'=>'..\\..\\tk\\com\\login\\templates\\default\\assets\\login_default_dark.css',
 		'.\\assets\\middleware_form_bright.css'=>'..\\..\\tk\\com\\middleware_form\\assets\\middleware_form_bright.css',
 		'.\\assets\\middleware_form_dark.css'=>'..\\..\\tk\\com\\middleware_form\\assets\\middleware_form_dark.css'
 	];

@@ -31,7 +31,10 @@
 	];
 
 	// socket has priority over the host/port
-	if(getenv('PGSQL_SOCKET') !== false)
+	if(
+		(getenv('DB_IGNORE_ENV') !== 'true') &&
+		(getenv('PGSQL_SOCKET') !== false)
+	)
 		$db_config['socket']=getenv('PGSQL_SOCKET');
 
 	// you can implement the var/databases hierarchy

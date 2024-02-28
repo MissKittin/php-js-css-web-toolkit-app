@@ -31,7 +31,10 @@
 	];
 
 	// socket has priority over the host/port
-	if(getenv('MYSQL_SOCKET') !== false)
+	if(
+		(getenv('DB_IGNORE_ENV') !== 'true') &&
+		(getenv('MYSQL_SOCKET') !== false)
+	)
 		$db_config['socket']=getenv('MYSQL_SOCKET');
 
 	// you can implement the var/databases hierarchy

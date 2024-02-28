@@ -53,6 +53,11 @@
 	 *   use add_style_header()
 	 *  script [array]
 	 *   use add_style_header()
+	 *
+	 * Favicon:
+	 *  paste the headers into the favicon.html file
+	 *  in the views directory.
+	 *  the content will be appended to the head section
 	 */
 
 	if(!class_exists('registry'))
@@ -69,7 +74,9 @@
 
 			require __DIR__.'/default_csp_header.php';
 
-			@include $view_path.'/template_config.php';
+			if(file_exists($view_path.'/template_config.php'))
+				include $view_path.'/template_config.php';
+
 			require __DIR__.'/views/top.php';
 
 			if(str_ends_with($page_content, '.php'))
@@ -174,7 +181,9 @@
 					return $content;
 				});
 
-			@include $view_path.'/template_config.php';
+			if(file_exists($view_path.'/template_config.php'))
+				include $view_path.'/template_config.php';
+
 			require __DIR__.'/views/top.php';
 
 			if(str_ends_with($page_content, '.php'))

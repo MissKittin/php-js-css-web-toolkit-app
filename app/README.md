@@ -84,11 +84,13 @@ You can configure the database connection through the following environment vari
 You can configure the database connection through the following environment variables:
 * `MEMCACHED_HOST` (default: 127.0.0.1)
 * `MEMCACHED_PORT` (default: 11211)
-* `MEMCACHED_IGNORE_ENV=true` (ignores all the variables above)
+* `MEMCACHED_SOCKET` (has priority over the host/port)
+* `MEMCACHED_IGNORE_ENV=true` (ignores all memcached variables above)
 * `REDIS_HOST` (default: 127.0.0.1)
 * `REDIS_PORT` (default: 6379)
+* `REDIS_SOCKET` (has priority over the host/port
 * `REDIS_DBINDEX` (default: 0)
-* `REDIS_IGNORE_ENV=true` (ignores all the variables above)
+* `REDIS_IGNORE_ENV=true` (ignores all redis variables above)
 
 ### Libraries
 * `app_template.php` - an overlay for the default template that saves typing

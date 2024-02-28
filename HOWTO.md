@@ -9,6 +9,18 @@ You can also run the HTTP server to test the CSS and Js libraries on the web bro
 ```
 php ./tk/bin/run-phtml-tests.php
 ```
+You can also provide the path to the directory with tests for the above tools:
+```
+php ./tk/bin/run-phtml-tests.php ./path/to/lib/tests
+php ./tk/bin/run-php-com-tests.php ./path/to/com-directory
+```
+
+# Removing documentation
+All library documentation is contained within the libraries themselves.  
+You can reduce the size of php files:
+```
+php ./tk/bin/strip-php-files.php ./tk
+```
 
 # Packing the toolkit into Phar
 If a better option is to pack the libraries and components into one file,  
@@ -23,6 +35,16 @@ require 'phar://'
 .	'./tk.phar'
 .	'/com/admin_panel/admin_panel.php'
 ;
+```
+If you don't need the css and js files, you can ignore them:
+```
+cd ./tk
+php -d phar.readonly=0 ./bin/mkphar.php --compress=gz --source=com --source=lib --ignore=assets/ --ignore=bin/ --ignore=tests/ --ignore=tmp/ --ignore=README.md --ignore=.js --ignore=.css --output=../tk.phar
+```
+and if you only need to include one file(s), use the --include option:
+```
+cd ./tk
+php -d phar.readonly=0 ./bin/mkphar.php --compress=gz --source=com --source=lib --ignore=assets/ --ignore=bin/ --ignore=tests/ --ignore=tmp/ --ignore=README.md --ignore=.js --ignore=.css --include=/sleep.js --output=../tk.phar
 ```
 
 # Installing Composer
@@ -170,15 +192,19 @@ HTTP only:
 
 	# Use PHP-FPM (you need to a2enmod proxy_fcgi)
 	#<FilesMatch \.php$>
-	#	SetHandler "proxy:unix:/run/php/php7.3-fpm.sock|fcgi://localhost"
+	#	SetHandler "proxy:unix:/run/php/php-fpm.sock|fcgi://localhost"
 	#</FilesMatch>
 
-	# Proxy to the websockets.php server
+	# Proxy to the websockets.php server (you need to a2enmod proxy_wstunnel)
+	# warning: tests failed, may not work
 	#RewriteEngine on
 	#RewriteCond %{REQUEST_URI} !/ws$
 	#RewriteCond %{HTTP:Upgrade} websocket [NC]
 	#RewriteCond %{HTTP:Connection} Upgrade [NC]
+	# via TCP
 	#RewriteRule .* ws://localhost:8081%{REQUEST_URI} [P,L]
+	# or via Unix Domain Socket
+	#RewriteRule .* unix:/path/to/websockets.sock [P,L]
 
 	ErrorLog ${APACHE_LOG_DIR}/error.log
 	CustomLog ${APACHE_LOG_DIR}/access.log combined
@@ -223,15 +249,19 @@ HTTPS only:
 
 	# Use PHP-FPM (you need to a2enmod proxy_fcgi)
 	#<FilesMatch \.php$>
-	#	SetHandler "proxy:unix:/run/php/php7.3-fpm.sock|fcgi://localhost"
+	#	SetHandler "proxy:unix:/run/php/php-fpm.sock|fcgi://localhost"
 	#</FilesMatch>
 
-	# Proxy to the websockets.php server
+	# Proxy to the websockets.php server (you need to a2enmod proxy_wstunnel)
+	# warning: tests failed, may not work
 	#RewriteEngine on
 	#RewriteCond %{REQUEST_URI} !/ws$
 	#RewriteCond %{HTTP:Upgrade} websocket [NC]
 	#RewriteCond %{HTTP:Connection} Upgrade [NC]
+	# via TCP
 	#RewriteRule .* ws://localhost:8081%{REQUEST_URI} [P,L]
+	# or via Unix Domain Socket
+	#RewriteRule .* unix:/path/to/websockets.sock [P,L]
 
 	ErrorLog ${APACHE_LOG_DIR}/error.log
 	CustomLog ${APACHE_LOG_DIR}/access.log combined
@@ -278,7 +308,11 @@ server {
 	#		break;
 	#	}
 
+	#	via TCP
 	#	proxy_pass http://127.0.0.1:8081;
+	#	or via Unix Domain Socket
+	#	proxy_pass http://unix:/path/to/websockets.sock;
+
 	#	proxy_http_version 1.1;
 	#	proxy_set_header Upgrade $http_upgrade;
 	#	proxy_set_header Connection "Upgrade";
@@ -287,7 +321,7 @@ server {
 
 	location ~ \.php$ {
 		include snippets/fastcgi-php.conf;
-		fastcgi_pass unix:/run/php/php7.3-fpm.sock;
+		fastcgi_pass unix:/run/php/php-fpm.sock;
 
 		# Remove the following code
 		# if the application is to be
@@ -345,7 +379,11 @@ server {
 	#		break;
 	#	}
 
+	#	via TCP
 	#	proxy_pass http://127.0.0.1:8081;
+	#	or via Unix Domain Socket
+	#	proxy_pass http://unix:/path/to/websockets.sock;
+
 	#	proxy_http_version 1.1;
 	#	proxy_set_header Upgrade $http_upgrade;
 	#	proxy_set_header Connection "Upgrade";
@@ -354,7 +392,7 @@ server {
 
 	location ~ \.php$ {
 		include snippets/fastcgi-php.conf;
-		fastcgi_pass unix:/run/php/php7.3-fpm.sock;
+		fastcgi_pass unix:/run/php/php-fpm.sock;
 
 		# Remove the following code
 		# if the application is to be
@@ -429,7 +467,11 @@ server {
 	#		break;
 	#	}
 
+	#	via TCP
 	#	proxy_pass http://127.0.0.1:8081;
+	#	or via Unix Domain Socket
+	#	proxy_pass http://unix:/path/to/websockets.sock;
+
 	#	proxy_http_version 1.1;
 	#	proxy_set_header Upgrade $http_upgrade;
 	#	proxy_set_header Connection "Upgrade";
@@ -438,7 +480,7 @@ server {
 
 	location ~ \.php$ {
 		include snippets/fastcgi-php.conf;
-		fastcgi_pass unix:/run/php/php7.3-fpm.sock;
+		fastcgi_pass unix:/run/php/php-fpm.sock;
 
 		# Remove the following code
 		# if the application is to be

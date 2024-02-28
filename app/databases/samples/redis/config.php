@@ -15,9 +15,18 @@
 			return $value;
 		};
 
-	return [
+	$db_config=[
 		'host'=>$db_getenv('REDIS_HOST', '127.0.0.1'),
-		'port'=>$db_getenv('REDIS_PORT', 6379),
-		'dbindex'=>$db_getenv('REDIS_DBINDEX', 0)
+		'port'=>(int)$db_getenv('REDIS_PORT', 6379),
+		'dbindex'=>(int)$db_getenv('REDIS_DBINDEX', 0)
 	];
+
+	// socket has priority over the host/port
+	if(
+		(getenv('REDIS_IGNORE_ENV') !== 'true') &&
+		(getenv('REDIS_SOCKET') !== false)
+	)
+		$db_config['socket']=getenv('REDIS_SOCKET');
+
+	return $db_config;
 ?>
