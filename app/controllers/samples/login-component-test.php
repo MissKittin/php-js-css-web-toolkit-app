@@ -1,49 +1,33 @@
 <?php
-	// replace long $array['a']['b']['c']='d' with nice array
-	// because if you declare $array=['a'=>['b'=>['c'=>'d']]],
-	// default settings will be lost
-	function configure_login_component($params)
-	{
-		foreach($params as $section=>$options)
-		{
-			if(is_array($options))
-				foreach($options as $option=>$value)
-					$GLOBALS['_login'][$section][$option]=$value;
-			else
-				$GLOBALS['_login'][$section]=$options;
-		}
-	}
-
 	// enable logging
 	define('LOGGER_APP_NAME', 'login-component-test');
 	require APP_LIB.'/samples/logger.php';
 
-	$GLOBALS['_login']['credentials']=login_component_test_credentials::read_password(); // model
+	login_com_reg::_()['credentials']=login_component_test_credentials::read_password(); // model
 
 	// configure the login component
-	configure_login_component([
-		'config'=>[
-			'method'=>'login_single'
-		],
-		'view'=>[
-			'lang'=>'pl',
-			'title'=>'Logowanie',
-			'login_style'=>'login_bright.css',
-			'login_label'=>'Nazwa użytkownika',
-			'password_label'=>'Hasło',
-			'remember_me_label'=>'Zapamiętaj mnie',
-			'wrong_credentials_label'=>'Nieprawidłowa nazwa użytkownika lub hasło',
-			'submit_button_label'=>'Zaloguj',
-			'loading_title'=>'Ładowanie...',
-			'loading_label'=>'Ładowanie...'
-		]
-	]);
-	// this cookie is from app/templates/samples/default/assets/default.js/darkTheme.js
-	if(
+	login_com_reg_config::_()['method']='login_single';
+	login_com_reg_view::_()['lang']='pl';
+	login_com_reg_view::_()['title']='Logowanie';
+	login_com_reg_view::_()['login_style']='login_default_bright.css';
+	login_com_reg_view::_()['login_label']='Nazwa użytkownika';
+	login_com_reg_view::_()['password_label']='Hasło';
+	login_com_reg_view::_()['remember_me_label']='Zapamiętaj mnie';
+	login_com_reg_view::_()['wrong_credentials_label']='Nieprawidłowa nazwa użytkownika lub hasło';
+	login_com_reg_view::_()['submit_button_label']='Zaloguj';
+	login_com_reg_view::_()['loading_title']='Ładowanie...';
+	login_com_reg_view::_()['loading_label']='Ładowanie...';
+
+	if(getenv('APP_INLINE_ASSETS') === 'yes')
+		login_com_reg_view::_()['inline_style']=true;
+
+	if(getenv('APP_MATERIALIZED') === 'yes')
+		login_com_reg_view::_()['template']='materialized';
+	else if(
 		isset($_COOKIE['app_dark_theme']) &&
-		($_COOKIE['app_dark_theme'] === 'true')
+		($_COOKIE['app_dark_theme'] === 'true') // from app/templates/samples/default/assets/default.js/darkTheme.js
 	)
-		$GLOBALS['_login']['view']['login_style']='login_dark.css';
+		login_com_reg_view::_()['login_style']='login_default_dark.css';
 
 	// add bruteforce protection
 	require APP_LIB.'/samples/pdo_instance.php';
@@ -63,42 +47,38 @@
 		$_POST=[];
 
 		// remove this block to hide from the user any info that has been banned
-		configure_login_component([
-			'view'=>[
-				'login_box_disabled'=>true,
-				'password_box_disabled'=>true,
-				'remember_me_box_disabled'=>true,
-				'submit_button_disabled'=>true,
-				'wrong_credentials_label'=>'Zostałeś zbanowany. Wróć później.'
-			],
-			'wrong_credentials'=>true
-		]);
+		login_com_reg_view::_()['login_box_disabled']=true;
+		login_com_reg_view::_()['password_box_disabled']=true;
+		login_com_reg_view::_()['remember_me_box_disabled']=true;
+		login_com_reg_view::_()['submit_button_disabled']=true;
+		login_com_reg_view::_()['wrong_credentials_label']='Zostałeś zbanowany. Wróć później.';
+		login_com_reg::_()['wrong_credentials']=true;
 
-		require TK_COM.'/login/login.php';
+		login_com();
 		exit();
 	}
 
 	// define callbacks for the login component
-	configure_login_component([
-		'config'=>[
-			'on_login_prompt'=>function(){
-				log_infos()->info('Login prompt requested');
-			},
-			'on_login_success'=>function(){
-				log_infos()->info('User logged in');
-			},
-			'on_login_failed'=>function() use($sec_bruteforce){
-				log_fails()->info($_SERVER['REMOTE_ADDR'].' login failed');
-				$sec_bruteforce->add();
-			},
-			'on_logout'=>function(){
-				log_infos()->info('User logged out');
-			}
-		]
-	]);
+	login_com_reg_config::_()['on_login_prompt']=function()
+	{
+		log_infos()->info('Login prompt requested');
+	};
+	login_com_reg_config::_()['on_login_success']=function()
+	{
+		log_infos()->info('User logged in');
+	};
+	login_com_reg_config::_()['on_login_failed']=function()
+	{
+		log_fails()->info($_SERVER['REMOTE_ADDR'].' login failed');
+		$sec_bruteforce->add();
+	};
+	login_com_reg_config::_()['on_logout']=function()
+	{
+		log_infos()->info('User logged out');
+	};
 
 	// display login prompt
-	require TK_COM.'/login/login.php';
+	login_com();
 
 	if(is_logged())
 	{
@@ -119,7 +99,11 @@
 			if((!isset($_POST['captcha'])) || (!captcha_check($_POST['captcha'])))
 			{
 				require TK_COM.'/middleware_form/middleware_form.php';
-				$captcha_form=new middleware_form();
+
+				if(getenv('APP_MATERIALIZED') === 'yes')
+					$captcha_form=new middleware_form('materialized');
+				else
+					$captcha_form=new middleware_form();
 
 				$captcha_form
 					->add_html_header(
@@ -135,18 +119,21 @@
 					->add_csp_header('style-src', '\'unsafe-hashes\'')
 					->add_csp_header('style-src', '\'sha256-N6tSydZ64AHCaOWfwKbUhxXx2fRFDxHOaL3e3CO7GPI=\'');
 
-				// this cookie is from app/templates/samples/default/assets/default.js/darkTheme.js
-				if(
-					isset($_COOKIE['app_dark_theme']) &&
-					($_COOKIE['app_dark_theme'] === 'true')
-				)
-					$captcha_form->add_config('middleware_form_style', 'middleware_form_dark.css');
-				else
-					$captcha_form->add_config('middleware_form_style', 'middleware_form_bright.css');
+				if(getenv('APP_MATERIALIZED') !== 'yes')
+					if(
+						isset($_COOKIE['app_dark_theme']) &&
+						($_COOKIE['app_dark_theme'] === 'true') // from app/templates/samples/default/assets/default.js/darkTheme.js
+					)
+						$captcha_form->add_config('middleware_form_style', 'middleware_form_default_dark.css');
+					else
+						$captcha_form->add_config('middleware_form_style', 'middleware_form_default_bright.css');
 
 				$captcha_form
 					->add_config('title', 'Weryfikacja')
 					->add_config('submit_button_label', 'Dalej');
+
+				if(getenv('APP_INLINE_ASSETS') === 'yes')
+					$captcha_form->add_config('inline_style', true);
 
 				$captcha_form
 					->add_field([
@@ -168,7 +155,7 @@
 					]);
 
 				if($captcha_form->is_form_sent())
-					require TK_COM.'/login/reload.php'; // display reload page
+					login_com_reload(false); // display reload page, do not exit()
 				else
 					$captcha_form->view();
 
@@ -177,8 +164,7 @@
 
 			$_SESSION['captcha_verified']=true;
 
-			require TK_COM.'/login/reload.php'; // display reload page
-			exit();
+			login_com_reload(); // display reload page and exit()
 		}
 
 		// captcha test passed, change password on first login
@@ -192,13 +178,13 @@
 				return false;
 			}
 
-			if(password_verify($new_password, $GLOBALS['_login']['credentials'][1]))
+			if(password_verify($new_password, login_com_reg::_()['credentials'][1]))
 			{
 				$change_password_form->add_error_message('Nowe hasło nie może być takie samo jak stare');
 				return false;
 			}
 
-			if(!password_verify($old_password, $GLOBALS['_login']['credentials'][1]))
+			if(!password_verify($old_password, login_com_reg::_()['credentials'][1]))
 			{
 				$change_password_form->add_error_message('Stare hasło jest nieprawidłowe');
 				return false;
@@ -210,7 +196,11 @@
 		if(login_component_test_credentials::change_password_requested())
 		{
 			require TK_COM.'/middleware_form/middleware_form.php';
-			$change_password_form=new middleware_form();
+
+			if(getenv('APP_MATERIALIZED') === 'yes')
+				$change_password_form=new middleware_form('materialized');
+			else
+				$change_password_form=new middleware_form();
 
 			if(
 				$change_password_form->is_form_sent() &&
@@ -224,23 +214,25 @@
 				login_component_test_credentials::save_new_password($_POST['new_password']);
 				log_infos()->info('Password updated');
 
-				require TK_COM.'/login/reload.php'; // display reload page
-				exit();
+				login_com_reload(); // display reload page
 			}
 			else
 			{
-				// this cookie is from app/templates/samples/default/assets/default.js/darkTheme.js
-				if(
-					isset($_COOKIE['app_dark_theme']) &&
-					($_COOKIE['app_dark_theme'] === 'true')
-				)
-					$change_password_form->add_config('middleware_form_style', 'middleware_form_dark.css');
-				else
-					$change_password_form->add_config('middleware_form_style', 'middleware_form_bright.css');
+				if(getenv('APP_MATERIALIZED') !== 'yes')
+					if(
+						isset($_COOKIE['app_dark_theme']) &&
+						($_COOKIE['app_dark_theme'] === 'true') // from app/templates/samples/default/assets/default.js/darkTheme.js
+					)
+						$change_password_form->add_config('middleware_form_style', 'middleware_form_default_dark.css');
+					else
+						$change_password_form->add_config('middleware_form_style', 'middleware_form_default_bright.css');
 
 				$change_password_form
 					->add_config('title', 'Zmiana hasła')
 					->add_config('submit_button_label', 'Zmień hasło');
+
+				if(getenv('APP_INLINE_ASSETS') === 'yes')
+					$change_password_form->add_config('inline_style', true);
 
 				$change_password_form
 					->add_field([

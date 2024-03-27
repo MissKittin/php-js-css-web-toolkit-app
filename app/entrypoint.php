@@ -4,6 +4,9 @@
 
 	chdir(APP_ROOT);
 
+	if(file_exists(APP_ROOT.'/composer.json'))
+		require APP_ROOT.'/vendor/autoload.php';
+
 	if(
 		(!isset($_SERVER['REQUEST_URI'])) ||
 		(!isset($_SERVER['REQUEST_METHOD']))
