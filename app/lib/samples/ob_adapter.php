@@ -14,9 +14,9 @@
 	 *  ob_adapter_gunzip - decompress if browser does not support gzip
 	 *
 	 * See:
-	 *  controllers/samples/404.php
-	 *  controllers/samples/home.php
-	 *  controllers/samples/obsfucate-html.php
+	 *  controllers/samples/http_error.php
+	 *  routes/samples/home.php
+	 *  routes/samples/obsfucate-html.php
 	 */
 
 	class ob_adapter
@@ -130,6 +130,7 @@
 					header_remove('Content-Encoding');
 
 				$raw_buffer=gzdecode($buffer);
+
 				if($raw_buffer !== false)
 					return $raw_buffer;
 			}
@@ -144,6 +145,7 @@
 
 		public function __construct($output_file)
 		{
+			header('Cache-Control: public, max-age=31536000');
 			parent::{__FUNCTION__}(VAR_CACHE.'/'.$output_file);
 		}
 	}

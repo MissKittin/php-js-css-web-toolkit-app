@@ -12,9 +12,9 @@
 	 *
 	 * See:
 	 *  bin/session-clean.php
-	 *  controllers/samples/database-test.php
-	 *  controllers/samples/login-component-test.php
-	 *  controllers/samples/login-library-test.php
+	 *  routes/samples/database-test.php
+	 *  routes/samples/login-component-test.php
+	 *  routes/samples/login-library-test.php
 	 */
 
 	if(isset($_SESSION_CLEAN_TOOL))

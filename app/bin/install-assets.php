@@ -39,8 +39,8 @@
 		'../tk/lib/sendNotification.js'=>'./assets/sendNotification.js',
 		'../tk/com/login/templates/default/assets/login_default_bright.css'=>'./assets/login_default_bright.css',
 		'../tk/com/login/templates/default/assets/login_default_dark.css'=>'./assets/login_default_dark.css',
-		'../tk/com/middleware_form/assets/middleware_form_bright.css'=>'./assets/middleware_form_bright.css',
-		'../tk/com/middleware_form/assets/middleware_form_dark.css'=>'./assets/middleware_form_dark.css'
+		'../tk/com/middleware_form/templates/default/assets/middleware_form_default_bright.css'=>'./assets/middleware_form_default_bright.css',
+		'../tk/com/middleware_form/templates/default/assets/middleware_form_default_dark.css'=>'./assets/middleware_form_default_dark.css'
 	];
 	$files_nix=[
 		'../templates/samples/default/assets/default_bright.css'=>'./assets/default_bright.css',
@@ -49,8 +49,8 @@
 		'../../tk/lib/sendNotification.js'=>'./assets/sendNotification.js',
 		'../../tk/com/login/templates/default/assets/login_default_bright.css'=>'./assets/login_default_bright.css',
 		'../../tk/com/login/templates/default/assets/login_default_dark.css'=>'./assets/login_default_dark.css',
-		'../../tk/com/middleware_form/assets/middleware_form_bright.css'=>'./assets/middleware_form_bright.css',
-		'../../tk/com/middleware_form/assets/middleware_form_dark.css'=>'./assets/middleware_form_dark.css'
+		'../../tk/com/middleware_form/templates/default/assets/middleware_form_bright.css'=>'./assets/middleware_form_default_bright.css',
+		'../../tk/com/middleware_form/templates/default/assets/middleware_form_dark.css'=>'./assets/middleware_form_default_dark.css'
 	];
 	$files_win=[
 		'.\\assets\\default_bright.css'=>'..\\templates\\samples\\default\\assets\\default_bright.css',
@@ -59,8 +59,8 @@
 		'.\\assets\\sendNotification.js'=>'..\\..\\tk\\lib\\sendNotification.js',
 		'.\\assets\\login_default_bright.css'=>'..\\..\\tk\\com\\login\\templates\\default\\assets\\login_default_bright.css',
 		'.\\assets\\login_default_dark.css'=>'..\\..\\tk\\com\\login\\templates\\default\\assets\\login_default_dark.css',
-		'.\\assets\\middleware_form_bright.css'=>'..\\..\\tk\\com\\middleware_form\\assets\\middleware_form_bright.css',
-		'.\\assets\\middleware_form_dark.css'=>'..\\..\\tk\\com\\middleware_form\\assets\\middleware_form_dark.css'
+		'.\\assets\\middleware_form_default_bright.css'=>'..\\..\\tk\\com\\middleware_form\\templates\\default\\assets\\middleware_form_default_bright.css',
+		'.\\assets\\middleware_form_default_dark.css'=>'..\\..\\tk\\com\\middleware_form\\templates\\default\\assets\\middleware_form_default_dark.css'
 	];
 
 	switch($argv[1])

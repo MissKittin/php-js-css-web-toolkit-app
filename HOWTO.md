@@ -1,4 +1,37 @@
 # Testing toolkit
+Before testing you can export environment variables:
+```
+export TEST_DB_TYPE=pgsql # pgsql, mysql, sqlite; default: sqlite
+
+export TEST_PGSQL_HOST=127.0.0.1 # default
+export TEST_PGSQL_PORT=5432 # default
+export TEST_PGSQL_SOCKET=/var/run/postgresql # has priority over the HOST
+export TEST_PGSQL_DBNAME=php_toolkit_tests # default
+export TEST_PGSQL_USER=postgres # default
+export TEST_PGSQL_PASSWORD=postgres # default
+
+export TEST_MYSQL_HOST=[::1] # default
+export TEST_MYSQL_PORT=3306 # default
+export TEST_MYSQL_SOCKET=/var/run/mysqld/mysqld.sock # has priority over the HOST
+export TEST_MYSQL_DBNAME=php_toolkit_tests # default
+export TEST_MYSQL_USER=root # default
+export TEST_MYSQL_PASSWORD=mypassword # not set by default
+
+export TEST_REDIS=yes # default: no
+export TEST_REDIS_HOST=127.0.0.1 # default
+export TEST_REDIS_SOCKET=/var/run/redis/redis.sock # has priority over the HOST
+export TEST_REDIS_PORT=6379 # default
+export TEST_REDIS_DBINDEX=0 # default
+export TEST_REDIS_USER=myuser # not set by default
+export TEST_REDIS_PASSWORD=mypass # not set by default
+
+export TEST_MEMCACHED=yes # default: no
+export TEST_MEMCACHED_HOST=127.0.0.1 # default
+export TEST_MEMCACHED_SOCKET=/var/run/memcached/memcached.sock # has priority over the HOST
+export TEST_MEMCACHED_PORT=11211 # default
+
+export TEST_APCU=yes # default: no
+```
 To check if all libraries and components will work on your server, run:
 ```
 php ./tk/bin/run-php-bin-tests.php
@@ -90,6 +123,7 @@ For more info, run:
 ```
 php ./tk/bin/websockets.php
 ```
+*Warning: Chrome doesn't allow unsecure websocket (ws) connections, so it may not work on HTTP!*
 
 ### Compiling assets
 Run
@@ -196,15 +230,11 @@ HTTP only:
 	#</FilesMatch>
 
 	# Proxy to the websockets.php server (you need to a2enmod proxy_wstunnel)
-	# warning: tests failed, may not work
 	#RewriteEngine on
 	#RewriteCond %{REQUEST_URI} !/ws$
 	#RewriteCond %{HTTP:Upgrade} websocket [NC]
 	#RewriteCond %{HTTP:Connection} Upgrade [NC]
-	# via TCP
 	#RewriteRule .* ws://localhost:8081%{REQUEST_URI} [P,L]
-	# or via Unix Domain Socket
-	#RewriteRule .* unix:/path/to/websockets.sock [P,L]
 
 	ErrorLog ${APACHE_LOG_DIR}/error.log
 	CustomLog ${APACHE_LOG_DIR}/access.log combined
@@ -253,15 +283,11 @@ HTTPS only:
 	#</FilesMatch>
 
 	# Proxy to the websockets.php server (you need to a2enmod proxy_wstunnel)
-	# warning: tests failed, may not work
 	#RewriteEngine on
 	#RewriteCond %{REQUEST_URI} !/ws$
 	#RewriteCond %{HTTP:Upgrade} websocket [NC]
 	#RewriteCond %{HTTP:Connection} Upgrade [NC]
-	# via TCP
 	#RewriteRule .* ws://localhost:8081%{REQUEST_URI} [P,L]
-	# or via Unix Domain Socket
-	#RewriteRule .* unix:/path/to/websockets.sock [P,L]
 
 	ErrorLog ${APACHE_LOG_DIR}/error.log
 	CustomLog ${APACHE_LOG_DIR}/access.log combined
@@ -308,9 +334,9 @@ server {
 	#		break;
 	#	}
 
-	#	via TCP
+	#	# via TCP
 	#	proxy_pass http://127.0.0.1:8081;
-	#	or via Unix Domain Socket
+	#	# or via Unix Domain Socket
 	#	proxy_pass http://unix:/path/to/websockets.sock;
 
 	#	proxy_http_version 1.1;
@@ -379,9 +405,9 @@ server {
 	#		break;
 	#	}
 
-	#	via TCP
+	#	# via TCP
 	#	proxy_pass http://127.0.0.1:8081;
-	#	or via Unix Domain Socket
+	#	# or via Unix Domain Socket
 	#	proxy_pass http://unix:/path/to/websockets.sock;
 
 	#	proxy_http_version 1.1;
@@ -467,9 +493,9 @@ server {
 	#		break;
 	#	}
 
-	#	via TCP
+	#	# via TCP
 	#	proxy_pass http://127.0.0.1:8081;
-	#	or via Unix Domain Socket
+	#	# or via Unix Domain Socket
 	#	proxy_pass http://unix:/path/to/websockets.sock;
 
 	#	proxy_http_version 1.1;

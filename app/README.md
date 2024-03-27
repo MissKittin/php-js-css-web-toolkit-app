@@ -9,11 +9,22 @@
 	```
 	php ./app/bin/install-assets.php
 	```
-	and follow the prompts
+	and follow the prompts  
+	or you can use inline assets (but this is not recommended)  
+	```
+	export APP_INLINE_ASSETS=yes
+	```
 3) compile assets to the public directory:  
 	```
 	php ./tk/bin/assets-compiler.php ./app/assets ./public/assets
 	```
+
+# Materialized template
+To enable the materialized template for components, set the environment variable:  
+```
+export APP_MATERIALIZED=yes
+```
+
 
 # Removing samples
 All example code is in `samples` dirs - ignore this fact.  
@@ -109,3 +120,16 @@ You can configure the database connection through the following environment vari
 * `remove-samples.php`
 * `replace-public-index-with-link.php`
 * `session-clean.php` - remove stale sessions (if the application stores the session content in files)
+
+### Predis
+Predis is not officially supported, but you can test if it (not) works as ob_cache.  
+You need composer - one of the methods of installing this invention is described in `HOWTO.md`  
+Install Predis:
+```
+php ./tk/bin/composer.phar --optimize-autoloader --no-cache require predis/predis
+```
+then set the environment variable:
+```
+export REDIS_PREDIS=true
+```
+All `REDIS_*` variables are respected

@@ -10,7 +10,7 @@
 		 *
 		 * See:
 		 *  controllers/samples/login-component-test.php
-		 *  models/samples/database_test_abstract.php.php
+		 *  models/samples/database_test_model.php
 		 */
 
 		static $pdo_handler=null;
