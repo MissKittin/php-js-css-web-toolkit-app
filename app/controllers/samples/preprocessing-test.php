@@ -5,12 +5,15 @@
 
 		public static function main($view)
 		{
-			// ./var/lib/preprocessing-test.php won't be refreshed
+			// ./var/lib/preprocessing-test/preprocessing-test.php won't be refreshed
 			$view['cache_created']=false;
 
-			if(!file_exists(VAR_LIB.'/preprocessing-test.php'))
+			if(!file_exists(VAR_LIB.'/preprocessing-test/preprocessing-test.php'))
 			{
-				$cache_object=new self(VAR_LIB.'/preprocessing-test.php');
+				if(!file_exists(VAR_LIB.'/preprocessing-test'))
+					mkdir(VAR_LIB.'/preprocessing-test');
+
+				$cache_object=new self(VAR_LIB.'/preprocessing-test/preprocessing-test.php');
 
 				if(strtoupper(substr(PHP_OS, 0, 3)) === 'WIN')
 					$cache_object->push('$view[\'windows\']=true;');
@@ -27,7 +30,7 @@
 				unset($cache_object);
 			}
 
-			require VAR_LIB.'/preprocessing-test.php';
+			require VAR_LIB.'/preprocessing-test/preprocessing-test.php';
 
 			return $view;
 		}

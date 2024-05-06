@@ -1,84 +1,99 @@
 <?php
 	// enable logging
-	define('LOGGER_APP_NAME', 'login-component-test');
-	require APP_LIB.'/samples/logger.php';
+		define('LOGGER_APP_NAME', 'login-component-test');
+		require APP_LIB.'/samples/logger.php';
+
+	// enable translation
+		require TK_LIB.'/string_translator.php';
+
+		$labels_lang='en';
+
+		if(isset($_SERVER['HTTP_ACCEPT_LANGUAGE']))
+			foreach(['pl', $labels_lang] as $labels_lang)
+				if(str_starts_with($_SERVER['HTTP_ACCEPT_LANGUAGE'], $labels_lang))
+					break;
+
+		$labels=new string_translator(string_translator::from_json(
+			file_get_contents(APP_VIEW.'/samples/login-component-test/labels.json'),
+			$labels_lang
+		));
 
 	login_com_reg::_()['credentials']=login_component_test_credentials::read_password(); // model
 
 	// configure the login component
-	login_com_reg_config::_()['method']='login_single';
-	login_com_reg_view::_()['lang']='pl';
-	login_com_reg_view::_()['title']='Logowanie';
-	login_com_reg_view::_()['login_style']='login_default_bright.css';
-	login_com_reg_view::_()['login_label']='Nazwa użytkownika';
-	login_com_reg_view::_()['password_label']='Hasło';
-	login_com_reg_view::_()['remember_me_label']='Zapamiętaj mnie';
-	login_com_reg_view::_()['wrong_credentials_label']='Nieprawidłowa nazwa użytkownika lub hasło';
-	login_com_reg_view::_()['submit_button_label']='Zaloguj';
-	login_com_reg_view::_()['loading_title']='Ładowanie...';
-	login_com_reg_view::_()['loading_label']='Ładowanie...';
+		login_com_reg_config::_()['method']='login_single';
+		login_com_reg_view::_()['lang']=$labels_lang;
+		login_com_reg_view::_()['title']=$labels('Login');
+		login_com_reg_view::_()['login_style']='login_default_bright.css';
+		login_com_reg_view::_()['login_label']=$labels('Username');
+		login_com_reg_view::_()['password_label']=$labels('Password');
+		login_com_reg_view::_()['remember_me_label']=$labels('Remember me');
+		login_com_reg_view::_()['wrong_credentials_label']=$labels('Wrong username or password');
+		login_com_reg_view::_()['submit_button_label']=$labels('Log in');
+		login_com_reg_view::_()['loading_title']=$labels('Loading...');
+		login_com_reg_view::_()['loading_label']=$labels('Loading...');
 
-	if(getenv('APP_INLINE_ASSETS') === 'yes')
-		login_com_reg_view::_()['inline_style']=true;
+		if(getenv('APP_INLINE_ASSETS') === 'yes')
+			login_com_reg_view::_()['inline_style']=true;
 
-	if(getenv('APP_MATERIALIZED') === 'yes')
-		login_com_reg_view::_()['template']='materialized';
-	else if(
-		isset($_COOKIE['app_dark_theme']) &&
-		($_COOKIE['app_dark_theme'] === 'true') // from app/templates/samples/default/assets/default.js/darkTheme.js
-	)
-		login_com_reg_view::_()['login_style']='login_default_dark.css';
+		if(getenv('APP_MATERIALIZED') === 'yes')
+			login_com_reg_view::_()['template']='materialized';
+		else if(
+			isset($_COOKIE['app_dark_theme']) &&
+			($_COOKIE['app_dark_theme'] === 'true') // from app/templates/samples/default/assets/default.js/darkTheme.js
+		)
+			login_com_reg_view::_()['login_style']='login_default_dark.css';
 
 	// add bruteforce protection
-	require APP_LIB.'/samples/pdo_instance.php';
-	require TK_LIB.'/sec_bruteforce.php';
+		require APP_LIB.'/samples/pdo_instance.php';
+		require TK_LIB.'/sec_bruteforce.php';
 
-	$sec_bruteforce=new bruteforce_timeout_pdo([
-		'pdo_handler'=>pdo_instance()
-	]);
+		$sec_bruteforce=new bruteforce_timeout_pdo([
+			'pdo_handler'=>pdo_instance()
+		]);
 
-	if($sec_bruteforce->check())
-	{
-		// disabled login prompt
+		if($sec_bruteforce->check())
+		{
+			// disabled login prompt
 
-		log_infos()->info('IP '.$_SERVER['REMOTE_ADDR'].' is banned');
+			log_infos()->info('IP '.$_SERVER['REMOTE_ADDR'].' is banned');
 
-		$_GET=[];
-		$_POST=[];
+			$_GET=[];
+			$_POST=[];
 
-		// remove this block to hide from the user any info that has been banned
-		login_com_reg_view::_()['login_box_disabled']=true;
-		login_com_reg_view::_()['password_box_disabled']=true;
-		login_com_reg_view::_()['remember_me_box_disabled']=true;
-		login_com_reg_view::_()['submit_button_disabled']=true;
-		login_com_reg_view::_()['wrong_credentials_label']='Zostałeś zbanowany. Wróć później.';
-		login_com_reg::_()['wrong_credentials']=true;
+			// remove this block to hide from the user any info that has been banned
+			login_com_reg_view::_()['login_box_disabled']=true;
+			login_com_reg_view::_()['password_box_disabled']=true;
+			login_com_reg_view::_()['remember_me_box_disabled']=true;
+			login_com_reg_view::_()['submit_button_disabled']=true;
+			login_com_reg_view::_()['wrong_credentials_label']=$labels('You have been banned. Come back later.');
+			login_com_reg::_()['wrong_credentials']=true;
 
-		login_com();
-		exit();
-	}
+			login_com();
+			exit();
+		}
 
 	// define callbacks for the login component
-	login_com_reg_config::_()['on_login_prompt']=function()
-	{
-		log_infos()->info('Login prompt requested');
-	};
-	login_com_reg_config::_()['on_login_success']=function()
-	{
-		log_infos()->info('User logged in');
-	};
-	login_com_reg_config::_()['on_login_failed']=function()
-	{
-		log_fails()->info($_SERVER['REMOTE_ADDR'].' login failed');
-		$sec_bruteforce->add();
-	};
-	login_com_reg_config::_()['on_logout']=function()
-	{
-		log_infos()->info('User logged out');
-	};
+		login_com_reg_config::_()['on_login_prompt']=function()
+		{
+			log_infos()->info('Login prompt requested');
+		};
+		login_com_reg_config::_()['on_login_success']=function()
+		{
+			log_infos()->info('User logged in');
+		};
+		login_com_reg_config::_()['on_login_failed']=function() use($sec_bruteforce)
+		{
+			log_fails()->info($_SERVER['REMOTE_ADDR'].' login failed');
+			$sec_bruteforce->add();
+		};
+		login_com_reg_config::_()['on_logout']=function()
+		{
+			log_infos()->info('User logged out');
+		};
 
 	// display login prompt
-	login_com();
+		login_com();
 
 	if(is_logged())
 	{
@@ -129,8 +144,8 @@
 						$captcha_form->add_config('middleware_form_style', 'middleware_form_default_bright.css');
 
 				$captcha_form
-					->add_config('title', 'Weryfikacja')
-					->add_config('submit_button_label', 'Dalej');
+					->add_config('title', $labels('Verification'))
+					->add_config('submit_button_label', $labels('Next'));
 
 				if(getenv('APP_INLINE_ASSETS') === 'yes')
 					$captcha_form->add_config('inline_style', true);
@@ -145,12 +160,12 @@
 						'tag'=>'input',
 						'type'=>'text',
 						'name'=>'captcha',
-						'placeholder'=>'Przepisz tekst z obrazka'
+						'placeholder'=>$labels('Enter the text from the image')
 					])
 					->add_field([
 						'tag'=>'input',
 						'type'=>'slider',
-						'slider_label'=>'Pokarz batona',
+						'slider_label'=>$labels('Show button'),
 						'name'=>'i_am_bam'
 					]);
 
@@ -170,23 +185,23 @@
 		// captcha test passed, change password on first login
 
 		// validate passwords
-		function are_passwords_valid($old_password, $new_password, $change_password_form)
+		function are_passwords_valid($old_password, $new_password, $change_password_form, $labels)
 		{
 			if($old_password === $new_password)
 			{
-				$change_password_form->add_error_message('Nowe hasło nie może być takie samo jak stare');
+				$change_password_form->add_error_message($labels('The new password cannot be the same as the old one'));
 				return false;
 			}
 
 			if(password_verify($new_password, login_com_reg::_()['credentials'][1]))
 			{
-				$change_password_form->add_error_message('Nowe hasło nie może być takie samo jak stare');
+				$change_password_form->add_error_message($labels('The new password cannot be the same as the old one'));
 				return false;
 			}
 
 			if(!password_verify($old_password, login_com_reg::_()['credentials'][1]))
 			{
-				$change_password_form->add_error_message('Stare hasło jest nieprawidłowe');
+				$change_password_form->add_error_message($labels('The old password is incorrect'));
 				return false;
 			}
 
@@ -208,7 +223,8 @@
 				are_passwords_valid(
 					$_POST['old_password'],
 					$_POST['new_password'],
-					$change_password_form
+					$change_password_form,
+					$labels
 				)
 			){
 				login_component_test_credentials::save_new_password($_POST['new_password']);
@@ -228,8 +244,8 @@
 						$change_password_form->add_config('middleware_form_style', 'middleware_form_default_bright.css');
 
 				$change_password_form
-					->add_config('title', 'Zmiana hasła')
-					->add_config('submit_button_label', 'Zmień hasło');
+					->add_config('title', $labels('Password change'))
+					->add_config('submit_button_label', $labels('Change password'));
 
 				if(getenv('APP_INLINE_ASSETS') === 'yes')
 					$change_password_form->add_config('inline_style', true);
@@ -239,13 +255,13 @@
 						'tag'=>'input',
 						'type'=>'password',
 						'name'=>'old_password',
-						'placeholder'=>'Stare hasło'
+						'placeholder'=>$labels('Old password')
 					])
 					->add_field([
 						'tag'=>'input',
 						'type'=>'password',
 						'name'=>'new_password',
-						'placeholder'=>'Nowe hasło'
+						'placeholder'=>$labels('New password')
 					]);
 
 					$change_password_form->view();

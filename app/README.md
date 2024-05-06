@@ -97,6 +97,7 @@ You can configure the database connection through the following environment vari
 * `MEMCACHED_PORT` (default: 11211)
 * `MEMCACHED_SOCKET` (has priority over the host/port)
 * `MEMCACHED_IGNORE_ENV=true` (ignores all memcached variables above)
+* `REDIS_PREDIS=true` (use Predis package, default: false)
 * `REDIS_HOST` (default: 127.0.0.1)
 * `REDIS_PORT` (default: 6379)
 * `REDIS_SOCKET` (has priority over the host/port
@@ -120,16 +121,3 @@ You can configure the database connection through the following environment vari
 * `remove-samples.php`
 * `replace-public-index-with-link.php`
 * `session-clean.php` - remove stale sessions (if the application stores the session content in files)
-
-### Predis
-Predis is not officially supported, but you can test if it (not) works as ob_cache.  
-You need composer - one of the methods of installing this invention is described in `HOWTO.md`  
-Install Predis:
-```
-php ./tk/bin/composer.phar --optimize-autoloader --no-cache require predis/predis
-```
-then set the environment variable:
-```
-export REDIS_PREDIS=true
-```
-All `REDIS_*` variables are respected

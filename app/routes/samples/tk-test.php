@@ -1,0 +1,23 @@
+<?php
+	require APP_LIB.'/samples/default_http_headers.php';
+	require TK_LIB.'/check_var.php';
+
+	require APP_CTRL.'/samples/tk-test.php';
+
+	$type=check_get_escaped('type');
+	$name=check_get_escaped('name');
+
+	if(($type !== null) && ($name !== null))
+	{
+		if(!run_test($type, $name))
+			echo '<pre>You\'re up to something</pre>';
+	}
+	else
+	{
+		require APP_LIB.'/samples/ob_cache.php';
+		ob_cache(ob_url2file(), 0);
+
+		require APP_LIB.'/samples/app_template.php';
+		get_tests(new app_template())->view('tk-test');
+	}
+?>

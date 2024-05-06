@@ -1,7 +1,7 @@
 <?php
 	class login_component_test_credentials
 	{
-		private static $credentials_file=VAR_LIB.'/login_component_test_new_password';
+		private static $credentials_file=VAR_LIB.'/login_component_test_credentials/login_component_test_new_password';
 
 		public static function change_password_requested()
 		{
@@ -19,6 +19,9 @@
 		}
 		public static function save_new_password($new_password)
 		{
+			if(!file_exists(VAR_LIB.'/login_component_test_credentials'))
+				mkdir(VAR_LIB.'/login_component_test_credentials');
+
 			file_put_contents(static::$credentials_file, string2bcrypt($new_password));
 		}
 	}

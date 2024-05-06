@@ -21,7 +21,7 @@
 		// set vartiable for session-clean.php tool
 		$_sessions_dir=VAR_SESS;
 
-	else if(file_exists(VAR_LIB.'/session_cookie_key'))
+	else if(file_exists(VAR_LIB.'/session_start/session_cookie_key'))
 	{
 		// quick boot up (default behavior)
 
@@ -29,7 +29,7 @@
 			require TK_LIB.'/sec_lv_encrypter.php';
 
 		lv_cookie_session_handler::register_handler([
-			'key'=>file_get_contents(VAR_LIB.'/session_cookie_key'),
+			'key'=>file_get_contents(VAR_LIB.'/session_start/session_cookie_key'),
 			'cipher'=>'aes-256-gcm'
 		]);
 
@@ -52,10 +52,13 @@
 		if(!class_exists('lv_cookie_session_handler'))
 			require TK_LIB.'/sec_lv_encrypter.php';
 
-		file_put_contents(VAR_LIB.'/session_cookie_key', lv_encrypter::generate_key('aes-256-gcm'));
+		if(!file_exists(VAR_LIB.'/session_start'))
+			mkdir(VAR_LIB.'/session_start');
+
+		file_put_contents(VAR_LIB.'/session_start/session_cookie_key', lv_encrypter::generate_key('aes-256-gcm'));
 
 		lv_cookie_session_handler::register_handler([
-			'key'=>file_get_contents(VAR_LIB.'/session_cookie_key'),
+			'key'=>file_get_contents(VAR_LIB.'/session_start/session_cookie_key'),
 			'cipher'=>'aes-256-gcm'
 		]);
 
@@ -63,6 +66,9 @@
 	}
 	else
 	{
+		if(!file_exists(VAR_SESS))
+			mkdir(VAR_SESS);
+
 		session_save_path(VAR_SESS);
 		session_name('id');
 		session_start();

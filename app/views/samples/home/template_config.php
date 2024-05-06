@@ -16,6 +16,8 @@
 		'Login component test (login and password: test)'=>'/login-component-test',
 		'Toolkit in Phar test'=>'/phar-test',
 		'PHP preprocessing test'=>'/preprocessing-test',
+		'Websockets test'=>'/ws-test',
+		'Toolkit test'=>'/tk-test',
 		'HTTP errors'=>[
 			'400'=>'/http-error-test',
 			'401'=>'/http-error-test/401',

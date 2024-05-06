@@ -54,6 +54,10 @@ You can reduce the size of php files:
 ```
 php ./tk/bin/strip-php-files.php ./tk
 ```
+or you can also remove all tests:
+```
+php ./tk/bin/strip-php-files.php ./tk --remove-tests
+```
 
 # Packing the toolkit into Phar
 If a better option is to pack the libraries and components into one file,  
@@ -66,8 +70,7 @@ and use the generated Phar, eg:
 ```
 require 'phar://'
 .	'./tk.phar'
-.	'/com/admin_panel/admin_panel.php'
-;
+.	'/com/admin_panel/admin_panel.php';
 ```
 If you don't need the css and js files, you can ignore them:
 ```
@@ -86,6 +89,16 @@ To install Composer, run:
 php ./tk/bin/get-composer.php
 ```
 Composer will be installed in `./tk/bin/composer.phar`
+
+# Installing Predis
+Predis is supported but not directly - the PHPRedis API is used by default.  
+For Predis, a `predis_phpredis_proxy` class from the `predis_connect.php` library is needed.  
+To install Predis, run:
+```
+php ./tk/bin/composer.phar --optimize-autoloader --no-cache require predis/predis
+```
+For more information, see the `predis_connect.php` library  
+**Note:** Predis requires PHP >= 7.2, for PHP >= 5.3.9 use Predis v1.1.10
 
 
 # How to create application
@@ -133,6 +146,15 @@ php ./tk/bin/assets-compiler.php ./app/assets ./public/assets
 or you can watch for changes:
 ```
 php ./tk/bin/file-watch.php "php ./tk/bin/assets-compiler.php ./app/assets ./public/assets" ./app/assets
+```
+or you can watch for changes and new files:
+```
+php ./tk/bin/file-watch.php "php ./tk/bin/assets-compiler.php ./app/assets ./public/assets" ./app/assets --extended
+```
+For more info, run:
+```
+php ./tk/bin/assets-compiler.php 
+php ./tk/bin/file-watch.php
 ```
 
 ### Minifying assets - webdev.sh client

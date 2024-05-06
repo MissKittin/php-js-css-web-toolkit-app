@@ -13,9 +13,9 @@
 	{
 		header('Content-type: text/xml');
 
-		if(file_exists(VAR_LIB.'/sitemap.xml'))
+		if(file_exists(VAR_LIB.'/robots-sitemap/sitemap.xml'))
 		{
-			readfile(VAR_LIB.'/sitemap.xml');
+			readfile(VAR_LIB.'/robots-sitemap/sitemap.xml');
 			exit();
 		}
 
@@ -38,7 +38,10 @@
 
 		$xml=$sitemap->get();
 
-		file_put_contents(VAR_LIB.'/sitemap.xml', $xml);
+		if(!file_exists(VAR_LIB.'/robots-sitemap'))
+			mkdir(VAR_LIB.'/robots-sitemap');
+
+		file_put_contents(VAR_LIB.'/robots-sitemap/sitemap.xml', $xml);
 
 		echo $xml;
 	}

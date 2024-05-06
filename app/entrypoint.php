@@ -59,6 +59,8 @@
 		case 'phar-test': require APP_ROUT.'/samples/phar-test.php'; break;
 		case 'preprocessing-test': require APP_ROUT.'/samples/preprocessing-test.php'; break;
 		case 'http-error-test': require APP_ROUT.'/samples/http-error-test.php'; break;
+		case 'tk-test': require APP_ROUT.'/samples/tk-test.php'; break;
+		case 'ws-test': require APP_ROUT.'/samples/ws-test.php'; break;
 
 		case 'robots.txt': require APP_ROUT.'/samples/robots.php'; break;
 		case 'sitemap.xml': require APP_ROUT.'/samples/sitemap.php'; break;

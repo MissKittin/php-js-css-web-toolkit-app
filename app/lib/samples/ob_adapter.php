@@ -146,7 +146,11 @@
 		public function __construct($output_file)
 		{
 			header('Cache-Control: public, max-age=31536000');
-			parent::{__FUNCTION__}(VAR_CACHE.'/'.$output_file);
+
+			if(!file_exists(VAR_CACHE.'/ob_adapter'))
+				mkdir(VAR_CACHE.'/ob_adapter');
+
+			parent::{__FUNCTION__}(VAR_CACHE.'/ob_adapter/'.$output_file);
 		}
 	}
 ?>

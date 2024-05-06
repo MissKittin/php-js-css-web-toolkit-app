@@ -70,21 +70,25 @@
 
 		public static function quick_view(string $view_path, string $page_content='page_content.php')
 		{
-			$view=[];
-
-			require __DIR__.'/default_csp_header.php';
+			$view['csp_header']=static::default_csp_header();
 
 			if(file_exists($view_path.'/template_config.php'))
 				include $view_path.'/template_config.php';
 
-			require __DIR__.'/views/top.php';
+			require __DIR__.'/view.php';
+		}
 
-			if(str_ends_with($page_content, '.php'))
-				require $view_path.'/'.$page_content;
-			else
-				readfile($view_path.'/'.$page_content);
-
-			require __DIR__.'/views/bottom.php';
+		private static function default_csp_header()
+		{
+			return [
+				'default-src'=>['\'none\''],
+				'script-src'=>['\'self\''],
+				'connect-src'=>['\'self\''],
+				'img-src'=>['\'self\''],
+				'style-src'=>['\'self\''],
+				'base-uri'=>['\'self\''],
+				'form-action'=>['\'self\'']
+			];
 		}
 		private static function parse_headers($view)
 		{
@@ -127,8 +131,7 @@
 
 		public function __construct(bool $return_content=false)
 		{
-			require __DIR__.'/default_csp_header.php';
-			$this->registry['csp_header']=$view['csp_header'];
+			$this->registry['csp_header']=static::default_csp_header();
 			static::$do_return_content=$return_content;
 		}
 
@@ -184,14 +187,7 @@
 			if(file_exists($view_path.'/template_config.php'))
 				include $view_path.'/template_config.php';
 
-			require __DIR__.'/views/top.php';
-
-			if(str_ends_with($page_content, '.php'))
-				require $view_path.'/'.$page_content;
-			else
-				readfile($view_path.'/'.$page_content);
-
-			require __DIR__.'/views/bottom.php';
+			require __DIR__.'/view.php';
 
 			if(static::$do_return_content)
 			{

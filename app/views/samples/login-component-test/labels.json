@@ -1,0 +1,22 @@
+{
+	"pl": {
+		"Login": "Logowanie",
+		"Username": "Nazwa użytkownika",
+		"Password": "Hasło",
+		"Remember me": "Zapamiętaj mnie",
+		"Wrong username or password": "Nieprawidłowa nazwa użytkownika lub hasło",
+		"Log in": "Zaloguj",
+		"Loading...": "Ładowanie...",
+		"You have been banned. Come back later.": "Zostałeś zbanowany. Wróć później.",
+		"Verification": "Weryfikacja",
+		"Next": "Dalej",
+		"Enter the text from the image": "Przepisz tekst z obrazka",
+		"Show button": "Pokarz batona",
+		"The new password cannot be the same as the old one": "Nowe hasło nie może być takie samo jak stare",
+		"The old password is incorrect": "Stare hasło jest nieprawidłowe",
+		"Password change": "Zmiana hasła",
+		"Change password": "Zmień hasło",
+		"Old password": "Stare hasło",
+		"New password": "Nowe hasło"
+	}
+}

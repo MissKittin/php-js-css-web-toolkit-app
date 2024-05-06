@@ -8,7 +8,7 @@
 
 	class app_template extends default_template
 	{
-		public function view($view_path, $page_content='page_content.php')
+		public static function quick_view($view_path, $page_content='page_content.php')
 		{
 			parent::{__FUNCTION__}(
 				APP_VIEW.'/samples/'.$view_path,
@@ -16,7 +16,7 @@
 			);
 		}
 
-		public static function quick_view($view_path, $page_content='page_content.php')
+		public function view($view_path, $page_content='page_content.php')
 		{
 			parent::{__FUNCTION__}(
 				APP_VIEW.'/samples/'.$view_path,
