@@ -9,7 +9,7 @@
 
 	require APP_LIB.'/samples/session_start.php';
 
-	require TK_COM.'/login/login.php';
+	require TK_COM.'/login/main.php';
 
 	// set custom session reloader
 	if(class_exists('lv_cookie_session_handler'))

@@ -5,14 +5,13 @@
 
 	require 'phar://'
 	.	'./tk.phar'
-	.	'/com/admin_panel/admin_panel.php'
-	;
+	.	'/com/admin_panel/main.php';
 	require 'phar://'
 	.	'./tk.phar'
-	.	'/com/middleware_form/middleware_form.php'
-	;
+	.	'/com/middleware_form/main.php';
 
 	$phar_realpath='phar://'.realpath('./toolkit.phar');
+
 	foreach(get_included_files() as $file)
 		if(str_starts_with($file, strtr($phar_realpath, '\\', '/')))
 		{

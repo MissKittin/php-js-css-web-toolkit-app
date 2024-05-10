@@ -1,6 +1,6 @@
 <?php
 	require __DIR__.'/lib/stdlib.php';
-	require TK_COM.'/php_polyfill/php_polyfill.php';
+	require TK_COM.'/php_polyfill/main.php';
 
 	chdir(APP_ROOT);
 

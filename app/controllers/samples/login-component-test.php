@@ -113,7 +113,7 @@
 
 			if((!isset($_POST['captcha'])) || (!captcha_check($_POST['captcha'])))
 			{
-				require TK_COM.'/middleware_form/middleware_form.php';
+				require TK_COM.'/middleware_form/main.php';
 
 				if(getenv('APP_MATERIALIZED') === 'yes')
 					$captcha_form=new middleware_form('materialized');
@@ -210,7 +210,7 @@
 
 		if(login_component_test_credentials::change_password_requested())
 		{
-			require TK_COM.'/middleware_form/middleware_form.php';
+			require TK_COM.'/middleware_form/main.php';
 
 			if(getenv('APP_MATERIALIZED') === 'yes')
 				$change_password_form=new middleware_form('materialized');
