@@ -41,7 +41,7 @@
 	if(!isset($_sessions_dir))
 	{
 		$_SESSION_CLEAN_TOOL=true;
-		include APP_LIB.'/samples/session_start.php';
+		require APP_LIB.'/samples/session_start.php';
 		unset($_SESSION_CLEAN_TOOL);
 	}
 

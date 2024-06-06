@@ -32,60 +32,88 @@
 	chdir(APP_DIR);
 	@mkdir('./assets');
 
+	$fc=[
+		[ // files_cp
+			'./com', // app
+			'../tk/com',
+			'../tk/lib'
+		],
+		[ // files_nix
+			'../com', // app
+			'../../tk/com',
+			'../../tk/lib'
+		],
+		[ // files_win
+			'..\\com', // app
+			'..\\..\\tk\\com',
+			'..\\..\\tk\\lib'
+		]
+	];
 	$files_cp=[
-		'./templates/samples/default/assets/default_bright.css'=>'./assets/default_bright.css',
-		'./templates/samples/default/assets/default_dark.css'=>'./assets/default_dark.css',
-		'./templates/samples/default/assets/default.js'=>'./assets/default.js',
-		'../tk/lib/sendNotification.js'=>'./assets/sendNotification.js',
-		'../tk/com/login/templates/default/assets/login_default_bright.css'=>'./assets/login_default_bright.css',
-		'../tk/com/login/templates/default/assets/login_default_dark.css'=>'./assets/login_default_dark.css',
-		'../tk/com/middleware_form/templates/default/assets/middleware_form_default_bright.css'=>'./assets/middleware_form_default_bright.css',
-		'../tk/com/middleware_form/templates/default/assets/middleware_form_default_dark.css'=>'./assets/middleware_form_default_dark.css'
+		$fc[0][0].'/basic_template/assets/default_bright.css',
+		$fc[0][0].'/basic_template/assets/default_dark.css',
+		$fc[0][0].'/basic_template/assets/default.js',
+		$fc[0][2].'/sendNotification.js',
+		$fc[0][1].'/login/templates/default/assets/login_default_bright.css',
+		$fc[0][1].'/login/templates/default/assets/login_default_dark.css',
+		$fc[0][1].'/login/templates/materialized/assets/login_materialized.css',
+		$fc[0][1].'/middleware_form/templates/default/assets/middleware_form_default_bright.css',
+		$fc[0][1].'/middleware_form/templates/default/assets/middleware_form_default_dark.css',
+		$fc[0][1].'/middleware_form/templates/materialized/assets/middleware_form_materialized.css',
+		$fc[0][2].'/simpleblog_materialized.css'
 	];
 	$files_nix=[
-		'../templates/samples/default/assets/default_bright.css'=>'./assets/default_bright.css',
-		'../templates/samples/default/assets/default_dark.css'=>'./assets/default_dark.css',
-		'../templates/samples/default/assets/default.js'=>'./assets/default.js',
-		'../../tk/lib/sendNotification.js'=>'./assets/sendNotification.js',
-		'../../tk/com/login/templates/default/assets/login_default_bright.css'=>'./assets/login_default_bright.css',
-		'../../tk/com/login/templates/default/assets/login_default_dark.css'=>'./assets/login_default_dark.css',
-		'../../tk/com/middleware_form/templates/default/assets/middleware_form_bright.css'=>'./assets/middleware_form_default_bright.css',
-		'../../tk/com/middleware_form/templates/default/assets/middleware_form_dark.css'=>'./assets/middleware_form_default_dark.css'
+		$fc[1][0].'/basic_template/assets/default_bright.css',
+		$fc[1][0].'/basic_template/assets/default_dark.css',
+		$fc[1][0].'/basic_template/assets/default.js',
+		$fc[1][2].'/sendNotification.js',
+		$fc[1][1].'/login/templates/default/assets/login_default_bright.css',
+		$fc[1][1].'/login/templates/default/assets/login_default_dark.css',
+		$fc[1][1].'/login/templates/materialized/assets/login_materialized.css',
+		$fc[1][1].'/middleware_form/templates/default/assets/middleware_form_default_bright.css',
+		$fc[1][1].'/middleware_form/templates/default/assets/middleware_form_default_dark.css',
+		$fc[1][1].'/middleware_form/templates/materialized/assets/middleware_form_materialized.css',
+		$fc[1][2].'/simpleblog_materialized.css'
 	];
 	$files_win=[
-		'.\\assets\\default_bright.css'=>'..\\templates\\samples\\default\\assets\\default_bright.css',
-		'.\\assets\\default_dark.css'=>'..\\templates\\samples\\default\\assets\\default_dark.css',
-		'.\\assets\\default.js'=>'..\\templates\\samples\\default\\assets\\default.js',
-		'.\\assets\\sendNotification.js'=>'..\\..\\tk\\lib\\sendNotification.js',
-		'.\\assets\\login_default_bright.css'=>'..\\..\\tk\\com\\login\\templates\\default\\assets\\login_default_bright.css',
-		'.\\assets\\login_default_dark.css'=>'..\\..\\tk\\com\\login\\templates\\default\\assets\\login_default_dark.css',
-		'.\\assets\\middleware_form_default_bright.css'=>'..\\..\\tk\\com\\middleware_form\\templates\\default\\assets\\middleware_form_default_bright.css',
-		'.\\assets\\middleware_form_default_dark.css'=>'..\\..\\tk\\com\\middleware_form\\templates\\default\\assets\\middleware_form_default_dark.css'
+		$fc[2][0].'\\basic_template\\assets\\default_bright.css',
+		$fc[2][0].'\\basic_template\\assets\\default_dark.css',
+		$fc[2][0].'\\basic_template\\assets\\default.js',
+		$fc[2][2].'\\sendNotification.js',
+		$fc[2][1].'\\login\\templates\\default\\assets\\login_default_bright.css',
+		$fc[2][1].'\\login\\templates\\default\\assets\\login_default_dark.css',
+		$fc[2][1].'\\login\\templates\\materialized\\assets\\login_materialized.css',
+		$fc[2][1].'\\middleware_form\\templates\\default\\assets\\middleware_form_default_bright.css',
+		$fc[2][1].'\\middleware_form\\templates\\default\\assets\\middleware_form_default_dark.css',
+		$fc[2][1].'\\middleware_form\\templates\\materialized\\assets\\middleware_form_materialized.css',
+		$fc[2][2].'\\simpleblog_materialized.css'
 	];
 
 	switch($argv[1])
 	{
 		case 'cp':
-			foreach($files_cp as $target=>$destination)
+			foreach($files_cp as $target)
 			{
-				echo $target.' => '.$destination.PHP_EOL;
-				copy_recursive($target, $destination);
+				echo $target.' => '.basename($target).PHP_EOL;
+				copy_recursive($target, './assets/'.basename($target));
 			}
 		break;
 		case 'ln':
 			@symlink(basename(__FILE__), './bin/install-assets-test');
+
 			if(@readlink('./bin/install-assets-test') === false)
 			{
 				echo 'Cannot create symlink'.PHP_EOL;
 				@unlink('./bin/install-assets-test');
 				exit(1);
 			}
+
 			unlink('./bin/install-assets-test');
 
-			foreach($files_nix as $target=>$destination)
+			foreach($files_nix as $target)
 			{
-				echo $target.' => '.$destination.PHP_EOL;
-				symlink($target, $destination);
+				echo $target.' => '.basename($target).PHP_EOL;
+				symlink($target, './assets/'.basename($target));
 			}
 		break;
 		case 'mklink':
@@ -101,17 +129,19 @@
 				@unlink('bin\\install-assets-test');
 				exit(1);
 			}
+
 			unlink('bin\\install-assets-test');
 
-			foreach($files_win as $link=>$target)
+			foreach($files_win as $target)
 			{
-				echo $target.' => '.$link.PHP_EOL;
+				echo $target.' => '.basename($target).PHP_EOL;
 
 				$dir_switch='';
-				if(is_dir($target))
-					$dir_switch='/d';
 
-				exec('mklink '.$dir_switch.' '.$link.' '.$target);
+				if(is_dir(__DIR__.'\\'.$target))
+					$dir_switch='/D';
+
+				exec('mklink '.$dir_switch.' .\\assets\\'.basename($target).' '.$target);
 			}
 		break;
 		default:
@@ -123,7 +153,7 @@
 			echo 'Where:'.PHP_EOL;
 			echo ' cp -> copy files'.PHP_EOL;
 			echo ' ln -> create symlink (*nix only)'.PHP_EOL;
-			echo ' mklink -> use windows mklink utility'.PHP_EOL;
+			echo ' mklink -> use mklink utility (windows only)'.PHP_EOL;
 			exit(1);
 	}
 ?>

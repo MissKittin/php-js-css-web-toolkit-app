@@ -15,7 +15,7 @@
 
 				$cache_object=new self(VAR_LIB.'/preprocessing-test/preprocessing-test.php');
 
-				if(strtoupper(substr(PHP_OS, 0, 3)) === 'WIN')
+				if(PHP_OS_FAMILY === 'Windows')
 					$cache_object->push('$view[\'windows\']=true;');
 				else
 					$cache_object->push('$view[\'windows\']=false;');

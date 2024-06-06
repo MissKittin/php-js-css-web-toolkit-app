@@ -21,17 +21,23 @@
 	login_com_reg::_()['credentials']=login_component_test_credentials::read_password(); // model
 
 	// configure the login component
-		login_com_reg_config::_()['method']='login_single';
-		login_com_reg_view::_()['lang']=$labels_lang;
-		login_com_reg_view::_()['title']=$labels('Login');
-		login_com_reg_view::_()['login_style']='login_default_bright.css';
-		login_com_reg_view::_()['login_label']=$labels('Username');
-		login_com_reg_view::_()['password_label']=$labels('Password');
-		login_com_reg_view::_()['remember_me_label']=$labels('Remember me');
-		login_com_reg_view::_()['wrong_credentials_label']=$labels('Wrong username or password');
-		login_com_reg_view::_()['submit_button_label']=$labels('Log in');
-		login_com_reg_view::_()['loading_title']=$labels('Loading...');
-		login_com_reg_view::_()['loading_label']=$labels('Loading...');
+		(function($array){
+			login_com_reg_config::_()['method']='login_single';
+
+			foreach($array as $key=>$value)
+				login_com_reg_view::_()[$key]=$value;
+		})([
+			'lang'=>$labels_lang,
+			'title'=>$labels('Login'),
+			'login_style'=>'login_default_bright.css',
+			'login_label'=>$labels('Username'),
+			'password_label'=>$labels('Password'),
+			'remember_me_label'=>$labels('Remember me'),
+			'wrong_credentials_label'=>$labels('Wrong username or password'),
+			'submit_button_label'=>$labels('Log in'),
+			'loading_title'=>$labels('Loading...'),
+			'loading_title'=>$labels('Loading...')
+		]);
 
 		if(getenv('APP_INLINE_ASSETS') === 'yes')
 			login_com_reg_view::_()['inline_style']=true;
@@ -62,15 +68,21 @@
 			$_POST=[];
 
 			// remove this block to hide from the user any info that has been banned
-			login_com_reg_view::_()['login_box_disabled']=true;
-			login_com_reg_view::_()['password_box_disabled']=true;
-			login_com_reg_view::_()['remember_me_box_disabled']=true;
-			login_com_reg_view::_()['submit_button_disabled']=true;
-			login_com_reg_view::_()['wrong_credentials_label']=$labels('You have been banned. Come back later.');
-			login_com_reg::_()['wrong_credentials']=true;
+			(function($array){
+				login_com_reg::_()['wrong_credentials']=true;
+				login_com_reg_view::_()['wrong_credentials_label']=$labels('You have been banned. Come back later.');
 
-			login_com();
-			exit();
+				foreach($array as $key)
+					login_com_reg_view::_()[$key]=true;
+			})([
+				'login_box_disabled',
+				'password_box_disabled',
+				'remember_me_box_disabled',
+				'submit_button_disabled'
+			]);
+
+			if(login_com())
+				exit();
 		}
 
 	// define callbacks for the login component
@@ -92,8 +104,9 @@
 			log_infos()->info('User logged out');
 		};
 
-	// display login prompt
-		login_com();
+	// display login prompt and exit
+		if(login_com())
+			exit();
 
 	if(is_logged())
 	{
@@ -121,18 +134,18 @@
 					$captcha_form=new middleware_form();
 
 				$captcha_form
-					->add_html_header(
+				->	add_html_header(
 						'<script>document.addEventListener(\'DOMContentLoaded\', function(){'
 							.file_get_contents(TK_LIB.'/disableEnterOnForm.js')
 							.file_get_contents(APP_VIEW.'/samples/login-component-test/middleware_form.js')
 						.'})</script>'
 					)
-					->add_csp_header('script-src', '\'sha256-i7O9RlEhU3xgPLwptAzsYt/FTWOe7Q8NrYrH0zecJvk=\'');
+				->	add_csp_header('script-src', '\'sha256-i7O9RlEhU3xgPLwptAzsYt/FTWOe7Q8NrYrH0zecJvk=\'');
 
 				$captcha_form
-					->add_csp_header('img-src', 'data:')
-					->add_csp_header('style-src', '\'unsafe-hashes\'')
-					->add_csp_header('style-src', '\'sha256-N6tSydZ64AHCaOWfwKbUhxXx2fRFDxHOaL3e3CO7GPI=\'');
+				->	add_csp_header('img-src', 'data:')
+				->	add_csp_header('style-src', '\'unsafe-hashes\'')
+				->	add_csp_header('style-src', '\'sha256-N6tSydZ64AHCaOWfwKbUhxXx2fRFDxHOaL3e3CO7GPI=\'');
 
 				if(getenv('APP_MATERIALIZED') !== 'yes')
 					if(
@@ -144,25 +157,31 @@
 						$captcha_form->add_config('middleware_form_style', 'middleware_form_default_bright.css');
 
 				$captcha_form
-					->add_config('title', $labels('Verification'))
-					->add_config('submit_button_label', $labels('Next'));
+				->	add_config('title', $labels('Verification'))
+				->	add_config('submit_button_label', $labels('Next'));
 
 				if(getenv('APP_INLINE_ASSETS') === 'yes')
 					$captcha_form->add_config('inline_style', true);
 
+				// now some magic: we place the generated image in $_SESSION
+				// and in case of an incorrect answer we save CPU time,
+				// and after giving the correct answer we delete it
+				if(!isset($_SESSION['captcha_image']))
+					$_SESSION['captcha_image']=base64_encode(captcha_get_once('captcha_gd2'));
+
 				$captcha_form
-					->add_field([
+				->	add_field([
 						'tag'=>'img',
-						'src'=>'data:image/jpeg;base64,'.base64_encode(captcha_get_once('captcha_gd2')),
+						'src'=>'data:image/jpeg;base64,'.$_SESSION['captcha_image'],
 						'style'=>'width: 100%;'
 					])
-					->add_field([
+				->	add_field([
 						'tag'=>'input',
 						'type'=>'text',
 						'name'=>'captcha',
 						'placeholder'=>$labels('Enter the text from the image')
 					])
-					->add_field([
+				->	add_field([
 						'tag'=>'input',
 						'type'=>'slider',
 						'slider_label'=>$labels('Show button'),
@@ -170,16 +189,21 @@
 					]);
 
 				if($captcha_form->is_form_sent())
-					login_com_reload(false); // display reload page, do not exit()
-				else
-					$captcha_form->view();
+				{
+					login_com_reload(); // display reload page and exit
+					exit();
+				}
 
+				$captcha_form->view();
 				exit();
 			}
 
 			$_SESSION['captcha_verified']=true;
+			unset($_SESSION['captcha_image']);
 
-			login_com_reload(); // display reload page and exit()
+			// display reload page and exit()
+			login_com_reload();
+			exit();
 		}
 
 		// captcha test passed, change password on first login
@@ -230,7 +254,8 @@
 				login_component_test_credentials::save_new_password($_POST['new_password']);
 				log_infos()->info('Password updated');
 
-				login_com_reload(); // display reload page
+				login_com_reload(); // display reload page and exit
+				exit();
 			}
 			else
 			{
@@ -244,20 +269,20 @@
 						$change_password_form->add_config('middleware_form_style', 'middleware_form_default_bright.css');
 
 				$change_password_form
-					->add_config('title', $labels('Password change'))
-					->add_config('submit_button_label', $labels('Change password'));
+				->	add_config('title', $labels('Password change'))
+				->	add_config('submit_button_label', $labels('Change password'));
 
 				if(getenv('APP_INLINE_ASSETS') === 'yes')
 					$change_password_form->add_config('inline_style', true);
 
 				$change_password_form
-					->add_field([
+				->	add_field([
 						'tag'=>'input',
 						'type'=>'password',
 						'name'=>'old_password',
 						'placeholder'=>$labels('Old password')
 					])
-					->add_field([
+				->	add_field([
 						'tag'=>'input',
 						'type'=>'password',
 						'name'=>'new_password',

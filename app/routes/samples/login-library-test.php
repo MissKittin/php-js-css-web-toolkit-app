@@ -1,5 +1,4 @@
 <?php
-	require APP_LIB.'/samples/default_http_headers.php';
 	require APP_LIB.'/samples/app_template.php';
 
 	if(

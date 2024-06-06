@@ -13,15 +13,15 @@
 					$tests[$type][]=$test_name;
 
 		foreach(
-			array_diff(scandir(APP_ROOT.'/tk/com'), ['.', '..'])
+			array_diff(scandir(TK_COM), ['.', '..'])
 			as $com_name
 		)
-			if(is_dir(APP_ROOT.'/tk/com/'.$com_name.'/tests'))
+			if(is_dir(TK_COM.'/'.$com_name.'/tests'))
 				foreach(
-					array_diff(scandir(APP_ROOT.'/tk/com/'.$com_name.'/tests'), ['.', '..'])
+					array_diff(scandir(TK_COM.'/'.$com_name.'/tests'), ['.', '..'])
 					as $test_name
 				)
-					if(is_file(APP_ROOT.'/tk/com/'.$com_name.'/tests/'.$test_name))
+					if(is_file(TK_COM.'/'.$com_name.'/tests/'.$test_name))
 						$com_tests[$com_name][]=$test_name;
 
 		$view['tests']=$tests;

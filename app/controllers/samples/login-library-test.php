@@ -8,11 +8,9 @@
 	$view['login_failed_callback']=false;
 	$view['logout']=false;
 
-	$use_login_refresh=true;
-
 	function reload_page($view)
 	{
-		$view->view(APP_VIEW.'/samples/login-library-test', 'reload_page.html');
+		$view->view('login-library-test', 'reload_page.html');
 	}
 
 	if(csrf_check_token('post'))
@@ -22,49 +20,36 @@
 			check_post('password'),
 			$login_credentials_single[0],
 			$login_credentials_single[1]
-		))
-			if($use_login_refresh)
-			{
-				login_refresh('callback', 'reload_page', [$view]);
-				exit();
-			}
-		else
-			$view['login_failed_single']=true;
+		)){
+			login_refresh('callback', 'reload_page', [$view]);
+			exit();
+		}
 
 		if(login_multi(
 			check_post('user_multi'),
 			check_post('password_multi'),
 			$login_credentials_multi
-		))
-			if($use_login_refresh)
-			{
-				login_refresh('callback', 'reload_page', [$view]);
-				exit();
-			}
-		else
-			$view['login_failed_multi']=true;
+		)){
+			login_refresh('callback', 'reload_page', [$view]);
+			exit();
+		}
 
 		if(login_callback(
 			check_post('user_callback'),
 			check_post('password_callback'),
 			'callback_function'
-		))
-			if($use_login_refresh)
-			{
-				login_refresh('callback', 'reload_page', [$view]);
-				exit();
-			}
-		else
-			$view['login_failed_callback']=true;
+		)){
+			login_refresh('callback', 'reload_page', [$view]);
+			exit();
+		}
 
-		if(logout(check_post('logout')))
+		if(check_post('logout') !== null)
 		{
+			logout();
 			$view['logout']=true;
-			if($use_login_refresh)
-			{
-				login_refresh('callback', 'reload_page', [$view]);
-				exit();
-			}
+
+			login_refresh('callback', 'reload_page', [$view]);
+			exit();
 		}
 	}
 ?>

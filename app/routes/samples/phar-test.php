@@ -1,10 +1,9 @@
 <?php
-	require APP_LIB.'/samples/default_http_headers.php';
 	require APP_LIB.'/samples/app_template.php';
 
 	if(!is_file('./tk.phar'))
 	{
-		default_template::quick_view(APP_VIEW.'/samples/phar-test', 'phar_not_found.php');
+		app_template::quick_view('phar-test', 'phar_not_found.php');
 		exit();
 	}
 

@@ -2,9 +2,9 @@
 	/*
 	 * Usage:
 		ob_adapter
-			::add(new ob_adapter_module1())
-			->add(new ob_adapter_module2())
-			->start();
+		::	add(new ob_adapter_module1())
+		->	add(new ob_adapter_module2())
+		->	start();
 	 *
 	 * Modules:
 	 *  ob_adapter_obminifier - adapter for ob_minifier.php library
@@ -21,7 +21,15 @@
 
 	class ob_adapter
 	{
-		private static $instances=[];
+		protected static $instances=[];
+
+		protected static function exec($buffer, $phase)
+		{
+			foreach((__CLASS__)::$instances as $instance)
+				$buffer=$instance->exec($buffer, $phase);
+
+			return $buffer;
+		}
 
 		public static function add($instance)
 		{
@@ -31,13 +39,6 @@
 		public static function start()
 		{
 			ob_start(__CLASS__.'::exec');
-		}
-		public static function exec($buffer, $phase)
-		{
-			foreach((__CLASS__)::$instances as $instance)
-				$buffer=$instance->exec($buffer, $phase);
-
-			return $buffer;
 		}
 	}
 
@@ -56,18 +57,26 @@
 	}
 	class ob_adapter_obsfucator
 	{
-		public function __construct()
-		{
+		protected $title;
+		protected $label;
+
+		public function __construct(
+			$title='ob_sfucator',
+			$label='<h1>Enable javascript to view content</h1>'
+		){
 			if(!function_exists('ob_sfucator'))
 				require TK_LIB.'/ob_sfucator.php';
+
+			$this->title=$title;
+			$this->label=$label;
 		}
 
 		public function exec($buffer)
 		{
 			return ob_sfucator(
 				[
-					'title'=>'ob_sfucator',
-					'label'=>'<h1>Enable javascript to view content</h1>'
+					'title'=>$this->title,
+					'label'=>$this->label
 				],
 				true, $buffer
 			);

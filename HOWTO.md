@@ -1,4 +1,27 @@
-# Testing toolkit
+# Creating The project
+```
+git clone --recursive --depth 1 --shallow-submodules -b stable "https://github.com/MissKittin/php-js-css-web-toolkit-app.git" my-awesome-project
+```
+To add unofficial extras, run:
+```
+git clone --depth 1 "https://github.com/MissKittin/php-js-css-web-toolkit-extras.git" tke
+```
+**Hint:** you won't need git anymore - you can delete the git repo data: run  
+for *nix:
+```
+rm -rf .git; rm .gitmodules; rm tk/.git; rm -rf tke/.git
+```
+for windows:
+```
+rd /s /q .git && del .gitmodules && del tk\.git && rd /s /q tke\.git
+```
+**Hint:** `public/index.php` just imports another php file - this is stupid thing if your OS allows you to use softlinks.  
+You can remove this file and create link to `../app/entrypoint.php`:
+```
+php ./app/bin/replace-public-index-with-link.php
+```
+
+### Testing toolkit
 Before testing you can export environment variables:
 ```
 export TEST_DB_TYPE=pgsql # pgsql, mysql, sqlite; default: sqlite
@@ -42,29 +65,51 @@ You can also run the HTTP server to test the CSS and Js libraries on the web bro
 ```
 php ./tk/bin/run-phtml-tests.php
 ```
-You can also provide the path to the directory with tests for the above tools:
+You can also provide the path to the directory with tests for the above tools, eg:
 ```
-php ./tk/bin/run-phtml-tests.php ./path/to/lib/tests
-php ./tk/bin/run-php-com-tests.php ./path/to/com-directory
+php ./tk/bin/run-php-bin-tests.php ./tke/bin
+php ./tk/bin/run-php-lib-tests.php ./tke/lib/tests
+php ./tk/bin/run-php-com-tests.php ./tke/com
+php ./tk/bin/run-phtml-tests.php ./tke/lib/tests
 ```
 
-# Removing documentation
+### Removing samples
+All example application code is in `samples` dirs.  
+Remove samples and start developing application: run:
+```
+php ./app/bin/remove-samples.php
+```
+
+### Removing documentation
 All library documentation is contained within the libraries themselves.  
+It is not needed in the production or in the Phar.  
 You can reduce the size of php files:
 ```
 php ./tk/bin/strip-php-files.php ./tk
+php ./tk/bin/strip-php-files.php ./tke
 ```
-or you can also remove all tests:
+or you can also remove all tests and markdown files:
 ```
-php ./tk/bin/strip-php-files.php ./tk --remove-tests
+php ./tk/bin/strip-php-files.php ./tk --remove-tests --remove-md
+php ./tk/bin/strip-php-files.php ./tke --remove-tests --remove-md
 ```
 
-# Packing the toolkit into Phar
-If a better option is to pack the libraries and components into one file,  
-use the `mkphar.php` utility:
+### PHP polyfill Component Cache
+This component includes `pf_*.php` libraries depending on PHP version.  
+But what if there was one file instead of many?
+```
+php ./tk/com/php_polyfill/bin/mkcache.php
+php ./tk/com/php_polyfill/bin/destroy.php
+```
+I gra gitara :)
+
+### Packing the toolkit into Phar
+If a better option is to pack the libraries and components into one file, use the `mkphar.php` utility:
 ```
 cd ./tk
 php -d phar.readonly=0 ./bin/mkphar.php --compress=gz --source=com --source=lib --ignore=assets/ --ignore=bin/ --ignore=tests/ --ignore=tmp/ --ignore=README.md --output=../tk.phar
+cd ../tke
+php -d phar.readonly=0 ./bin/mkphar.php --compress=gz --source=lib --ignore=tests/ --ignore=tmp/ --ignore=README.md --output=../tke.phar
 ```
 and use the generated Phar, eg:
 ```
@@ -76,22 +121,26 @@ If you don't need the css and js files, you can ignore them:
 ```
 cd ./tk
 php -d phar.readonly=0 ./bin/mkphar.php --compress=gz --source=com --source=lib --ignore=assets/ --ignore=bin/ --ignore=tests/ --ignore=tmp/ --ignore=README.md --ignore=.js --ignore=.css --output=../tk.phar
+cd ../tke
+php -d phar.readonly=0 ./bin/mkphar.php --compress=gz --source=lib --ignore=tests/ --ignore=tmp/ --ignore=README.md --ignore=.js --ignore=.css --output=../tke.phar
 ```
-and if you only need to include one file(s), use the --include option:
+and if you only need to include one file(s), use the `--include` option:
 ```
 cd ./tk
 php -d phar.readonly=0 ./bin/mkphar.php --compress=gz --source=com --source=lib --ignore=assets/ --ignore=bin/ --ignore=tests/ --ignore=tmp/ --ignore=README.md --ignore=.js --ignore=.css --include=/sleep.js --output=../tk.phar
+cd ../tke
+php -d phar.readonly=0 ./bin/mkphar.php --compress=gz --source=lib --ignore=tests/ --ignore=tmp/ --ignore=README.md --ignore=.js --ignore=.css --include=/melinskrypt.js --output=../tke.phar
 ```
 
-# Installing Composer
+### Installing Composer
 To install Composer, run:
 ```
 php ./tk/bin/get-composer.php
 ```
 Composer will be installed in `./tk/bin/composer.phar`
 
-# Installing Predis
-Predis is supported but not directly - the PHPRedis API is used by default.  
+### Installing Predis
+Predis is supported but not directly - the PHPRedis API (`redis` PHP extension) is used by default.  
 For Predis, a `predis_phpredis_proxy` class from the `predis_connect.php` library is needed.  
 To install Predis, run:
 ```
@@ -104,8 +153,7 @@ For more information, see the `predis_connect.php` library
 # How to create application
 
 ### Autoloading
-You can use the `autoloader-generator.php` tool  
-to generate an autoloader script for functions and classes.   
+You can use the `autoloader-generator.php` tool to generate an autoloader script for functions and classes.  
 For more info, run:
 ```
 php ./tk/bin/autoloader-generator.php
@@ -124,14 +172,14 @@ See `pdo_connect.php` library.
 ### Queue worker
 It is better to do more time-consuming tasks outside the main application.  
 The `queue_worker.php` library and the `queue-worker.php` tool are available for this purpose.  
-Note: this library uses the features of *nix systems and is only intended for them.  
+**Note:** this library uses the features of *nix systems and is only intended for them.  
 For more info, see `./tk/lib/queue_worker.php` and run:
 ```
 php ./tk/bin/queue-worker.php
 ```
 
 ### WebSockets
-Note: this tool uses the features of *nix systems and is only intended for them.  
+**Note:** this tool uses the features of *nix systems and is only intended for them.  
 For more info, run:
 ```
 php ./tk/bin/websockets.php
@@ -139,7 +187,6 @@ php ./tk/bin/websockets.php
 *Warning: Chrome doesn't allow unsecure websocket (ws) connections, so it may not work on HTTP!*
 
 ### Compiling assets
-Run
 ```
 php ./tk/bin/assets-compiler.php ./app/assets ./public/assets
 ```
@@ -158,29 +205,28 @@ php ./tk/bin/file-watch.php
 ```
 
 ### Minifying assets - webdev.sh client
-Run
 ```
 php ./tk/bin/webdev.sh --dir ./public/assets
 ```
 All css and js files in `public/assets` will be minified.
 
 ### Minifying assets - matthiasmullie's minifier
-The way of using `./tk/bin/matthiasmullie-minify.php` is the same as in the webdevsh client.  
-Note: before use, you need to install the composer and minifier package:
+The way of using `./tk/bin/matthiasmullie-minify.php` is the same as in the webdev.sh client.  
+**Note:** before use, you need to install the composer and minifier package:
 ```
 mkdir ./tk/bin/composer
 php ./tk/bin/composer.phar --optimize-autoloader --no-cache --working-dir=./tk/bin/composer require matthiasmullie/minify
 ```
 
 ### Seeding database offline with pdo_connect() (optional)
-To offline seed database, run
+To offline seed database, run:
 ```
 php ./tk/bin/pdo-connect.php --db ./app/databases/database-name
 ```
-Note: database can be seeded automatically on first start.
+**Note:** database can be seeded automatically on first start.
 
 ### Running dev server
-In this dir run
+In this directory run:
 ```
 php ./tk/bin/serve.php
 ```
@@ -219,12 +265,46 @@ php ./tk/bin/link2file.php ./app
 ```
 
 ### Deploy on shared hosting in a subdirectory
-Note: all routing and asset paths in views must be appropriate  
-Note: if you don't have something like `public_html`, good luck
-1) upload `./public` directory to `public_html/app-name` (where `public_html` is document root in your hosting)
-2) upload application to `app-name` (next to the `public_html` directory)
-3) edit `public_html/app-name/index.php` and correct the require path (here: `require '../../your-app/app/entrypoint.php';`)
-4) test application: `php ./tk/bin/serve.php --docroot ../public_html`
+**Note:** all routings and asset paths in views must be appropriate:  
+**Hint:** just modify the switch argument in `app/entrypoint.php`:
+```
+// add a slash to $_SERVER['REQUEST_URI']
+// and increase the explode key according to the number of subdirectories
+switch(explode('/', strtok($_SERVER['REQUEST_URI'].'/', '?'))[2])
+```
+* hosting with `public_html`
+	1. mkdir `./public_html` and `./your-app`
+	2. move `./public` to `./public_html` and rename to `app-name`
+	3. move everything to `./your-app` except `./public_html`
+	4. edit `./public_html/app-name/index.php` and correct the require path  
+		(here: `require '../../your-app/app/entrypoint.php';`)
+	5. test the application:
+
+			php ./your-app/tk/bin/serve.php --docroot ./public_html
+
+		and open a web browser: `http://127.0.0.1:8080/app-name/`
+	6. upload `./public_html/app-name` directory to `public_html/app-name`  
+		(where the second `public_html` is document root in your hosting)
+	7. upload `./your-app` to `your-app`  
+		(next to the `public_html` directory in your hosting)
+* hosting without `public_html`
+	1. mkdir `./my-app` and `./my-app/app-src`
+	2. move everything to `./my-app/app-src` except `./public`
+	3. move `./public/*` and `./public/.htaccess` to `./my-app` and rmdir `./public`
+	4. edit `./my-app/index.php` and correct the require path  
+		(here: `require './app-src/app/entrypoint.php';`)
+	5. create `./my-app/app-src/.htaccess` file:
+
+			RewriteEngine on
+			RewriteRule . ../index.php [L]
+
+	6. test the application:
+
+			php ./my-app/app-src/tk/bin/serve.php --docroot .
+
+		and open a web browser: `http://127.0.0.1:8080/app-name/`
+	7. upload project to `my-app`
+
 
 # Apache configuration
 You need to `a2enmod rewrite`  

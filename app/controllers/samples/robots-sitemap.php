@@ -4,6 +4,7 @@
 		header('Content-type: text/plain');
 
 		$proto='http';
+
 		if(isset($_SERVER['HTTPS']))
 			$proto='https';
 
@@ -20,10 +21,12 @@
 		}
 
 		$proto='http';
+
 		if(isset($_SERVER['HTTPS']))
 			$proto='https';
 
 		require TK_LIB.'/sitemap_generator.php';
+
 		$sitemap=new sitemap_generator([
 			'url'=>$proto.'://'.$_SERVER['HTTP_HOST'],
 			'default_tags'=>[

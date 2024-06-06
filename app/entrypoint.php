@@ -43,7 +43,7 @@
 
 	register_shutdown_function(function(){
 		$exec_time=microtime(true)-$_SERVER['REQUEST_TIME_FLOAT'];
-		error_log('Executed in '.$exec_time.' seconds, '.memory_get_peak_usage().' bytes used');
+		error_log('Executed in '.$exec_time.' seconds, '.memory_get_peak_usage().' bytes used, '.count(get_included_files()).' scripts included');
 	});
 
 	switch(explode('/', strtok($_SERVER['REQUEST_URI'], '?'))[1])

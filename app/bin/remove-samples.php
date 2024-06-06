@@ -30,7 +30,7 @@
 
 		}
 
-	foreach(['assets', 'databases', 'routes', 'templates'] as $directory)
+	foreach(['assets', 'databases', 'routes'] as $directory)
 		if(is_dir('./'.$directory))
 		{
 			echo ' -> Removing '.$directory;
@@ -51,21 +51,18 @@
 						return ''
 						.	'{'
 						.		"\n\t\t".'//'
-						.	"\n\t".'}'
-						;
+						.	"\n\t".'}';
 					else if(strpos($match[0], 'case') !== false)
 						return ''
 						.	'{'
 						.		"\n\t\t".'//case \'link\': require APP_ROUT.\'/link.php\'; break;'
-						.	"\n\t".'}'
-						;
+						.	"\n\t".'}';
 
 					return ''
 					.	'{'
 					.		"\n\t\t".'//'
 					.		"\n\t\t".'exit();'
-					.	"\n\t".'}'
-					;
+					.	"\n\t".'}';
 				},
 				$entrypoint
 			)

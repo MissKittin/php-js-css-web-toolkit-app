@@ -1,11 +1,11 @@
 if(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
 {
-	console.log('Dark theme enabled');
+	//console.log('Dark theme enabled');
 
 	if(getCookie('app_dark_theme') !== 'true')
 	{
 		document.cookie='app_dark_theme=true';
-		console.log('app_dark_theme cookie saved')
+		//console.log('app_dark_theme cookie saved')
 	}
 
 	getCSS('/assets/default_dark.css');
@@ -14,7 +14,7 @@ if(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matche
 		if(getComputedStyle(document.body).backgroundColor === 'rgb(0, 0, 0)')
 		{
 			document.body.style.opacity=1;
-			console.log(' /assets/default_dark.css applied');
+			//console.log(' /assets/default_dark.css applied');
 
 			return 0;
 		}
@@ -25,6 +25,6 @@ if(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matche
 }
 else
 {
-	console.log('Dark theme disabled');
+	//console.log('Dark theme disabled');
 	document.body.style.opacity=1;
 }

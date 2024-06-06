@@ -9,11 +9,11 @@
 	const APP_DIR=__DIR__.'/..';
 	const APP_CTRL=APP_DIR.'/controllers';
 	const APP_DB=APP_DIR.'/databases';
+	const APP_COM=APP_DIR.'/com';
 	const APP_LIB=__DIR__;
 	const APP_MOD=APP_DIR.'/models';
 	const APP_ROOT=APP_DIR.'/..';
 	const APP_ROUT=APP_DIR.'/routes';
-	const APP_TEMPL=APP_DIR.'/templates';
 	const APP_VIEW=APP_DIR.'/views';
 
 	const VAR_DIR=APP_ROOT.'/var';
@@ -27,6 +27,9 @@
 
 	const TK_COM=APP_ROOT.'/tk/com';
 	const TK_LIB=APP_ROOT.'/tk/lib';
+
+	if(is_dir(APP_ROOT.'/tke'))
+		define('TKE_LIB', APP_ROOT.'/tke');
 
 	if(!file_exists(VAR_DIR))
 		(function(){

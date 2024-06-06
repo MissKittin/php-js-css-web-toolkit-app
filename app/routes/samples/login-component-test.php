@@ -1,5 +1,5 @@
 <?php
-	require APP_LIB.'/samples/default_http_headers.php';
+	require APP_LIB.'/samples/app_template.php';
 
 	if(
 		isset($_SERVER['HTTP_ACCEPT_ENCODING']) &&
@@ -8,7 +8,6 @@
 		ob_start('ob_gzhandler');
 
 	require APP_LIB.'/samples/session_start.php';
-
 	require TK_COM.'/login/main.php';
 
 	// set custom session reloader
@@ -24,8 +23,5 @@
 	require APP_CTRL.'/samples/login-component-test.php';
 
 	if(is_logged())
-	{
-		require APP_LIB.'/samples/app_template.php';
 		app_template::quick_view('login-component-test');
-	}
 ?>

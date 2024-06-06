@@ -5,6 +5,7 @@
 		require __DIR__.'/../lib/stdlib.php';
 
 	echo 'chdir("'.APP_ROOT.'/public")'.PHP_EOL;
+
 	if(!chdir(APP_ROOT.'/public'))
 	{
 		echo 'Cannot chdir to '.APP_ROOT.'/public'.PHP_EOL;
@@ -20,14 +21,15 @@
 	if(strtoupper(substr(PHP_OS, 0, 3)) === 'WIN')
 	{
 		echo 'MS Windows detected, using mklink'.PHP_EOL;
-
 		echo 'Testing mklink';
+
 		if(@exec('mklink .\\index-test.php .\\index.php') !== 'symbolic link created for .\index-test.php <<===>> .\index.php')
 		{
 			echo ' mklink failed'.PHP_EOL;
 			@unlink('.\\index-test.php');
 			exit(1);
 		}
+
 		unlink('.\\index-test.php');
 		echo ' OK'.PHP_EOL;
 
@@ -43,12 +45,14 @@
 
 		echo 'Testing symlink';
 		@symlink('./index.php', './index-test.php');
+
 		if(@readlink('./index-test.php') === false)
 		{
 			echo ' symlink failed'.PHP_EOL;
 			@unlink('./index-test.php');
 			exit(1);
 		}
+
 		unlink('./index-test.php');
 		echo ' OK'.PHP_EOL;
 
