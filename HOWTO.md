@@ -73,7 +73,12 @@ php ./tk/bin/run-php-com-tests.php ./tke/com
 php ./tk/bin/run-phtml-tests.php ./tke/lib/tests
 ```
 
-### Removing samples
+### Example application
+Instructions on how to run the sample application are in [app README](app/README.md)  
+After configuring the application, [start the HTTP server](#running-dev-server)  
+If you want to create your own app, read on.
+
+### Removing example application
 All example application code is in `samples` dirs.  
 Remove samples and start developing application: run:
 ```

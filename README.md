@@ -12,4 +12,4 @@ Supported cache databases: Redis, Memcached, APCu
 * PHP and CSS have a snake_case, Js - camelCase
 
 ## Getting started
-Read [app README](app/README.md) and [HOWTO](HOWTO.md)
+Read [HOWTO](HOWTO.md)

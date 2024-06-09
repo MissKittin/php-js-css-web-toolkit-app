@@ -19,7 +19,7 @@
 			]);
 		};
 
-	require APP_MOD.'/samples/login_component_test_credentials.php';
+	require APP_MODEL.'/samples/login_component_test_credentials.php';
 	require APP_CTRL.'/samples/login-component-test.php';
 
 	if(is_logged())

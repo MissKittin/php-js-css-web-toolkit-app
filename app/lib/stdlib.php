@@ -7,14 +7,16 @@
 	const APP_STDLIB=1;
 
 	const APP_DIR=__DIR__.'/..';
-	const APP_CTRL=APP_DIR.'/controllers';
-	const APP_DB=APP_DIR.'/databases';
+	const APP_ROOT=APP_DIR.'/..';
 	const APP_COM=APP_DIR.'/com';
 	const APP_LIB=__DIR__;
-	const APP_MOD=APP_DIR.'/models';
-	const APP_ROOT=APP_DIR.'/..';
-	const APP_ROUT=APP_DIR.'/routes';
-	const APP_VIEW=APP_DIR.'/views';
+
+	const APP_SRC=APP_DIR.'/src';
+	const APP_CTRL=APP_SRC.'/controllers';
+	const APP_DB=APP_SRC.'/databases';
+	const APP_MODEL=APP_SRC.'/models';
+	const APP_ROUTE=APP_SRC.'/routes';
+	const APP_VIEW=APP_SRC.'/views';
 
 	const VAR_DIR=APP_ROOT.'/var';
 	const VAR_CACHE=VAR_DIR.'/cache';

@@ -27,14 +27,13 @@
 					echo ' [ OK ]'.PHP_EOL;
 				else
 					echo ' [FAIL]'.PHP_EOL;
-
 		}
 
-	foreach(['assets', 'databases', 'routes'] as $directory)
-		if(is_dir('./'.$directory))
+	foreach(array_slice(scandir('./src'), 2) as $directory)
+		if(is_dir('./src/'.$directory.'/samples'))
 		{
-			echo ' -> Removing '.$directory;
-				if(@rmdir('./'.$directory))
+			echo ' -> Removing src/'.$directory.'/samples';
+				if(@rmdir_recursive('./src/'.$directory.'/samples'))
 					echo ' [ OK ]'.PHP_EOL;
 				else
 					echo ' [FAIL]'.PHP_EOL;
@@ -55,7 +54,7 @@
 					else if(strpos($match[0], 'case') !== false)
 						return ''
 						.	'{'
-						.		"\n\t\t".'//case \'link\': require APP_ROUT.\'/link.php\'; break;'
+						.		"\n\t\t".'//case \'link\': require APP_ROUTE.\'/link.php\'; break;'
 						.	"\n\t".'}';
 
 					return ''
@@ -74,18 +73,12 @@
 	echo ' [ OK ]'.PHP_EOL;
 
 	echo ' -> Removing tools';
-		foreach(array_slice(scandir('./bin'), 2) as $file)
+		foreach(['install-assets.php', 'remove-samples.php', 'session-clean.php'] as $file)
 			if(@unlink('./bin/'.$file))
 				echo ' [ OK ]';
 			else
 				echo ' [FAIL]';
 		echo PHP_EOL;
-
-	echo ' -> Removing bin directory';
-		if(@rmdir('./bin'))
-			echo ' [ OK ]'.PHP_EOL;
-		else
-			echo ' [FAIL]'.PHP_EOL;
 
 	echo ' -> Removing README.md';
 		if(@unlink('./README.md'))

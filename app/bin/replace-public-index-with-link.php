@@ -62,4 +62,7 @@
 		echo 'symlink("../app/entrypoint.php", "./index.php")'.PHP_EOL;
 		symlink('../app/entrypoint.php', './index.php');
 	}
+
+	if(is_link('./index.php'))
+		unlink(__FILE__);
 ?>

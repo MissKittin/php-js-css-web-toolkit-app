@@ -11,7 +11,7 @@
 
 	$view=new app_template();
 
-	require APP_MOD.'/samples/login_library_test_credentials.php'; // import credentials and callback_function()
+	require APP_MODEL.'/samples/login_library_test_credentials.php'; // import credentials and callback_function()
 	require APP_CTRL.'/samples/login-library-test.php';
 
 	$view->view('login-library-test');

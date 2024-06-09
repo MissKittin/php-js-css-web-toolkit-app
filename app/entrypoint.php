@@ -48,22 +48,22 @@
 
 	switch(explode('/', strtok($_SERVER['REQUEST_URI'], '?'))[1])
 	{
-		case '': require APP_ROUT.'/samples/home.php'; break;
+		case '': require APP_ROUTE.'/samples/home.php'; break;
 
-		case 'about': require APP_ROUT.'/samples/about.php'; break;
-		case 'check-date': require APP_ROUT.'/samples/check-date.php'; break;
-		case 'database-test': require APP_ROUT.'/samples/database-test.php'; break;
-		case 'obsfucate-html': require APP_ROUT.'/samples/obsfucate-html.php'; break;
-		case 'login-library-test': require APP_ROUT.'/samples/login-library-test.php'; break;
-		case 'login-component-test': require APP_ROUT.'/samples/login-component-test.php'; break;
-		case 'phar-test': require APP_ROUT.'/samples/phar-test.php'; break;
-		case 'preprocessing-test': require APP_ROUT.'/samples/preprocessing-test.php'; break;
-		case 'http-error-test': require APP_ROUT.'/samples/http-error-test.php'; break;
-		case 'tk-test': require APP_ROUT.'/samples/tk-test.php'; break;
-		case 'ws-test': require APP_ROUT.'/samples/ws-test.php'; break;
+		case 'about': require APP_ROUTE.'/samples/about.php'; break;
+		case 'check-date': require APP_ROUTE.'/samples/check-date.php'; break;
+		case 'database-test': require APP_ROUTE.'/samples/database-test.php'; break;
+		case 'obsfucate-html': require APP_ROUTE.'/samples/obsfucate-html.php'; break;
+		case 'login-library-test': require APP_ROUTE.'/samples/login-library-test.php'; break;
+		case 'login-component-test': require APP_ROUTE.'/samples/login-component-test.php'; break;
+		case 'phar-test': require APP_ROUTE.'/samples/phar-test.php'; break;
+		case 'preprocessing-test': require APP_ROUTE.'/samples/preprocessing-test.php'; break;
+		case 'http-error-test': require APP_ROUTE.'/samples/http-error-test.php'; break;
+		case 'tk-test': require APP_ROUTE.'/samples/tk-test.php'; break;
+		case 'ws-test': require APP_ROUTE.'/samples/ws-test.php'; break;
 
-		case 'robots.txt': require APP_ROUT.'/samples/robots.php'; break;
-		case 'sitemap.xml': require APP_ROUT.'/samples/sitemap.php'; break;
+		case 'robots.txt': require APP_ROUTE.'/samples/robots.php'; break;
+		case 'sitemap.xml': require APP_ROUTE.'/samples/sitemap.php'; break;
 
 		default:
 			require APP_CTRL.'/samples/http_error.php';

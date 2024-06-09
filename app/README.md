@@ -21,6 +21,12 @@ export APP_MATERIALIZED=yes
 
 
 # Application content
+The application source code is located in the `app/src` directory:  
+* controllers
+* database connection configurations
+* models
+* routes
+* views
 
 ### Routes
 * `about.php` - `/about` (About toolkit) (has view)
@@ -56,7 +62,8 @@ export APP_MATERIALIZED=yes
 
 ### Databases (host:port db_name user password)
 One of these databases is used in the `database_test_abstract.php` model.  
-You can select a database via the `DB_TYPE` environment variable (default: `sqlite`).
+You can select a database via the `DB_TYPE` environment variable (default: `sqlite`).  
+The following connection configurations are for the `pdo_connect.php` library.
 * `pgsql` (`127.0.0.1:5432` `sampledb` `postgres` `postgres`)
 * `mysql` (`[::1]:3306` `sampledb` `root` [no password])
 * `sqlite` (`./var/lib/databases/sqlite/database.sqlite3`)
@@ -80,6 +87,10 @@ You can configure the database connection through the following environment vari
 * `DB_IGNORE_ENV=true` (ignores all the variables above and the `DB_TYPE`)
 
 ### Cache databases
+* `memcached` (for the `memcached_connect.php` library)
+* `predis` (for the `predis_connect.php` library)
+* `redis` (for the `redis_connect.php` library)
+
 You can configure the database connection through the following environment variables:
 * `MEMCACHED_HOST` (default: `127.0.0.1`)
 * `MEMCACHED_PORT` (default: `11211`)
