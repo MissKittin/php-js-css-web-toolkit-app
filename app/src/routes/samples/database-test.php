@@ -1,5 +1,5 @@
 <?php
-	require APP_LIB.'/samples/app_template.php';
+	require APP_LIB.'/app_template.php';
 
 	if(
 		isset($_SERVER['HTTP_ACCEPT_ENCODING']) &&
@@ -16,5 +16,5 @@
 			database_test_controller::model_params()
 		),
 		new app_template()
-	)->view('database-test');
+	)->view('samples/database-test');
 ?>

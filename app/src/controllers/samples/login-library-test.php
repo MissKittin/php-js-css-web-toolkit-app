@@ -10,7 +10,7 @@
 
 	function reload_page($view)
 	{
-		$view->view('login-library-test', 'reload_page.html');
+		$view->view('samples/login-library-test', 'reload_page.html');
 	}
 
 	if(csrf_check_token('post'))

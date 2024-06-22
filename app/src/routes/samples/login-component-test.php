@@ -1,5 +1,5 @@
 <?php
-	require APP_LIB.'/samples/app_template.php';
+	require APP_LIB.'/app_template.php';
 
 	if(
 		isset($_SERVER['HTTP_ACCEPT_ENCODING']) &&
@@ -23,5 +23,5 @@
 	require APP_CTRL.'/samples/login-component-test.php';
 
 	if(is_logged())
-		app_template::quick_view('login-component-test');
+		app_template::quick_view('samples/login-component-test');
 ?>

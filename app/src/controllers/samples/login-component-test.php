@@ -46,7 +46,7 @@
 			login_com_reg_view::_()['template']='materialized';
 		else if(
 			isset($_COOKIE['app_dark_theme']) &&
-			($_COOKIE['app_dark_theme'] === 'true') // from app/templates/samples/default/assets/default.js/darkTheme.js
+			($_COOKIE['app_dark_theme'] === 'true') // from app/com/basic_template/assets/default.js/darkTheme.js
 		)
 			login_com_reg_view::_()['login_style']='login_default_dark.css';
 
@@ -68,7 +68,7 @@
 			$_POST=[];
 
 			// remove this block to hide from the user any info that has been banned
-			(function($array){
+			(function($array) use($labels){
 				login_com_reg::_()['wrong_credentials']=true;
 				login_com_reg_view::_()['wrong_credentials_label']=$labels('You have been banned. Come back later.');
 
@@ -150,7 +150,7 @@
 				if(getenv('APP_MATERIALIZED') !== 'yes')
 					if(
 						isset($_COOKIE['app_dark_theme']) &&
-						($_COOKIE['app_dark_theme'] === 'true') // from app/templates/samples/default/assets/default.js/darkTheme.js
+						($_COOKIE['app_dark_theme'] === 'true') // from app/com/basic_template/assets/default.js/darkTheme.js
 					)
 						$captcha_form->add_config('middleware_form_style', 'middleware_form_default_dark.css');
 					else
@@ -262,7 +262,7 @@
 				if(getenv('APP_MATERIALIZED') !== 'yes')
 					if(
 						isset($_COOKIE['app_dark_theme']) &&
-						($_COOKIE['app_dark_theme'] === 'true') // from app/templates/samples/default/assets/default.js/darkTheme.js
+						($_COOKIE['app_dark_theme'] === 'true') // from app/com/basic_template/assets/default.js/darkTheme.js
 					)
 						$change_password_form->add_config('middleware_form_style', 'middleware_form_default_dark.css');
 					else
@@ -294,6 +294,6 @@
 			}
 		}
 
-		// password updated, you can see the content (see routes/samples/login-component-test.php)
+		// password updated, you can see the content (See: app/src/routes/samples/login-component-test.php)
 	}
 ?>

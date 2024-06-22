@@ -45,9 +45,9 @@ The application source code is located in the `app/src` directory:
 * `ws-test.php` - `/ws-test`
 
 ### Controllers <-> routes
+* `http_error.php` <-> `http-error-test.php`
 * `check-date.php` <-> `check-date.php`
 * `database-test.php` <-> `database-test.php`
-* `http_error.php` <-> `http-error-test.php`
 * `login-component-test.php` <-> `login-component-test.php`
 * `login-library-test.php` <-> `login-library-test.php`
 * `phar-test.php` <-> `phar-test.php`
@@ -104,16 +104,17 @@ You can configure the database connection through the following environment vari
 * `REDIS_IGNORE_ENV=true` (ignores all redis variables above)
 
 ### Libraries
+* `app_template.php` - default http headers and a basic_template overlay that saves typing
+* `ob_adapter.php` - modular output buffer
 * `stdlib.php` - application standard library
-* `app_template.php` - default http headers and a basic template overlay that saves typing
-* `logger.php` - logging functions
-* `ob_adapter.php` - `ob_start()` handler
-* `ob_cache.php`
 * `pdo_instance.php` - get PDO handler
+* `logger.php` - logging functions
+* `ob_cache.php`
 * `session_start.php` - session handler
 
 ### Components
 * `basic_template` - simple template management
+* `ie_error` - made without love
 
 ### Tools
 * `install-assets.php`

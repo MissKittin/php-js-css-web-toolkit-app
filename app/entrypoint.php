@@ -1,6 +1,10 @@
 <?php
 	require __DIR__.'/lib/stdlib.php';
-	require TK_COM.'/php_polyfill/main.php';
+
+	if(file_exists(APP_DIR.'/php_polyfill.php'))
+		require APP_DIR.'/php_polyfill.php';
+	else
+		require TK_COM.'/php_polyfill/main.php';
 
 	chdir(APP_ROOT);
 
@@ -11,7 +15,7 @@
 		(!isset($_SERVER['REQUEST_URI'])) ||
 		(!isset($_SERVER['REQUEST_METHOD']))
 	){
-		require APP_CTRL.'/samples/http_error.php';
+		require APP_CTRL.'/http_error.php';
 		http_error(400);
 		exit();
 	}
@@ -20,7 +24,7 @@
 		($_SERVER['REQUEST_METHOD'] !== 'GET') &&
 		($_SERVER['REQUEST_METHOD'] !== 'POST')
 	){
-		require APP_CTRL.'/samples/http_error.php';
+		require APP_CTRL.'/http_error.php';
 		http_error(400);
 		exit();
 	}
@@ -66,12 +70,15 @@
 		case 'sitemap.xml': require APP_ROUTE.'/samples/sitemap.php'; break;
 
 		default:
-			require APP_CTRL.'/samples/http_error.php';
+			require APP_CTRL.'/http_error.php';
 
 			if(is_dir($_SERVER['DOCUMENT_ROOT'].strtok($_SERVER['REQUEST_URI'], '?')))
-				require http_error(403);
-			else
-				require http_error(404);
+			{
+				http_error(403);
+				break;
+			}
+
+			http_error(404);
 	}
 
 	error_log(basename(__FILE__).' finished');

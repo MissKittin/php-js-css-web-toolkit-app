@@ -2,23 +2,17 @@
 	if(!class_exists('registry'))
 		require TK_LIB.'/registry.php';
 
+	class basic_template_exception extends Exception {}
 	class basic_template extends registry
 	{
 		protected static $return_content='';
+		protected static $assets_path='/assets';
+		protected static $assets_filename='basic-template';
+		protected static $favicon=null;
 
 		protected $do_return_content;
 
-		public static function quick_view(string $view_path, string $page_content='page_content.php')
-		{
-			$view['csp_header']=static::default_csp_header();
-
-			if(file_exists($view_path.'/template_config.php'))
-				include $view_path.'/template_config.php';
-
-			require __DIR__.'/view.php';
-		}
-
-		private static function default_csp_header()
+		protected static function default_csp_header()
 		{
 			return [
 				'default-src'=>['\'none\''],
@@ -30,7 +24,7 @@
 				'form-action'=>['\'self\'']
 			];
 		}
-		private static function parse_headers($view)
+		protected static function parse_headers($view)
 		{
 			if(isset($view['csp_header']))
 			{
@@ -38,8 +32,10 @@
 				foreach($view['csp_header'] as $csp_param=>$csp_values)
 				{
 					echo $csp_param;
+
 					foreach($csp_values as $csp_value)
 						echo ' '.$csp_value;
+
 					echo ';';
 				}
 				?>"><?php
@@ -67,6 +63,35 @@
 			if(isset($view['styles']))
 				foreach($view['styles'] as $style)
 					{ ?><link rel="stylesheet" href="<?php echo $style; ?>"><?php }
+		}
+
+		public static function set_assets_path(string $path)
+		{
+			static::$assets_path=$path;
+			return static::class;
+		}
+		public static function set_assets_filename(string $name)
+		{
+			static::$assets_filename=$name;
+			return static::class;
+		}
+		public static function set_favicon(string $path)
+		{
+			if(!file_exists($path))
+				throw new basic_template_exception($path.' does not exist');
+
+			static::$favicon=realpath($path);
+
+			return static::class;
+		}
+		public static function quick_view(string $view_path, string $page_content='page_content.php')
+		{
+			$view['csp_header']=static::default_csp_header();
+
+			if(file_exists($view_path.'/template_config.php'))
+				include $view_path.'/template_config.php';
+
+			require __DIR__.'/view.php';
 		}
 
 		public function __construct(bool $return_content=false)

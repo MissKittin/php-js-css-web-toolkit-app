@@ -1,5 +1,5 @@
 <?php
-	require APP_LIB.'/samples/app_template.php';
+	require APP_LIB.'/app_template.php';
 
 	if(
 		isset($_SERVER['HTTP_ACCEPT_ENCODING']) &&
@@ -14,5 +14,5 @@
 	require APP_MODEL.'/samples/login_library_test_credentials.php'; // import credentials and callback_function()
 	require APP_CTRL.'/samples/login-library-test.php';
 
-	$view->view('login-library-test');
+	$view->view('samples/login-library-test');
 ?>

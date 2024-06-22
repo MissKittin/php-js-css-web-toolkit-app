@@ -33,6 +33,8 @@
 	if(is_dir(APP_ROOT.'/tke'))
 		define('TKE_LIB', APP_ROOT.'/tke');
 
+	class app_exception extends Exception {}
+
 	if(!file_exists(VAR_DIR))
 		(function(){
 			foreach([
@@ -45,6 +47,6 @@
 				VAR_TMP
 			] as $directory)
 				if(!mkdir($directory))
-					throw new Exception('APP STDLIB: mkdir '.$directory.' failed');
+					throw new app_exception('APP STDLIB: mkdir '.$directory.' failed');
 		})();
 ?>

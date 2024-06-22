@@ -35,7 +35,7 @@
 		// you can implement the var/databases hierarchy
 
 		if(!file_exists(VAR_DB.'/'.$db_config['db_type']))
-			mkdir(VAR_DB.'/'.$db_config['db_type'], 0777, true);
+			mkdir(VAR_DB.'/'.$db_config['db_type']);
 
 		$db_config['host']=VAR_DB.'/'.$db_config['db_type'].'/database.sqlite3';
 		//$db_config['seeded_path']=VAR_DB.'/'.$db_config['db_type'];

@@ -1,9 +1,9 @@
 <?php
-	require APP_LIB.'/samples/app_template.php';
+	require APP_LIB.'/app_template.php';
 
 	if(!is_file('./tk.phar'))
 	{
-		app_template::quick_view('phar-test', 'phar_not_found.php');
+		app_template::quick_view('samples/phar-test', 'phar_not_found.php');
 		exit();
 	}
 
@@ -11,5 +11,5 @@
 
 	require APP_CTRL.'/samples/phar-test.php';
 
-	$view->view('phar-test');
+	$view->view('samples/phar-test');
 ?>

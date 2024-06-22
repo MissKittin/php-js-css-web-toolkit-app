@@ -11,10 +11,10 @@
 	 *  $_SESSION_CLEAN_TOOL is reserved for session-clean.php tool
 	 *
 	 * See:
-	 *  bin/session-clean.php
-	 *  routes/samples/database-test.php
-	 *  routes/samples/login-component-test.php
-	 *  routes/samples/login-library-test.php
+	 *  app/bin/session-clean.php
+	 *  app/src/routes/samples/database-test.php
+	 *  app/src/routes/samples/login-component-test.php
+	 *  app/src/routes/samples/login-library-test.php
 	 */
 
 	if(isset($_SESSION_CLEAN_TOOL))

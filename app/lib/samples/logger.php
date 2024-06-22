@@ -3,7 +3,7 @@
 	 * Logging functions
 	 *
 	 * See:
-	 *  controllers/samples/login-component-test.php
+	 *  app/src/controllers/samples/login-component-test.php
 	 */
 
 	if(!class_exists('log_to_txt'))

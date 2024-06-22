@@ -1,5 +1,5 @@
 <?php
-	require APP_LIB.'/samples/app_template.php';
+	require APP_LIB.'/app_template.php';
 
 	// will be refreshed hourly ("Cache file was created" will disappear in an hour)
 	require APP_LIB.'/samples/ob_cache.php';
@@ -9,5 +9,5 @@
 
 	preprocessed_cache
 	::	main(new app_template())
-	->	view('preprocessing-test');
+	->	view('samples/preprocessing-test');
 ?>

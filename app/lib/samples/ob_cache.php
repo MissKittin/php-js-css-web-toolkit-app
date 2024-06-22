@@ -4,9 +4,9 @@
 	 * if so, use Redis as cache, if not - dump the cache to a file
 	 *
 	 * See:
-	 *  routes/samples/about.php
-	 *  routes/samples/check-date.php
-	 *  routes/samples/preprocessing-test.php
+	 *  app/src/routes/samples/about.php
+	 *  app/src/routes/samples/check-date.php
+	 *  app/src/routes/samples/preprocessing-test.php
 	 */
 
 	if(!function_exists('ob_file_cache'))

@@ -54,7 +54,9 @@
 					else if(strpos($match[0], 'case') !== false)
 						return ''
 						.	'{'
+						.		"\n\t\t".'case \'\': require APP_ROUTE.\'/route_template.php\'; break;'
 						.		"\n\t\t".'//case \'link\': require APP_ROUTE.\'/link.php\'; break;'
+						.		"\n\t\t".'default: //'
 						.	"\n\t".'}';
 
 					return ''

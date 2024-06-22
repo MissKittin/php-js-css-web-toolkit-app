@@ -1,3 +1,9 @@
+# A few words about design
+The application design does not define the paradigm in which individual parts of the application will be written.  
+You decide what will be written procedurally, functionally and object-oriented, as well as what type of routing you will use.  
+It has its advantages and disadvantages - it is not a typical framework, so think about whether you need something like Symfony or Laravel.  
+**Remember about safety!** Treat all data coming from the user as untrusted. Filter them before sending them back. **Keep your code clean.**
+
 # Creating The project
 ```
 git clone --recursive --depth 1 --shallow-submodules -b stable "https://github.com/MissKittin/php-js-css-web-toolkit-app.git" my-awesome-project
@@ -6,7 +12,9 @@ To add unofficial extras, run:
 ```
 git clone --depth 1 "https://github.com/MissKittin/php-js-css-web-toolkit-extras.git" tke
 ```
-**Hint:** you won't need git anymore - you can delete the git repo data: run  
+
+### Hint
+If you won't need git anymore, you can delete the git repo data: run  
 for *nix:
 ```
 rm -rf .git; rm .gitmodules; rm tk/.git; rm -rf tke/.git
@@ -15,7 +23,20 @@ for windows:
 ```
 rd /s /q .git && del .gitmodules && del tk\.git && rd /s /q tke\.git
 ```
-**Hint:** `public/index.php` just imports another php file - this is stupid thing if your OS allows you to use softlinks.  
+but if you want to have a smaller repository and the ability to update the toolkit, change the submodule URL:
+```
+git submodule set-url tk "https://github.com/MissKittin/php-js-css-web-toolkit.git"
+git commit -a -m "Changed URL of tk submodule"
+```
+and then change the remote repository address and optionally push:
+```
+git remote set-url origin "git@github.com:YourName/my-app.git"
+git push origin master
+```
+remember that after updating the `tk` submodule all changes to the `tk` directory will be lost!
+
+### Hint
+`public/index.php` just imports another php file - this is stupid thing if your OS allows you to use softlinks.  
 You can remove this file and create link to `../app/entrypoint.php`:
 ```
 php ./app/bin/replace-public-index-with-link.php
@@ -98,13 +119,19 @@ or you can also remove all tests and markdown files:
 php ./tk/bin/strip-php-files.php ./tk --remove-tests --remove-md
 php ./tk/bin/strip-php-files.php ./tke --remove-tests --remove-md
 ```
+**Warning:** if you update the toolkit, you need to repeat this procedure
 
 ### PHP polyfill Component Cache
 This component includes `pf_*.php` libraries depending on PHP version.  
-But what if there was one file instead of many?
+But what if there was one file instead of many?  
+Method 1: if you do not intend to use the submodule (e.g. pack it into phar or integrate it with the application repository):
 ```
 php ./tk/com/php_polyfill/bin/mkcache.php
 php ./tk/com/php_polyfill/bin/destroy.php
+```
+Method 2: if you don't want to change anything in the submodule (smaller application repository, ability to update the submodule):
+```
+php ./tk/com/php_polyfill/bin/mkcache.php --out ./app/php_polyfill.php
 ```
 I gra gitara :)
 
@@ -136,6 +163,21 @@ php -d phar.readonly=0 ./bin/mkphar.php --compress=gz --source=com --source=lib 
 cd ../tke
 php -d phar.readonly=0 ./bin/mkphar.php --compress=gz --source=lib --ignore=tests/ --ignore=tmp/ --ignore=README.md --ignore=.js --ignore=.css --include=/melinskrypt.js --output=../tke.phar
 ```
+or `--include-regex` option:
+```
+cd ./tk
+php -d phar.readonly=0 ./bin/mkphar.php --compress=gz --source=com --source=lib --ignore=assets/ --ignore=bin/ --ignore=tests/ --ignore=tmp/ --ignore=README.md --ignore=.js --ignore=.css "--include-regex=sleep.js$" --output=../tk.phar
+cd ../tke
+php -d phar.readonly=0 ./bin/mkphar.php --compress=gz --source=lib --ignore=tests/ --ignore=tmp/ --ignore=README.md --ignore=.js --ignore=.css "--include-regex=melinskrypt.js$" --output=../tke.phar
+```
+if you used the first method of cache php polyfill, you can ignore the `pf_*.php` libraries:
+```
+cd ./tk
+php -d phar.readonly=0 ./bin/mkphar.php --compress=gz --source=com --source=lib --ignore=assets/ --ignore=bin/ --ignore=tests/ --ignore=tmp/ --ignore=README.md --ignore=.js --ignore=.css "--ignore-regex=\/pf_(.*?).php" --output=../tk.phar
+cd ../tke
+php -d phar.readonly=0 ./bin/mkphar.php --compress=gz --source=lib --ignore=tests/ --ignore=tmp/ --ignore=README.md --ignore=.js --ignore=.css --output=../tke.phar
+```
+you can also use `--include-regex` option.
 
 ### Installing Composer
 To install Composer, run:
@@ -156,6 +198,13 @@ For more information, see the `predis_connect.php` library
 
 
 # How to create application
+
+### Templates
+Copy them and start creating.
+* `app/src/controllers/controller_template.php`
+* `app/src/models/model_template.php`
+* `app/src/routes/route_template.php`
+* `app/src/views/view_template`
 
 ### Autoloading
 You can use the `autoloader-generator.php` tool to generate an autoloader script for functions and classes.  
@@ -277,6 +326,7 @@ php ./tk/bin/link2file.php ./app
 // and increase the explode key according to the number of subdirectories
 switch(explode('/', strtok($_SERVER['REQUEST_URI'].'/', '?'))[2])
 ```
+
 * hosting with `public_html`
 	1. mkdir `./public_html` and `./your-app`
 	2. move `./public` to `./public_html` and rename to `app-name`
@@ -292,6 +342,7 @@ switch(explode('/', strtok($_SERVER['REQUEST_URI'].'/', '?'))[2])
 		(where the second `public_html` is document root in your hosting)
 	7. upload `./your-app` to `your-app`  
 		(next to the `public_html` directory in your hosting)
+
 * hosting without `public_html`
 	1. mkdir `./my-app` and `./my-app/app-src`
 	2. move everything to `./my-app/app-src` except `./public`

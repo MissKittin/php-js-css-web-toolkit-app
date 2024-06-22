@@ -38,9 +38,10 @@
 		$db_config['socket']=getenv('PGSQL_SOCKET');
 
 	// you can implement the var/databases hierarchy
-	if(!file_exists(VAR_DB.'/'.$db_config['db_type']))
-		mkdir(VAR_DB.'/'.$db_config['db_type'], 0777, true);
-	$db_config['seeded_path']=VAR_DB.'/'.$db_config['db_type'];
+		if(!file_exists(VAR_DB.'/'.$db_config['db_type']))
+			mkdir(VAR_DB.'/'.$db_config['db_type']);
+
+		$db_config['seeded_path']=VAR_DB.'/'.$db_config['db_type'];
 
 	return $db_config;
 ?>

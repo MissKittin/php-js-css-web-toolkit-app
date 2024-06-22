@@ -29,8 +29,8 @@
 	<h1>Update</h1>
 	<form method="post" action="">
 		ID: <input type="text" name="car_id"><br>
-		Name: <input type="text" name="car_name"><br>
-		Price: <input type="text" name="car_price"><br>
+		New name: <input type="text" name="car_name"><br>
+		New price: <input type="text" name="car_price"><br>
 		<input type="submit" name="update" value="Update">
 		<input type="hidden" name="<?php echo csrf_print_token('parameter'); ?>" value="<?php echo csrf_print_token('value'); ?>">
 	</form>

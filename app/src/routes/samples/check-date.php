@@ -1,5 +1,5 @@
 <?php
-	require APP_LIB.'/samples/app_template.php';
+	require APP_LIB.'/app_template.php';
 	require APP_LIB.'/samples/ob_cache.php';
 
 	ob_cache(ob_url2file(), 3600);
@@ -8,5 +8,5 @@
 
 	require APP_CTRL.'/samples/check-date.php';
 
-	$view->view('check-date');
+	$view->view('samples/check-date');
 ?>

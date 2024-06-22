@@ -50,9 +50,8 @@
 		]
 	];
 	$files_cp=[
-		$fc[0][0].'/basic_template/assets/default_bright.css',
-		$fc[0][0].'/basic_template/assets/default_dark.css',
-		$fc[0][0].'/basic_template/assets/default.js',
+		$fc[0][0].'/basic_template/assets/basic-template.js',
+		$fc[0][0].'/basic_template/assets/basic-template.css',
 		$fc[0][2].'/sendNotification.js',
 		$fc[0][1].'/login/templates/default/assets/login_default_bright.css',
 		$fc[0][1].'/login/templates/default/assets/login_default_dark.css',
@@ -63,9 +62,8 @@
 		$fc[0][2].'/simpleblog_materialized.css'
 	];
 	$files_nix=[
-		$fc[1][0].'/basic_template/assets/default_bright.css',
-		$fc[1][0].'/basic_template/assets/default_dark.css',
-		$fc[1][0].'/basic_template/assets/default.js',
+		$fc[1][0].'/basic_template/assets/basic-template.js',
+		$fc[1][0].'/basic_template/assets/basic-template.css',
 		$fc[1][2].'/sendNotification.js',
 		$fc[1][1].'/login/templates/default/assets/login_default_bright.css',
 		$fc[1][1].'/login/templates/default/assets/login_default_dark.css',
@@ -76,9 +74,8 @@
 		$fc[1][2].'/simpleblog_materialized.css'
 	];
 	$files_win=[
-		$fc[2][0].'\\basic_template\\assets\\default_bright.css',
-		$fc[2][0].'\\basic_template\\assets\\default_dark.css',
-		$fc[2][0].'\\basic_template\\assets\\default.js',
+		$fc[2][0].'\\basic_template\\assets\\basic-template.js',
+		$fc[2][0].'\\basic_template\\assets\\basic-template.css',
 		$fc[2][2].'\\sendNotification.js',
 		$fc[2][1].'\\login\\templates\\default\\assets\\login_default_bright.css',
 		$fc[2][1].'\\login\\templates\\default\\assets\\login_default_dark.css',

@@ -1,42 +1,23 @@
 <?php
-	function pdo_instance($on_error=null)
-	{
-		/*
-		 * Add some features on top of pdo_connect
-		 *
-		 * Environment variables:
-		 *  DB_IGNORE_ENV=true - ignore all variables (default: false)
-		 *  DB_TYPE - select database from app/databases/samples
-		 *
-		 * See:
-		 *  controllers/samples/login-component-test.php
-		 *  models/samples/database_test_model.php
-		 */
+	/*
+	 * pdo_instance configuration via environment variables
+	 * also sets the sqlite database as the default
+	 *
+	 * Environment variables:
+	 *  DB_IGNORE_ENV=true - ignore all variables (default: false)
+	 *  DB_TYPE - select database from app/src/databases/samples
+	 *
+	 * See:
+	 *  app/src/controllers/samples/login-component-test.php
+	 *  app/src/models/samples/database_test_model.php
+	 */
 
-		static $pdo_handler=null;
+	require APP_LIB.'/pdo_instance.php';
 
-		if($pdo_handler === null)
-		{
-			if(!function_exists('pdo_connect'))
-				require TK_LIB.'/pdo_connect.php';
-
-			if(getenv('DB_IGNORE_ENV') === 'true')
-				$pdo_connect_db='sqlite';
-			else
-				$pdo_connect_db=getenv('DB_TYPE');
-
-			if($pdo_connect_db === false)
-				$pdo_connect_db='sqlite';
-
-			if(!is_dir(APP_DB.'/samples/'.$pdo_connect_db))
-				throw new Exception(APP_DB.'/samples/'.$pdo_connect_db.' not exists');
-
-			$pdo_handler=pdo_connect(
-				APP_DB.'/samples/'.$pdo_connect_db,
-				$on_error
-			);
-		}
-
-		return $pdo_handler;
-	}
+	if(getenv('DB_IGNORE_ENV') === 'true')
+		pdo_instance(null, null, 'samples/sqlite');
+	else if(getenv('DB_TYPE') !== false)
+		pdo_instance(null, null, 'samples/'.getenv('DB_TYPE'));
+	else
+		pdo_instance(null, null, 'samples/sqlite');
 ?>
