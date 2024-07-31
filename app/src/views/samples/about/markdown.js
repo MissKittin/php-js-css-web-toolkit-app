@@ -1,118 +1,148 @@
-function format_readme(input, output)
-{
-	if(output === null)
-		return false;
+document.addEventListener('DOMContentLoaded', function(){
+	var startTime=performance.now();
 
-	var markdown=input.innerHTML.replace(/\n\n\t\t\t([\s\S]*?)\n\n/g, function(match){
-		// code block embedded in list
-
-		return ''
-		+	'<br><br><div style="font-family: monospace; font-weight: bold; border-radius: 5px; color: #000000; background-color: #aaaaaa; padding: 2px;">'
-		+		match.trim().replace(/\n/g, '<br>')
-		+	'</div><br>\n';
-	}).split('\n');
-	var html='';
-	var code_block_opened=false; var ul_list_opened=false; var ol_list_opened=false;
-
-	for(var i=0; i<markdown.length; i++)
+	function format_readme(input, output)
 	{
-		// headers
-		if(markdown[i].substring(0, 3) === '###')
-			html+='<h3>'+markdown[i].slice(4)+'</h3>';
-		else if(markdown[i].substring(0, 2) === '##')
-			html+='<h2>'+markdown[i].slice(3)+'</h2>';
-		else if(markdown[i].substring(0, 1) === '#')
-			html+='<h1>'+markdown[i].slice(2)+'</h1>';
+		// this function is created only for toolkit readme
 
-		// code blocks
-		else if(markdown[i].trim().substring(0, 3) === '```')
+		if(output === null)
+			return false;
+
+		var html='';
+		var code_block_opened=false;
+		var ul_list_opened=false;
+		var ol_list_opened=false;
+		var markdown=input.innerHTML
+		.	replace(/\n\n\t\t\t([\s\S]*?)\n\n/g, function(match){
+				// code block embedded in list
+
+				return ''
+				+	'<br><br><div class="md_inline_code_block">'
+				+		match.trim().replace(/\n/g, '<br>')
+				+	'</div><br>\n';
+			})
+		.	replace(/\n\n\t\t([\s\S]*?)\n\n/g, function(match){
+				// code block embedded in list
+
+				if(match.trimStart().substring(0, 1) === '#') // do not touch server configurations
+					return match;
+
+				return ''
+				+	'<br><br><div class="md_inline_code_block">'
+				+		match.trim().replace(/\n/g, '<br>')
+				+	'</div><br>\n';
+			})
+		.	split('\n');
+
+		for(var i=0; i<markdown.length; i++)
 		{
-			if(code_block_opened)
-			{
-				html+='</div>';
-				code_block_opened=false;
-			}
-			else
-			{
-				html+='<div style="font-family: monospace; font-weight: bold; white-space: pre; overflow: auto; border-radius: 5px; color: #000000; background-color: #aaaaaa; margin-top: 5px; margin-bottom: 5px; padding-top: 20px; padding-bottom: 20px; padding-left: 5px; padding-right: 5px;">';
-				code_block_opened=true;
-			}
-		}
+			// headers
+			if(markdown[i].substring(0, 3) === '###')
+				html+='<h3 id="'+markdown[i].substring(3).trim().toLowerCase().replace(/\W/g, '-')+'">'+markdown[i].slice(4)+'</h3>';
+			else if(markdown[i].substring(0, 2) === '##')
+				html+='<h2 id="'+markdown[i].substring(2).trim().toLowerCase().replace(/\W/g, '-')+'">'+markdown[i].slice(3)+'</h2>';
+			else if(markdown[i].substring(0, 1) === '#')
+				html+='<h1 id="'+markdown[i].substring(1).trim().toLowerCase().replace(/\W/g, '-')+'">'+markdown[i].slice(2)+'</h1>';
 
-		// lists opening
-		else if(
-			(!isNaN(markdown[i].substring(0, 1))) &&
-			(
-				(markdown[i].substring(1, 3) === ') ') ||
-				(markdown[i].substring(2, 4) === '. ')
-			)
-		){
-			if(!ol_list_opened)
+			// code blocks
+			else if(markdown[i].trim().substring(0, 3) === '```')
 			{
-				html+='<ol>';
-				ol_list_opened=true;
-			}
-
-			html+='<li>'
-			+	markdown[i]
-			.	slice(3)
-			.	replace('  ', '<br>')
-			.	replace(/`(.*?)`/g, '<span style="font-family: monospace; font-weight: bold; border-radius: 5px; color: #000000; background-color: #aaaaaa; padding: 2px;">$1</span>') // inline code blocks
-			+	'</li>';
-		}
-		else if(markdown[i].substring(0, 2) === '* ')
-		{
-			if(!ul_list_opened)
-			{
-				html+='<ul>';
-				ul_list_opened=true;
-			}
-
-			html+='<li>'
-			+	markdown[i]
-			.	slice(2)
-			.	replace('  ', '<br>')
-			.	replace(/`(.*?)`/g, '<span style="font-family: monospace; font-weight: bold; border-radius: 5px; color: #000000; background-color: #aaaaaa; padding: 2px;">$1</span>') // inline code blocks
-			+	'</li>';
-		}
-
-		// regular text/lists closing/code blocks linebreaks
-		else
-		{
-			if(markdown[i].substring(0, 1) !== "\t")
-			{
-				if(ol_list_opened)
+				if(code_block_opened)
 				{
-					html+='</ol>';
-					ol_list_opened=false;
+					html+='</div>';
+					code_block_opened=false;
 				}
-				if(ul_list_opened)
+				else
 				{
-					html+='</ul>';
-					ul_list_opened=false;
+					html+='<div class="md_code_block">';
+					code_block_opened=true;
 				}
 			}
 
-			if(code_block_opened)
-				html+=markdown[i].trimStart()+'<br>';
-			else
-				html+=markdown[i]
-				.	trimStart()
+			// lists opening
+			else if(
+				(!isNaN(markdown[i].substring(0, 1))) &&
+				(
+					(markdown[i].substring(1, 3) === ') ') ||
+					(markdown[i].substring(2, 4) === '. ')
+				)
+			){
+				if(!ol_list_opened)
+				{
+					html+='<ol>';
+					ol_list_opened=true;
+				}
+
+				html+='<li>'
+				+	markdown[i]
+				.	slice(3)
 				.	replace('  ', '<br>')
-				.	replace(/`(.*?)`/g, '<span style="font-family: monospace; font-weight: bold; border-radius: 5px; color: #000000; background-color: #aaaaaa; padding: 2px;">$1</span>') // inline code blocks
-				.	replace(/\*\*(.*?)\*\*/gm, '<strong>$1</strong>') // bolds
-				.	replace('*nix', '&#42;nix').replace(/\*(.*?)\*/gm, '<i>$1</i>') // italians
-				.	replace(':)', '&#128512;');
+				.	replace(/`(.*?)`/g, '<span class="md_inline_code_block">$1</span>') // inline code blocks
+				+	'</li>';
+			}
+			else if(markdown[i].substring(0, 2) === '* ')
+			{
+				if(!ul_list_opened)
+				{
+					html+='<ul>';
+					ul_list_opened=true;
+				}
+
+				html+='<li>'
+				+	markdown[i]
+				.	slice(2)
+				.	replace('  ', '<br>')
+				.	replace(/`(.*?)`/g, '<span class="md_inline_code_block">$1</span>') // inline code blocks
+				+	'</li>';
+			}
+
+			// regular text/lists closing/code blocks linebreaks
+			else
+			{
+				if(markdown[i].substring(0, 1) !== "\t")
+				{
+					if(ol_list_opened)
+					{
+						html+='</ol>';
+						ol_list_opened=false;
+					}
+					if(ul_list_opened)
+					{
+						html+='</ul>';
+						ul_list_opened=false;
+					}
+				}
+
+				if(code_block_opened)
+					html+=markdown[i]+'<br>';
+				else
+					html+=markdown[i]
+					.	trimStart()
+					.	replace('  ', '<br>')
+					.	replace(/`(.*?)`/g, '<span class="md_inline_code_block">$1</span>') // inline code blocks
+					.	replace(/\*\*(.*?)\*\*/gm, '<strong>$1</strong>') // bolds
+					.	replace('*nix', '&#42;nix').replace(/\*(.*?)\*/gm, '<i>$1</i>') // italians
+					.	replace(':)', '&#128512;');
+			}
 		}
+
+		// links
+		output.innerHTML=html
+		.	replace(/\[([^\]]+)\]\(#([^\)]+)\)/gm, '<span class="md_link"><a href="#$2">$1</a></span>') // headlink hash
+		.	replace(/\[([^\]]+)\]\(([^\)]+)\)/gm, '<span class="md_link">$2</span>');
 	}
 
-	// links
-	output.innerHTML=html.replace(/\[([^\]]+)\]\(([^\)]+)\)/gm, '<span style="font-family: monospace; font-weight: bold; border-radius: 5px; color: #ff0000; background-color: #ffffff; padding: 2px;">$2</span>');
-}
-function format_license(id)
-{
-	if(id === null)
-		return false;
+	var markdowns=document.getElementsByClassName('markdown');
 
-	id.children[1].style.font='initial';
-}
+	for(var i=0; i<markdowns.length; i++)
+		format_readme(
+			markdowns[i].children[1],
+			markdowns[i]
+		);
+
+	document.getElementById('page_content').style.display='block';
+	document.getElementById('loading_page_content').style.display='none';
+
+	var endTime=performance.now();
+	console.log(`Formatting the document took ${endTime-startTime} milliseconds`);
+}, false);

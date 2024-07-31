@@ -2,6 +2,12 @@
 	require APP_LIB.'/app_template.php';
 	require TK_LIB.'/check_var.php';
 
+	if(defined('TK_PHAR'))
+	{
+		app_template::quick_view('samples/tk-test', 'phar_not_allowed.html');
+		exit();
+	}
+
 	require APP_CTRL.'/samples/tk-test.php';
 
 	$type=check_get_escaped('type');

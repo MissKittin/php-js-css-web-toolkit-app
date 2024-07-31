@@ -17,7 +17,7 @@
 		if($expire === 0)
 			header('Cache-Control: public, max-age=31536000');
 
-		if(getenv('REDIS_PREDIS') === 'true')
+		if(app_env::getenv('REDIS_PREDIS') === 'true')
 		{
 			if(!function_exists('predis_connect_proxy'))
 				require TK_LIB.'/predis_connect.php';

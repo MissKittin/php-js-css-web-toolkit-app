@@ -1,4 +1,10 @@
 <?php
+	if(file_exists(__DIR__.'/../var/APP_IS_DOWN'))
+	{
+		readfile(__DIR__.'/../var/APP_IS_DOWN');
+		exit();
+	}
+
 	require __DIR__.'/lib/stdlib.php';
 
 	if(file_exists(APP_DIR.'/php_polyfill.php'))

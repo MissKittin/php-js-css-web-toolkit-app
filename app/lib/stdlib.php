@@ -1,13 +1,14 @@
 <?php
 	/*
 	 * Application standard library
-	 * used by entrypoint, database configurations and tools
+	 * used by other libraries, entrypoint, database configurations and tools
 	 */
 
 	const APP_STDLIB=1;
 
 	const APP_DIR=__DIR__.'/..';
 	const APP_ROOT=APP_DIR.'/..';
+
 	const APP_COM=APP_DIR.'/com';
 	const APP_LIB=__DIR__;
 
@@ -27,13 +28,49 @@
 	const VAR_SESS=VAR_LIB.'/sessions';
 	const VAR_TMP=VAR_DIR.'/tmp';
 
-	const TK_COM=APP_ROOT.'/tk/com';
-	const TK_LIB=APP_ROOT.'/tk/lib';
+	if(file_exists(APP_ROOT.'/tk.phar'))
+	{
+		define('TK_PHAR', APP_ROOT.'/tk.phar');
+		define('TK_COM', TK_PHAR.'/com');
+		define('TK_LIB', TK_PHAR.'/lib');
+	}
+	else
+	{
+		define('TK_COM', APP_ROOT.'/tk/com');
+		define('TK_LIB', APP_ROOT.'/tk/lib');
+	}
 
 	if(is_dir(APP_ROOT.'/tke'))
-		define('TKE_LIB', APP_ROOT.'/tke');
+	{
+		if(file_exists(APP_ROOT.'/tke.phar'))
+		{
+			define('TKE_PHAR', APP_ROOT.'/tke.phar');
+			define('TKE_LIB', TKE_PHAR.'/lib');
+		}
+		else
+			define('TKE_LIB', APP_ROOT.'/tke');
+	}
 
 	class app_exception extends Exception {}
+	class app_env
+	{
+		protected static $registry=null;
+
+		public static function getenv(
+			string $variable,
+			$default_value=false
+		){
+			if(static::$registry === null)
+			{
+				if(!class_exists('dotenv'))
+					require TK_LIB.'/dotenv.php';
+
+				static::$registry=new dotenv(APP_ROOT.'/.env');
+			}
+
+			return static::$registry->getenv($variable, $default_value);
+		}
+	}
 
 	if(!file_exists(VAR_DIR))
 		(function(){

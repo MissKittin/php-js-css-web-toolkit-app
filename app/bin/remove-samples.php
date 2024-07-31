@@ -39,6 +39,18 @@
 					echo ' [FAIL]'.PHP_EOL;
 		}
 
+	foreach(array_slice(scandir('./tests'), 2) as $directory)
+		if(is_dir('./tests/'.$directory.'/samples'))
+		{
+			echo ' -> Removing tests/'.$directory.'/samples';
+				if(@rmdir_recursive('./tests/'.$directory.'/samples'))
+					echo ' [ OK ]'.PHP_EOL;
+				else
+					echo ' [FAIL]'.PHP_EOL;
+
+			@rmdir('./tests/'.$directory);
+		}
+
 	echo ' -> Editing entrypoint.php';
 		$entrypoint=file_get_contents('./entrypoint.php');
 		file_put_contents(
@@ -75,7 +87,12 @@
 	echo ' [ OK ]'.PHP_EOL;
 
 	echo ' -> Removing tools';
-		foreach(['install-assets.php', 'remove-samples.php', 'session-clean.php'] as $file)
+		foreach([
+			'build-app.php',
+			'install-assets.php',
+			'remove-samples.php',
+			'session-clean.php'
+		] as $file)
 			if(@unlink('./bin/'.$file))
 				echo ' [ OK ]';
 			else

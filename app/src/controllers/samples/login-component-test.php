@@ -39,10 +39,10 @@
 			'loading_title'=>$labels('Loading...')
 		]);
 
-		if(getenv('APP_INLINE_ASSETS') === 'yes')
+		if(app_env::getenv('APP_INLINE_ASSETS') === 'yes')
 			login_com_reg_view::_()['inline_style']=true;
 
-		if(getenv('APP_MATERIALIZED') === 'yes')
+		if(app_env::getenv('APP_MATERIALIZED') === 'yes')
 			login_com_reg_view::_()['template']='materialized';
 		else if(
 			isset($_COOKIE['app_dark_theme']) &&
@@ -128,7 +128,7 @@
 			{
 				require TK_COM.'/middleware_form/main.php';
 
-				if(getenv('APP_MATERIALIZED') === 'yes')
+				if(app_env::getenv('APP_MATERIALIZED') === 'yes')
 					$captcha_form=new middleware_form('materialized');
 				else
 					$captcha_form=new middleware_form();
@@ -147,7 +147,7 @@
 				->	add_csp_header('style-src', '\'unsafe-hashes\'')
 				->	add_csp_header('style-src', '\'sha256-N6tSydZ64AHCaOWfwKbUhxXx2fRFDxHOaL3e3CO7GPI=\'');
 
-				if(getenv('APP_MATERIALIZED') !== 'yes')
+				if(app_env::getenv('APP_MATERIALIZED') !== 'yes')
 					if(
 						isset($_COOKIE['app_dark_theme']) &&
 						($_COOKIE['app_dark_theme'] === 'true') // from app/com/basic_template/assets/default.js/darkTheme.js
@@ -160,7 +160,7 @@
 				->	add_config('title', $labels('Verification'))
 				->	add_config('submit_button_label', $labels('Next'));
 
-				if(getenv('APP_INLINE_ASSETS') === 'yes')
+				if(app_env::getenv('APP_INLINE_ASSETS') === 'yes')
 					$captcha_form->add_config('inline_style', true);
 
 				// now some magic: we place the generated image in $_SESSION
@@ -236,7 +236,7 @@
 		{
 			require TK_COM.'/middleware_form/main.php';
 
-			if(getenv('APP_MATERIALIZED') === 'yes')
+			if(app_env::getenv('APP_MATERIALIZED') === 'yes')
 				$change_password_form=new middleware_form('materialized');
 			else
 				$change_password_form=new middleware_form();
@@ -259,7 +259,7 @@
 			}
 			else
 			{
-				if(getenv('APP_MATERIALIZED') !== 'yes')
+				if(app_env::getenv('APP_MATERIALIZED') !== 'yes')
 					if(
 						isset($_COOKIE['app_dark_theme']) &&
 						($_COOKIE['app_dark_theme'] === 'true') // from app/com/basic_template/assets/default.js/darkTheme.js
@@ -272,7 +272,7 @@
 				->	add_config('title', $labels('Password change'))
 				->	add_config('submit_button_label', $labels('Change password'));
 
-				if(getenv('APP_INLINE_ASSETS') === 'yes')
+				if(app_env::getenv('APP_INLINE_ASSETS') === 'yes')
 					$change_password_form->add_config('inline_style', true);
 
 				$change_password_form

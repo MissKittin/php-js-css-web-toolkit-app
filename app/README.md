@@ -1,4 +1,14 @@
-# Application assets
+# Application assets - new method
+Run in parent directory:
+```
+php ./app/bin/build-app.php
+```
+and serve:
+```
+php ./tk/bin/serve.php
+```
+
+# Application assets - old method
 1. To install assets for example project, run in parent directory:
 
 		php ./app/bin/install-assets.php
@@ -103,6 +113,41 @@ You can configure the database connection through the following environment vari
 * `REDIS_DBINDEX` (default: `0`)
 * `REDIS_IGNORE_ENV=true` (ignores all redis variables above)
 
+### DotEnv
+Create `.env` file in parent directory:
+```
+APP_MATERIALIZED=no
+PGSQL_HOST=127.0.0.1
+PGSQL_PORT=5432
+PGSQL_DBNAME=sampledb
+PGSQL_CHARSET=UTF8
+PGSQL_USER=postgres
+PGSQL_PASSWORD=postgres
+MYSQL_HOST=[::1]
+MYSQL_PORT=3306
+MYSQL_DBNAME=sampledb
+MYSQL_CHARSET=utf8mb4
+MYSQL_USER=root
+MYSQL_PASSWORD=root
+DB_IGNORE_ENV=false
+MEMCACHED_HOST=127.0.0.1
+MEMCACHED_PORT=11211
+MEMCACHED_IGNORE_ENV=false
+REDIS_PREDIS=false
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+REDIS_DBINDEX=0
+REDIS_IGNORE_ENV=false
+```
+You can also use the following values:
+```
+PGSQL_SOCKET=/var/run/postgresql
+MYSQL_SOCKET=/var/run/mysqld/mysqld.sock
+SQLITE_PATH=path/to/database.sqlite3
+MEMCACHED_SOCKET=/var/run/memcached/memcached.sock
+REDIS_SOCKET=/var/run/redis/redis.sock
+```
+
 ### Libraries
 * `app_template.php` - default http headers and a basic_template overlay that saves typing
 * `ob_adapter.php` - modular output buffer
@@ -117,7 +162,10 @@ You can configure the database connection through the following environment vari
 * `ie_error` - made without love
 
 ### Tools
+* `app-down.php`
+* `build-app.php` - application builder
 * `install-assets.php`
 * `remove-samples.php`
 * `replace-public-index-with-link.php`
+* `run-php-tests.php`
 * `session-clean.php` - remove stale sessions (if the application stores the session content in files)

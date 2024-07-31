@@ -9,6 +9,7 @@
 		protected static $assets_path='/assets';
 		protected static $assets_filename='basic-template';
 		protected static $favicon=null;
+		protected static $inline_assets=false;
 
 		protected $do_return_content;
 
@@ -28,6 +29,12 @@
 		{
 			if(isset($view['csp_header']))
 			{
+				if(static::$inline_assets)
+				{
+					$view['csp_header']['script-src'][]='\'nonce-mainscript\'';
+					$view['csp_header']['style-src'][]='\'nonce-mainstyle\'';
+				}
+
 				?><meta http-equiv="Content-Security-Policy" content="<?php
 				foreach($view['csp_header'] as $csp_param=>$csp_values)
 				{
@@ -73,6 +80,11 @@
 		public static function set_assets_filename(string $name)
 		{
 			static::$assets_filename=$name;
+			return static::class;
+		}
+		public static function set_inline_assets(bool $inline_assets)
+		{
+			static::$inline_assets=$inline_assets;
 			return static::class;
 		}
 		public static function set_favicon(string $path)

@@ -2,7 +2,7 @@
 	if(!defined('APP_STDLIB'))
 		require __DIR__.'/../../../lib/stdlib.php';
 
-	if(getenv('DB_IGNORE_ENV') === 'true')
+	if(app_env::getenv('DB_IGNORE_ENV') === 'true')
 		$db_getenv=function($env, $default_value)
 		{
 			return $default_value;
@@ -10,7 +10,7 @@
 	else
 		$db_getenv=function($env, $default_value)
 		{
-			$value=getenv($env);
+			$value=app_env::getenv($env);
 
 			if($value === false)
 				return $default_value;
@@ -32,10 +32,10 @@
 
 	// socket has priority over the host/port
 	if(
-		(getenv('DB_IGNORE_ENV') !== 'true') &&
-		(getenv('MYSQL_SOCKET') !== false)
+		(app_env::getenv('DB_IGNORE_ENV') !== 'true') &&
+		(app_env::getenv('MYSQL_SOCKET') !== false)
 	)
-		$db_config['socket']=getenv('MYSQL_SOCKET');
+		$db_config['socket']=app_env::getenv('MYSQL_SOCKET');
 
 	// you can implement the var/databases hierarchy
 		if(!file_exists(VAR_DB.'/'.$db_config['db_type']))

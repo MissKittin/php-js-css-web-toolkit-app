@@ -2,7 +2,7 @@
 	if(!defined('APP_STDLIB'))
 		require __DIR__.'/../../../lib/stdlib.php';
 
-	if(getenv('DB_IGNORE_ENV') === 'true')
+	if(app_env::getenv('DB_IGNORE_ENV') === 'true')
 		$db_getenv=function($env, $default_value)
 		{
 			return $default_value;
@@ -10,7 +10,7 @@
 	else
 		$db_getenv=function($env, $default_value)
 		{
-			$value=getenv($env);
+			$value=app_env::getenv($env);
 
 			if($value === false)
 				return $default_value;
@@ -30,7 +30,7 @@
 		//'seeded_path'=>$db
 	];
 
-	if(getenv('SQLITE_PATH') === false)
+	if(app_env::getenv('SQLITE_PATH') === false)
 	{
 		// you can implement the var/databases hierarchy
 

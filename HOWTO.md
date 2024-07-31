@@ -1,8 +1,118 @@
+# Toolkit as a composer package
+Toolkit was not intended as a Composer package, but such usage is possible, e.g.:
+```
+{
+    "repositories": [
+        {
+            "type": "package",
+            "package": {
+                "name": "misskittin/php-js-css-web-toolkit",
+                "description": "MissKittin web toolkit",
+                "license": "LGPL-3.0-only",
+                "version": "1",
+                "dist": {
+                    "url": "https://github.com/MissKittin/php-js-css-web-toolkit/archive/refs/tags/stable.zip",
+                    "type": "zip"
+                }
+            }
+        }
+    ],
+    "scripts": {
+        "pre-autoload-dump": [
+            "@php ./vendor/misskittin/php-js-css-web-toolkit/bin/remove-gpl.php --yes",
+            "@php ./vendor/misskittin/php-js-css-web-toolkit/bin/strip-php-files.php ./vendor/misskittin/php-js-css-web-toolkit --remove-tests --remove-md",
+            "@php ./vendor/misskittin/php-js-css-web-toolkit/com/php_polyfill/bin/mkcache.php",
+            "@php ./vendor/misskittin/php-js-css-web-toolkit/bin/autoloader-generator.php --in ./vendor/misskittin/php-js-css-web-toolkit/com --in ./vendor/misskittin/php-js-css-web-toolkit/lib --ignore bin/ --out ./vendor/misskittin/php-js-css-web-toolkit/autoload.php"
+        ]
+    },
+    "autoload": {
+        "files": ["vendor/misskittin/php-js-css-web-toolkit/autoload.php"]
+    },
+    "require": {
+        "misskittin/php-js-css-web-toolkit": "*"
+    }
+}
+```
+or if you also want extras:
+```
+{
+    "repositories": [
+        {
+            "type": "package",
+            "package": {
+                "name": "misskittin/php-js-css-web-toolkit",
+                "description": "MissKittin web toolkit",
+                "license": "LGPL-3.0-only",
+                "version": "1",
+                "dist": {
+                    "url": "https://github.com/MissKittin/php-js-css-web-toolkit/archive/refs/tags/stable.zip",
+                    "type": "zip"
+                }
+            }
+        },
+        {
+            "type": "package",
+            "package": {
+                "name": "misskittin/php-js-css-web-toolkit-extras",
+                "description": "MissKittin web toolkit extras",
+                "license": "LGPL-3.0-only",
+                "version": "1",
+                "dist": {
+                    "url": "https://github.com/MissKittin/php-js-css-web-toolkit-extras/archive/refs/tags/stable.zip",
+                    "type": "zip"
+                }
+            }
+        }
+    ],
+    "scripts": {
+        "pre-autoload-dump": [
+            "@php ./vendor/misskittin/php-js-css-web-toolkit/bin/remove-gpl.php --yes",
+            "@php ./vendor/misskittin/php-js-css-web-toolkit/bin/strip-php-files.php ./vendor/misskittin/php-js-css-web-toolkit --remove-tests --remove-md",
+            "@php ./vendor/misskittin/php-js-css-web-toolkit/bin/strip-php-files.php ./vendor/misskittin/php-js-css-web-toolkit-extras --remove-tests --remove-md",
+            "@php ./vendor/misskittin/php-js-css-web-toolkit/com/php_polyfill/bin/mkcache.php",
+            "@php ./vendor/misskittin/php-js-css-web-toolkit/bin/autoloader-generator.php --in ./vendor/misskittin/php-js-css-web-toolkit/com --in ./vendor/misskittin/php-js-css-web-toolkit/lib --in ./vendor/misskittin/php-js-css-web-toolkit-extras/lib --ignore bin/ --out ./vendor/misskittin/php-js-css-web-toolkit/autoload.php"
+        ]
+    },
+    "autoload": {
+        "files": ["vendor/misskittin/php-js-css-web-toolkit/autoload.php"]
+    },
+    "require": {
+        "misskittin/php-js-css-web-toolkit": "*",
+        "misskittin/php-js-css-web-toolkit-extras": "*"
+    }
+}
+```
+If your project is GPL licensed, you can remove the first line in the `scripts` section.  
+PHP does not have an autoloader for functions, so you have to load the function manually:
+```
+<?php
+	load_function('copy_recursive'); // invoke this once
+	copy_recursive($src, $dest);
+?>
+```
+
 # A few words about design
 The application design does not define the paradigm in which individual parts of the application will be written.  
 You decide what will be written procedurally, functionally and object-oriented, as well as what type of routing you will use.  
 It has its advantages and disadvantages - it is not a typical framework, so think about whether you need something like Symfony or Laravel.  
 **Remember about safety!** Treat all data coming from the user as untrusted. Filter them before sending them back. **Keep your code clean.**
+
+### Application standard library
+The `app/lib/stdlib.php` library is the parent library of the application - it is loaded by the `app/entrypoint.php`.  
+Provides constants with paths to specific parts of the application.  
+If you pack the toolkit into a phar, the library will set the paths so that files are loaded from the archive.  
+The library also includes an application bootstrap that creates a `var` directory hierarchy.  
+Additionally, it provides classes:
+* `app_exception`
+
+		throw new app_exception('Fehler!')
+
+* `app_env`  
+	that uses `dotenv.php` library  
+	see [app README DotEnv](app/README.md#dotenv)
+
+		$env_var=app_env::getenv('ENV_VAR_NAME', 'default_value');
+
 
 # Creating The project
 ```
@@ -13,7 +123,14 @@ To add unofficial extras, run:
 git clone --depth 1 "https://github.com/MissKittin/php-js-css-web-toolkit-extras.git" tke
 ```
 
-### Hint
+### GNU GPL
+It happens that GPL license is not wanted - if you link to a GPL-licensed library, your project must also be GPL-licensed.  
+If you are in such a situation, you can remove them:
+```
+php ./tk/bin/remove-gpl.php --yes
+```
+
+### Hint - git
 If you won't need git anymore, you can delete the git repo data: run  
 for *nix:
 ```
@@ -35,7 +152,7 @@ git push origin master
 ```
 remember that after updating the `tk` submodule all changes to the `tk` directory will be lost!
 
-### Hint
+### Hint - index.php
 `public/index.php` just imports another php file - this is stupid thing if your OS allows you to use softlinks.  
 You can remove this file and create link to `../app/entrypoint.php`:
 ```
@@ -88,7 +205,7 @@ php ./tk/bin/run-phtml-tests.php
 ```
 You can also provide the path to the directory with tests for the above tools, eg:
 ```
-php ./tk/bin/run-php-bin-tests.php ./tke/bin
+php ./tk/bin/run-php-bin-tests.php ./tke/bin/tests
 php ./tk/bin/run-php-lib-tests.php ./tke/lib/tests
 php ./tk/bin/run-php-com-tests.php ./tke/com
 php ./tk/bin/run-phtml-tests.php ./tke/lib/tests
@@ -145,9 +262,11 @@ php -d phar.readonly=0 ./bin/mkphar.php --compress=gz --source=lib --ignore=test
 ```
 and use the generated Phar, eg:
 ```
-require 'phar://'
-.	'./tk.phar'
-.	'/com/admin_panel/admin_panel.php';
+<?php
+	require 'phar://'
+	.	'./tk.phar'
+	.	'/com/admin_panel/admin_panel.php';
+?>
 ```
 If you don't need the css and js files, you can ignore them:
 ```
@@ -194,8 +313,12 @@ To install Predis, run:
 php ./tk/bin/composer.phar --optimize-autoloader --no-cache require predis/predis
 ```
 For more information, see the `predis_connect.php` library  
-**Note:** Predis requires PHP >= 7.2, for PHP >= 5.3.9 use Predis v1.1.10
-
+**Note:** Predis requires PHP >= 7.2, for PHP >= 5.3.9 use Predis v1.1.10  
+**Hint:** It is possible to install Predis without Composer using Git (not recommended):
+```
+php -r "file_put_contents('./composer.json', '');"
+git clone "https://github.com/predis/predis.git" ./vendor
+```
 
 # How to create application
 
@@ -205,6 +328,15 @@ Copy them and start creating.
 * `app/src/models/model_template.php`
 * `app/src/routes/route_template.php`
 * `app/src/views/view_template`
+* `app/tests/ns_test_template.php` - allows you to create mock PHP functions and classes
+* `app/tests/test_template.php`
+
+### Tests
+`app/tests` has the same layout as `app/src` - tests are divided into individual sections.  
+Copy the test template to a similar location as in `app/src` and rename the file to the same name as the file being tested.  
+If you need a mock built-in function or class, use the `ns_test_template.php` template.  
+Then edit `$stdlib_path`, add required libraries and put testing code in `// test body` section.  
+To run all tests at once use the `app/bin/run-php-tests.php` tool.
 
 ### Autoloading
 You can use the `autoloader-generator.php` tool to generate an autoloader script for functions and classes.  
@@ -220,14 +352,29 @@ You can use eg. `uri_router.php` library or `superclosure_router` component.
 ### Creating assets
 See `assets_compiler.php` library.
 
+### Sass von der Less
+First see `assets_compiler.php` library.  
+You can use any tool you want, in this example we will use node.js:
+```
+npm install sass
+npm install less
+```
+Use the preprocessed asset: in `main.php`
+```
+<?php
+	echo shell_exec('node ./node_modules/.bin/sass "'.__DIR__.'/main.scss"');
+	echo shell_exec('node ./node_modules/.bin/lessc "'.__DIR__.'/main.less"');
+?>
+```
+
 ### Creating database configuration for pdo_connect()
 See `pdo_connect.php` library.
 
 ### Queue worker
 It is better to do more time-consuming tasks outside the main application.  
 The `queue_worker.php` library and the `queue-worker.php` tool are available for this purpose.  
-**Note:** this library uses the features of *nix systems and is only intended for them.  
-For more info, see `./tk/lib/queue_worker.php` and run:
+This library has several methods for transporting data. You can choose.  
+For more info, see `./tk/lib/queue_worker.php`and `./tk/bin/queue_worker.php` and run:
 ```
 php ./tk/bin/queue-worker.php
 ```
@@ -289,6 +436,20 @@ You can also specify IP, port, preload script, document root and server threads,
 php ./tk/bin/serve.php --ip 127.0.0.1 --port 8080 --docroot ./public --preload ../var/lib/app-preload.php --threads 4
 ```
 
+### Maintenance break
+Disable application:
+```
+php ./app/bin/app-down.php down
+```
+Enable application:
+```
+php ./app/bin/app-down.php up
+```
+Get application status:
+```
+php ./app/bin/app-down.php status && echo "App up" || echo "App down"
+```
+
 ### Preloading application
 To take advantage of the possibility of preloading the application,  
 you can generate the preloader script using the `opcache-preload-generator.php` tool.  
@@ -296,6 +457,9 @@ For more info, run:
 ```
 php ./tk/bin/opcache-preload-generator.php
 ```
+However, if you use an autoloader, this method may not be optimal. You will need to write your own preloader:  
+* if the script only defines a constants, functions, classes, traits or interfaces, use `require`
+* in other cases use `opcache_compile_file`
 
 ### Task scheduling
 For info, run:

@@ -12,7 +12,6 @@ You can use `$template->variable='value'` and `$template['variable']='value'` an
 Pass `true` to the constructor to have the view method return the content instead of echoing it.
 
 ## Methods
-
 * `add_csp_header(string_section, string_value)` [returns self]  
 	where `string_section` is eg `'script-src'` and `string_value` is `'\'unsafe-hashes\''`
 * `add_html_header(string_header)` [returns self]  
@@ -35,6 +34,9 @@ Pass `true` to the constructor to have the view method return the content instea
 * **[static]** `set_favicon(string_path)` [returns self]  
 	path to the favicon headers file  
 	the content will be appended to the `<head>` section
+* **[static]** `set_inline_assets(bool_option)` [returns self]  
+	compiles styles and scripts and adds them to the inline tag instead of `link rel="stylesheet"` and `script src=""` (not recommended)  
+	default: `false`
 * `set_variable(string_variable, value)` [returns self]  
 	add value to registry  
 	see [Variables](#variables)
