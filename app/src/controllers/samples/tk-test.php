@@ -58,8 +58,8 @@
 					$type='com/'.$com;
 					break;
 				}
-				else
-					return false;
+
+				return false;
 			default:
 				return false;
 		}
@@ -68,14 +68,15 @@
 			return false;
 
 		if(str_ends_with($test_name, '.phtml'))
-			include APP_ROOT.'/tk/'.$type.'/tests/'.$test_name;
-		else
 		{
-			echo '<pre>';
 			include APP_ROOT.'/tk/'.$type.'/tests/'.$test_name;
-			echo '</pre>';
+			return true;
 		}
 
-		exit();
+		echo '<pre>';
+		include APP_ROOT.'/tk/'.$type.'/tests/'.$test_name;
+		echo '</pre>';
+
+		return true;
 	}
 ?>

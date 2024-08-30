@@ -25,12 +25,16 @@
 				$dark_theme=true;
 			}
 
-		ob_adapter
+		if(ob_adapter
 		::	add(new ob_adapter_obminifier())
 		::	add(new ob_adapter_gzip())
-		::	add(new ob_adapter_filecache(VAR_CACHE.'/ob_adapter/http_error_'.$error_code.'_'.$theme.'_'.$lang.'.cache'))
+		::	add(new ob_adapter_filecache(
+				VAR_CACHE.'/ob_adapter/http_error_'.$error_code.'_'.$theme.'_'.$lang.'.cache',
+				'ob_adapter'
+			))
 		::	add(new ob_adapter_gunzip())
-		::	start();
+		::	start())
+			return;
 
 		require APP_COM.'/ie_error/main.php';
 

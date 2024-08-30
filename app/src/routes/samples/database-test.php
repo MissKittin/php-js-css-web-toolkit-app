@@ -7,7 +7,9 @@
 	)
 		ob_start('ob_gzhandler');
 
-	require APP_LIB.'/samples/session_start.php';
+	require APP_LIB.'/samples/app_session.php';
+	app_session();
+
 	require APP_MODEL.'/samples/database_test_model.php';
 	require APP_CTRL.'/samples/database-test.php';
 

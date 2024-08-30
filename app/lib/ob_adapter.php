@@ -10,15 +10,17 @@
 	 *  ob_adapter_gunzip - decompress if browser does not support gzip
 	 *
 	 * Usage:
-		ob_adapter
+		if(ob_adapter
 		::	add(new ob_adapter_module1())
 		::	add(new ob_adapter_module2())
-		::	start();
+		::	start())
+			exit(); // or return;
 	 */
 
 	class ob_adapter
 	{
 		protected static $instances=[];
+		protected static $exit=false;
 
 		protected static function exec($buffer, $phase)
 		{
@@ -30,12 +32,25 @@
 
 		public static function add(ob_adapter_module $instance)
 		{
+			if(static::$exit)
+				return static::class;
+
 			(__CLASS__)::$instances[]=$instance;
+
 			return static::class;
 		}
 		public static function start()
 		{
+			if(static::$exit)
+				return true;
+
 			ob_start(__CLASS__.'::exec');
+
+			return false;
+		}
+		public static function toggle_exit()
+		{
+			static::$exit=true;
 		}
 	}
 
@@ -92,23 +107,26 @@
 	{
 		protected $output_file;
 
-		public function __construct(string $output_file)
-		{
+		public function __construct(
+			string $output_file,
+			string $ob_adapter_class
+		){
 			if(file_exists($output_file))
 			{
 				if(
 					(!isset($_SERVER['HTTP_ACCEPT_ENCODING'])) ||
-					(strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false)
+					(strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') === false)
 				){
 					if(in_array('Content-Encoding: gzip', headers_list()))
 						header_remove('Content-Encoding');
 
-					readgzfile($output_file);
+					if(readgzfile($output_file) === false)
+						readfile($output_file);
 				}
 				else
 					readfile($output_file);
 
-				exit();
+				return $ob_adapter_class::toggle_exit();
 			}
 
 			$dirname=dirname($output_file);

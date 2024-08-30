@@ -22,7 +22,7 @@
 			$login_credentials_single[1]
 		)){
 			login_refresh('callback', 'reload_page', [$view]);
-			exit();
+			return true;
 		}
 
 		if(login_multi(
@@ -31,7 +31,7 @@
 			$login_credentials_multi
 		)){
 			login_refresh('callback', 'reload_page', [$view]);
-			exit();
+			return true;
 		}
 
 		if(login_callback(
@@ -40,7 +40,7 @@
 			'callback_function'
 		)){
 			login_refresh('callback', 'reload_page', [$view]);
-			exit();
+			return true;
 		}
 
 		if(check_post('logout') !== null)
@@ -49,7 +49,10 @@
 			$view['logout']=true;
 
 			login_refresh('callback', 'reload_page', [$view]);
-			exit();
+
+			return true;
 		}
 	}
+
+	return false;
 ?>

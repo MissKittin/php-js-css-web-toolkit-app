@@ -7,12 +7,15 @@
 	)
 		ob_start('ob_gzhandler');
 
-	require APP_LIB.'/samples/session_start.php';
+	require APP_LIB.'/samples/app_session.php';
+	app_session();
 
 	$view=new app_template();
 
 	require APP_MODEL.'/samples/login_library_test_credentials.php'; // import credentials and callback_function()
-	require APP_CTRL.'/samples/login-library-test.php';
+
+	if(require APP_CTRL.'/samples/login-library-test.php')
+		return;
 
 	$view->view('samples/login-library-test');
 ?>

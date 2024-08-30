@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function(){
 		var html='';
 		var code_block_opened=false;
 		var ul_list_opened=false;
+		var ul_2_list_opened=false;
 		var ol_list_opened=false;
 		var markdown=input.innerHTML
 		.	replace(/\n\n\t\t\t([\s\S]*?)\n\n/g, function(match){
@@ -38,11 +39,38 @@ document.addEventListener('DOMContentLoaded', function(){
 		{
 			// headers
 			if(markdown[i].substring(0, 3) === '###')
-				html+='<h3 id="'+markdown[i].substring(3).trim().toLowerCase().replace(/\W/g, '-')+'">'+markdown[i].slice(4)+'</h3>';
+				html+='<h3 id="'+markdown[i]
+				.	substring(3)
+				.	trim()
+				.	toLowerCase()
+				.	replace(/\.|'/g, '') // Hint - index.php | Minifying assets - matthiasmullie's minifier
+				.	replace(/\W/g, '-')
+				.	replace(/--$|-$/g, '') // Creating database configuration for pdo_connect()
+				.	replace(/----/g, '-') // Seeding database offline with pdo_connect()
+				+	'">'
+				+	markdown[i]
+				.	slice(4)
+				+	'</h3>';
 			else if(markdown[i].substring(0, 2) === '##')
-				html+='<h2 id="'+markdown[i].substring(2).trim().toLowerCase().replace(/\W/g, '-')+'">'+markdown[i].slice(3)+'</h2>';
+				html+='<h2 id="'+markdown[i]
+				.	substring(2)
+				.	trim()
+				.	toLowerCase()
+				.	replace(/\W/g, '-')
+				+	'">'
+				+	markdown[i]
+				.	slice(3)
+				+	'</h2>';
 			else if(markdown[i].substring(0, 1) === '#')
-				html+='<h1 id="'+markdown[i].substring(1).trim().toLowerCase().replace(/\W/g, '-')+'">'+markdown[i].slice(2)+'</h1>';
+				html+='<h1 id="'+markdown[i]
+				.	substring(1)
+				.	trim()
+				.	toLowerCase()
+				.	replace(/\W/g, '-')
+				+	'">'
+				+	markdown[i]
+				.	slice(2)
+				+	'</h1>';
 
 			// code blocks
 			else if(markdown[i].trim().substring(0, 3) === '```')
@@ -82,6 +110,12 @@ document.addEventListener('DOMContentLoaded', function(){
 			}
 			else if(markdown[i].substring(0, 2) === '* ')
 			{
+				if(ul_2_list_opened)
+				{
+					html+='</ul>';
+					ul_2_list_opened=false;
+				}
+
 				if(!ul_list_opened)
 				{
 					html+='<ul>';
@@ -99,7 +133,22 @@ document.addEventListener('DOMContentLoaded', function(){
 			// regular text/lists closing/code blocks linebreaks
 			else
 			{
-				if(markdown[i].substring(0, 1) !== "\t")
+				if(markdown[i].substring(0, 3) === "\t* ")
+				{
+					if(!ul_2_list_opened)
+					{
+						html+='<ul>';
+						ul_2_list_opened=true;
+					}
+
+					html+='<li>'
+					+	markdown[i]
+					.	slice(2)
+					.	replace('  ', '<br>')
+					.	replace(/`(.*?)`/g, '<span class="md_inline_code_block">$1</span>') // inline code blocks
+					+	'</li>';
+				}
+				else if(markdown[i].substring(0, 1) !== "\t")
 				{
 					if(ol_list_opened)
 					{
@@ -115,7 +164,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
 				if(code_block_opened)
 					html+=markdown[i]+'<br>';
-				else
+				else if(!ul_2_list_opened)
 					html+=markdown[i]
 					.	trimStart()
 					.	replace('  ', '<br>')

@@ -7,7 +7,9 @@
 	)
 		ob_start('ob_gzhandler');
 
-	require APP_LIB.'/samples/session_start.php';
+	require APP_LIB.'/samples/app_session.php';
+	app_session();
+
 	require TK_COM.'/login/main.php';
 
 	// set custom session reloader
@@ -20,7 +22,9 @@
 		};
 
 	require APP_MODEL.'/samples/login_component_test_credentials.php';
-	require APP_CTRL.'/samples/login-component-test.php';
+
+	if(require APP_CTRL.'/samples/login-component-test.php')
+		return;
 
 	if(is_logged())
 		app_template::quick_view('samples/login-component-test');

@@ -82,7 +82,7 @@
 			]);
 
 			if(login_com())
-				exit();
+				return true; // exit()
 		}
 
 	// define callbacks for the login component
@@ -106,7 +106,7 @@
 
 	// display login prompt and exit
 		if(login_com())
-			exit();
+			return true; // exit()
 
 	if(is_logged())
 	{
@@ -123,6 +123,7 @@
 		if(!isset($_SESSION['captcha_verified']))
 		{
 			require TK_LIB.'/sec_captcha.php';
+			require TK_LIB.'/generate_csp_hash.php';
 
 			if((!isset($_POST['captcha'])) || (!captcha_check($_POST['captcha'])))
 			{
@@ -133,14 +134,23 @@
 				else
 					$captcha_form=new middleware_form();
 
+				if($captcha_form->is_form_sent())
+				{
+					login_com_reload(); // display reload page and exit
+					return true; // exit()
+				}
+
+				$captcha_form_script=''
+				.	'document.addEventListener(\'DOMContentLoaded\', function(){'
+				.		file_get_contents(TK_LIB.'/disableEnterOnForm.js')
+				.		file_get_contents(APP_VIEW.'/samples/login-component-test/middleware_form.js')
+				.	'});';
+
 				$captcha_form
-				->	add_html_header(
-						'<script>document.addEventListener(\'DOMContentLoaded\', function(){'
-							.file_get_contents(TK_LIB.'/disableEnterOnForm.js')
-							.file_get_contents(APP_VIEW.'/samples/login-component-test/middleware_form.js')
-						.'})</script>'
-					)
-				->	add_csp_header('script-src', '\'sha256-i7O9RlEhU3xgPLwptAzsYt/FTWOe7Q8NrYrH0zecJvk=\'');
+				->	add_html_header('<script>'.$captcha_form_script.'</script>')
+				->	add_csp_header('script-src', generate_csp_hash($captcha_form_script));
+
+				unset($captcha_form_script);
 
 				$captcha_form
 				->	add_csp_header('img-src', 'data:')
@@ -148,6 +158,7 @@
 				->	add_csp_header('style-src', '\'sha256-N6tSydZ64AHCaOWfwKbUhxXx2fRFDxHOaL3e3CO7GPI=\'');
 
 				if(app_env::getenv('APP_MATERIALIZED') !== 'yes')
+				{
 					if(
 						isset($_COOKIE['app_dark_theme']) &&
 						($_COOKIE['app_dark_theme'] === 'true') // from app/com/basic_template/assets/default.js/darkTheme.js
@@ -155,6 +166,7 @@
 						$captcha_form->add_config('middleware_form_style', 'middleware_form_default_dark.css');
 					else
 						$captcha_form->add_config('middleware_form_style', 'middleware_form_default_bright.css');
+				}
 
 				$captcha_form
 				->	add_config('title', $labels('Verification'))
@@ -188,22 +200,16 @@
 						'name'=>'i_am_bam'
 					]);
 
-				if($captcha_form->is_form_sent())
-				{
-					login_com_reload(); // display reload page and exit
-					exit();
-				}
-
 				$captcha_form->view();
-				exit();
+				return true; // exit()
 			}
 
 			$_SESSION['captcha_verified']=true;
 			unset($_SESSION['captcha_image']);
 
 			// display reload page and exit()
-			login_com_reload();
-			exit();
+				login_com_reload();
+				return true; // exit()
 		}
 
 		// captcha test passed, change password on first login
@@ -254,46 +260,49 @@
 				login_component_test_credentials::save_new_password($_POST['new_password']);
 				log_infos()->info('Password updated');
 
-				login_com_reload(); // display reload page and exit
-				exit();
+				// display reload page and exit
+					login_com_reload();
+					return true; // exit()
 			}
-			else
+
+			if(app_env::getenv('APP_MATERIALIZED') !== 'yes')
 			{
-				if(app_env::getenv('APP_MATERIALIZED') !== 'yes')
-					if(
-						isset($_COOKIE['app_dark_theme']) &&
-						($_COOKIE['app_dark_theme'] === 'true') // from app/com/basic_template/assets/default.js/darkTheme.js
-					)
-						$change_password_form->add_config('middleware_form_style', 'middleware_form_default_dark.css');
-					else
-						$change_password_form->add_config('middleware_form_style', 'middleware_form_default_bright.css');
-
-				$change_password_form
-				->	add_config('title', $labels('Password change'))
-				->	add_config('submit_button_label', $labels('Change password'));
-
-				if(app_env::getenv('APP_INLINE_ASSETS') === 'yes')
-					$change_password_form->add_config('inline_style', true);
-
-				$change_password_form
-				->	add_field([
-						'tag'=>'input',
-						'type'=>'password',
-						'name'=>'old_password',
-						'placeholder'=>$labels('Old password')
-					])
-				->	add_field([
-						'tag'=>'input',
-						'type'=>'password',
-						'name'=>'new_password',
-						'placeholder'=>$labels('New password')
-					]);
-
-					$change_password_form->view();
-					exit();
+				if(
+					isset($_COOKIE['app_dark_theme']) &&
+					($_COOKIE['app_dark_theme'] === 'true') // from app/com/basic_template/assets/default.js/darkTheme.js
+				)
+					$change_password_form->add_config('middleware_form_style', 'middleware_form_default_dark.css');
+				else
+					$change_password_form->add_config('middleware_form_style', 'middleware_form_default_bright.css');
 			}
+
+			$change_password_form
+			->	add_config('title', $labels('Password change'))
+			->	add_config('submit_button_label', $labels('Change password'));
+
+			if(app_env::getenv('APP_INLINE_ASSETS') === 'yes')
+				$change_password_form->add_config('inline_style', true);
+
+			$change_password_form
+			->	add_field([
+					'tag'=>'input',
+					'type'=>'password',
+					'name'=>'old_password',
+					'placeholder'=>$labels('Old password')
+				])
+			->	add_field([
+					'tag'=>'input',
+					'type'=>'password',
+					'name'=>'new_password',
+					'placeholder'=>$labels('New password')
+				]);
+
+			$change_password_form->view();
+			return true; // exit()
 		}
 
 		// password updated, you can see the content (See: app/src/routes/samples/login-component-test.php)
 	}
+
+	return false;
 ?>

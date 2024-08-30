@@ -1,3 +1,43 @@
+* [Toolkit as a composer package](#toolkit-as-a-composer-package)
+* [A few words about design](#a-few-words-about-design)
+	* [Application standard library](#application-standard-library)
+* [Creating The project](#creating-the-project)
+	* [GNU GPL](#gnu-gpl)
+	* [Hint - git](#hint---git)
+	* [Hint - index.php](#hint---indexphp)
+	* [Testing toolkit](#testing-toolkit)
+	* [Example application](#example-application)
+	* [Removing example application](#removing-example-application)
+	* [Removing documentation](#removing-documentation)
+	* [PHP polyfill Component Cache](#php-polyfill-component-cache)
+	* [JavaScript polyfills](#javascript-polyfills)
+	* [Packing the toolkit into Phar](#packing-the-toolkit-into-phar)
+	* [Installing Composer](#installing-composer)
+	* [Installing Predis](#installing-predis)
+* [How to create application](#how-to-create-application)
+	* [Templates](#templates)
+	* [Tests](#tests)
+	* [Autoloading](#autoloading)
+	* [Configuring URL routing](#configuring-url-routing)
+	* [Creating assets](#creating-assets)
+	* [Sass von der Less](#sass-von-der-less)
+	* [Creating database configuration for pdo_connect()](#creating-database-configuration-for-pdo_connect)
+	* [Queue worker](#queue-worker)
+	* [WebSockets](#websockets)
+	* [Compiling assets](#compiling-assets)
+	* [Minifying assets - webdev.sh client](#minifying-assets---webdevsh-client)
+	* [Minifying assets - matthiasmullie's minifier](#minifying-assets---matthiasmullies-minifier)
+	* [Seeding database offline with pdo_connect()](#seeding-database-offline-with-pdo_connect-optional)
+	* [Running dev server](#running-dev-server)
+	* [Maintenance break](#maintenance-break)
+	* [Preloading application](#preloading-application)
+	* [Task scheduling](#task-scheduling)
+	* [Rotating logs](#rotating-logs)
+	* [Removing symlinks](#removing-symlinks)
+	* [Deploy on shared hosting in a subdirectory](#deploy-on-shared-hosting-in-a-subdirectory)
+* [Apache configuration](#apache-configuration)
+* [nginx configuration](#nginx-configuration)
+
 # Toolkit as a composer package
 Toolkit was not intended as a Composer package, but such usage is possible, e.g.:
 ```
@@ -8,30 +48,47 @@ Toolkit was not intended as a Composer package, but such usage is possible, e.g.
             "package": {
                 "name": "misskittin/php-js-css-web-toolkit",
                 "description": "MissKittin web toolkit",
+                "homepage": "https://github.com/MissKittin/php-js-css-web-toolkit/",
+                "authors": [
+                    {
+                        "name": "MissKittin@GitHub",
+                        "homepage": "https://github.com/MissKittin"
+                    }
+                ],
+                "type": "library",
                 "license": "LGPL-3.0-only",
                 "version": "1",
+                "autoload": {
+                    "files": [
+                        "com/php_polyfill/main.php",
+                        "autoload.php"
+                    ]
+                },
                 "dist": {
                     "url": "https://github.com/MissKittin/php-js-css-web-toolkit/archive/refs/tags/stable.zip",
                     "type": "zip"
+                },
+                "require": {
+                    "php": ">=7.1"
                 }
             }
         }
     ],
     "scripts": {
         "pre-autoload-dump": [
-            "@php ./vendor/misskittin/php-js-css-web-toolkit/bin/remove-gpl.php --yes",
-            "@php ./vendor/misskittin/php-js-css-web-toolkit/bin/strip-php-files.php ./vendor/misskittin/php-js-css-web-toolkit --remove-tests --remove-md",
-            "@php ./vendor/misskittin/php-js-css-web-toolkit/com/php_polyfill/bin/mkcache.php",
-            "@php ./vendor/misskittin/php-js-css-web-toolkit/bin/autoloader-generator.php --in ./vendor/misskittin/php-js-css-web-toolkit/com --in ./vendor/misskittin/php-js-css-web-toolkit/lib --ignore bin/ --out ./vendor/misskittin/php-js-css-web-toolkit/autoload.php"
-        ]
-    },
-    "autoload": {
-        "files": ["vendor/misskittin/php-js-css-web-toolkit/autoload.php"]
+            "@mktk remove-gpl -- --yes",
+            "@mktk strip-php-files -- ./vendor/misskittin/php-js-css-web-toolkit --remove-tests --remove-md",
+            "@mktkc php_polyfill mkcache",
+            "@mktk autoloader-generator --in ./vendor/misskittin/php-js-css-web-toolkit/com --in ./vendor/misskittin/php-js-css-web-toolkit/lib --ignore bin/ --out ./vendor/misskittin/php-js-css-web-toolkit/autoload.php"
+        ],
+        "mktk": "@php -r \"$_bin=$argv[1]; array_shift($argv); array_shift($argv); if(is_file('./vendor/misskittin/php-js-css-web-toolkit/bin/'.$_bin.'.php')) require './vendor/misskittin/php-js-css-web-toolkit/bin/'.$_bin.'.php'; else exit(1);\"",
+        "mktkc": "@php -r \"$_com=$argv[1]; $_bin=$argv[2]; array_shift($argv); array_shift($argv); array_shift($argv); if(is_file('./vendor/misskittin/php-js-css-web-toolkit/com/'.$_com.'/bin/'.$_bin.'.php')) require './vendor/misskittin/php-js-css-web-toolkit/com/'.$_com.'/bin/'.$_bin.'.php'; else exit(1);\""
     },
     "require": {
         "misskittin/php-js-css-web-toolkit": "*"
     }
 }
+
 ```
 or if you also want extras:
 ```
@@ -42,11 +99,27 @@ or if you also want extras:
             "package": {
                 "name": "misskittin/php-js-css-web-toolkit",
                 "description": "MissKittin web toolkit",
+                "homepage": "https://github.com/MissKittin/php-js-css-web-toolkit/",
+                "authors": [
+                    {
+                        "name": "MissKittin@GitHub",
+                        "homepage": "https://github.com/MissKittin"
+                    }
+                ],
                 "license": "LGPL-3.0-only",
                 "version": "1",
+                "autoload": {
+                    "files": [
+                        "com/php_polyfill/main.php",
+                        "autoload.php"
+                    ]
+                },
                 "dist": {
                     "url": "https://github.com/MissKittin/php-js-css-web-toolkit/archive/refs/tags/stable.zip",
                     "type": "zip"
+                },
+                "require": {
+                    "php": ">=7.1"
                 }
             }
         },
@@ -55,32 +128,42 @@ or if you also want extras:
             "package": {
                 "name": "misskittin/php-js-css-web-toolkit-extras",
                 "description": "MissKittin web toolkit extras",
+                "homepage": "https://github.com/MissKittin/php-js-css-web-toolkit-extras/",
+                "authors": [
+                    {
+                        "name": "MissKittin@GitHub",
+                        "homepage": "https://github.com/MissKittin"
+                    }
+                ],
                 "license": "LGPL-3.0-only",
                 "version": "1",
                 "dist": {
                     "url": "https://github.com/MissKittin/php-js-css-web-toolkit-extras/archive/refs/tags/stable.zip",
                     "type": "zip"
+                },
+                "require": {
+                    "php": ">=7.1"
                 }
             }
         }
     ],
     "scripts": {
         "pre-autoload-dump": [
-            "@php ./vendor/misskittin/php-js-css-web-toolkit/bin/remove-gpl.php --yes",
-            "@php ./vendor/misskittin/php-js-css-web-toolkit/bin/strip-php-files.php ./vendor/misskittin/php-js-css-web-toolkit --remove-tests --remove-md",
-            "@php ./vendor/misskittin/php-js-css-web-toolkit/bin/strip-php-files.php ./vendor/misskittin/php-js-css-web-toolkit-extras --remove-tests --remove-md",
-            "@php ./vendor/misskittin/php-js-css-web-toolkit/com/php_polyfill/bin/mkcache.php",
-            "@php ./vendor/misskittin/php-js-css-web-toolkit/bin/autoloader-generator.php --in ./vendor/misskittin/php-js-css-web-toolkit/com --in ./vendor/misskittin/php-js-css-web-toolkit/lib --in ./vendor/misskittin/php-js-css-web-toolkit-extras/lib --ignore bin/ --out ./vendor/misskittin/php-js-css-web-toolkit/autoload.php"
-        ]
-    },
-    "autoload": {
-        "files": ["vendor/misskittin/php-js-css-web-toolkit/autoload.php"]
+            "@mktk remove-gpl -- --yes",
+            "@mktk strip-php-files -- ./vendor/misskittin/php-js-css-web-toolkit --remove-tests --remove-md",
+            "@mktk strip-php-files -- ./vendor/misskittin/php-js-css-web-toolkit-extras --remove-tests --remove-md",
+            "@mktkc php_polyfill mkcache",
+            "@mktk autoloader-generator --in ./vendor/misskittin/php-js-css-web-toolkit/com --in ./vendor/misskittin/php-js-css-web-toolkit/lib --in ./vendor/misskittin/php-js-css-web-toolkit-extras/lib --ignore bin/ --out ./vendor/misskittin/php-js-css-web-toolkit/autoload.php"
+        ],
+        "mktk": "@php -r \"$_bin=$argv[1]; array_shift($argv); array_shift($argv); if(is_file('./vendor/misskittin/php-js-css-web-toolkit/bin/'.$_bin.'.php')) require './vendor/misskittin/php-js-css-web-toolkit/bin/'.$_bin.'.php'; else if(is_file('./vendor/misskittin/php-js-css-web-toolkit-extras/bin/'.$_bin.'.php')) require './vendor/misskittin/php-js-css-web-toolkit-extras/bin/'.$_bin.'.php'; else exit(1);\"",
+        "mktkc": "@php -r \"$_com=$argv[1]; $_bin=$argv[2]; array_shift($argv); array_shift($argv); array_shift($argv); if(is_file('./vendor/misskittin/php-js-css-web-toolkit/com/'.$_com.'/bin/'.$_bin.'.php')) require './vendor/misskittin/php-js-css-web-toolkit/com/'.$_com.'/bin/'.$_bin.'.php'; else exit(1);\""
     },
     "require": {
         "misskittin/php-js-css-web-toolkit": "*",
         "misskittin/php-js-css-web-toolkit-extras": "*"
     }
 }
+
 ```
 If your project is GPL licensed, you can remove the first line in the `scripts` section.  
 PHP does not have an autoloader for functions, so you have to load the function manually:
@@ -105,7 +188,7 @@ The library also includes an application bootstrap that creates a `var` director
 Additionally, it provides classes:
 * `app_exception`
 
-		throw new app_exception('Fehler!')
+		throw new app_exception('Fehler!');
 
 * `app_env`  
 	that uses `dotenv.php` library  
@@ -252,6 +335,10 @@ php ./tk/com/php_polyfill/bin/mkcache.php --out ./app/php_polyfill.php
 ```
 I gra gitara :)
 
+### JavaScript polyfills
+The Toolkit does not support ECMAScript older than 6.  
+If you need compatibility with very old browsers, you must take care of it yourself.
+
 ### Packing the toolkit into Phar
 If a better option is to pack the libraries and components into one file, use the `mkphar.php` utility:
 ```
@@ -364,6 +451,22 @@ Use the preprocessed asset: in `main.php`
 <?php
 	echo shell_exec('node ./node_modules/.bin/sass "'.__DIR__.'/main.scss"');
 	echo shell_exec('node ./node_modules/.bin/lessc "'.__DIR__.'/main.less"');
+?>
+```
+
+But if you don't любишь java in "script" version (like me), you can do it in PHP too:
+```
+php ./tk/bin/composer.phar require scssphp/scssphp
+php ./tk/bin/composer.phar require leafo/lessphp
+```
+Use the preprocessed asset: in `main.php`
+```
+<?php
+	echo shell_exec('"PHP_BINARY" ./vendor/bin/pscss "'.__DIR__.'/main.scss"');
+	echo shell_exec('"PHP_BINARY" ./vendor/bin/plessc "'.__DIR__.'/main.less"');
+
+	// lessphp has a bug in earlier versions. if you don't have an vendor/bin/plessc file, use this:
+	//echo shell_exec('"PHP_BINARY" ./vendor/leafo/lessphp/plessc "'.__DIR__.'/main.less"');
 ?>
 ```
 

@@ -18,7 +18,9 @@
 			default:
 				http_error(400);
 		}
+
+		return;
 	}
-	else
-		http_error(400);
+
+	http_error(400);
 ?>

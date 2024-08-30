@@ -90,8 +90,7 @@
 		foreach([
 			'build-app.php',
 			'install-assets.php',
-			'remove-samples.php',
-			'session-clean.php'
+			'remove-samples.php'
 		] as $file)
 			if(@unlink('./bin/'.$file))
 				echo ' [ OK ]';

@@ -29,6 +29,13 @@ To enable the materialized template for components, set the environment variable
 export APP_MATERIALIZED=yes
 ```
 
+# Session data in cookie
+By default (if possible) the application stores session data in an encrypted cookie using the `sec_lv_encrypter.php` library.  
+To switch the application to server-side session data storage mode, set the environment variable:
+```
+export APP_NO_SESSION_IN_COOKIE=yes
+```
+
 
 # Application content
 The application source code is located in the `app/src` directory:  
@@ -116,7 +123,9 @@ You can configure the database connection through the following environment vari
 ### DotEnv
 Create `.env` file in parent directory:
 ```
+APP_INLINE_ASSETS=no
 APP_MATERIALIZED=no
+APP_NO_SESSION_IN_COOKIE=no
 PGSQL_HOST=127.0.0.1
 PGSQL_PORT=5432
 PGSQL_DBNAME=sampledb
@@ -149,20 +158,20 @@ REDIS_SOCKET=/var/run/redis/redis.sock
 ```
 
 ### Libraries
+* `app_session.php` - session manager
 * `app_template.php` - default http headers and a basic_template overlay that saves typing
 * `ob_adapter.php` - modular output buffer
 * `stdlib.php` - application standard library
 * `pdo_instance.php` - get PDO handler
 * `logger.php` - logging functions
 * `ob_cache.php`
-* `session_start.php` - session handler
 
 ### Components
 * `basic_template` - simple template management
 * `ie_error` - made without love
 
 ### Tools
-* `app-down.php`
+* `app-down.php` - show board "road works"
 * `build-app.php` - application builder
 * `install-assets.php`
 * `remove-samples.php`

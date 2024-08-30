@@ -4,8 +4,15 @@
 
 	if(defined('TK_PHAR'))
 	{
+		if(
+			isset($_SERVER['HTTP_ACCEPT_ENCODING']) &&
+			str_contains($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip')
+		)
+			ob_start('ob_gzhandler');
+
 		app_template::quick_view('samples/tk-test', 'phar_not_allowed.html');
-		exit();
+
+		return;
 	}
 
 	require APP_CTRL.'/samples/tk-test.php';
@@ -15,14 +22,22 @@
 
 	if(($type !== null) && ($name !== null))
 	{
+		if(
+			isset($_SERVER['HTTP_ACCEPT_ENCODING']) &&
+			str_contains($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip')
+		)
+			ob_start('ob_gzhandler');
+
 		if(!run_test($type, $name))
 			echo '<pre>You\'re up to something</pre>';
-	}
-	else
-	{
-		require APP_LIB.'/samples/ob_cache.php';
-		ob_cache(ob_url2file(), 0);
 
-		get_tests(new app_template())->view('samples/tk-test');
+		return;
 	}
+
+	require APP_LIB.'/samples/ob_cache.php';
+
+	if(ob_cache(ob_url2file(), 0))
+		return;
+
+	get_tests(new app_template())->view('samples/tk-test');
 ?>

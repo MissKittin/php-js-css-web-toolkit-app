@@ -7,6 +7,8 @@
 	 *  app/src/routes/samples/about.php
 	 *  app/src/routes/samples/check-date.php
 	 *  app/src/routes/samples/preprocessing-test.php
+	 *  app/src/routes/samples/tk-test.php
+	 *  app/src/routes/samples/ws-test.php
 	 */
 
 	if(!function_exists('ob_file_cache'))
@@ -28,9 +30,9 @@
 				$redis->connect();
 
 				if(ob_redis_cache($redis, $url, $expire, true) === 0)
-					exit();
+					return true;
 
-				return true;
+				return false;
 			} catch(Predis\Connection\ConnectionException $error) {
 				error_log(__FILE__.': Predis connection error: '.$error->getMessage().' - using ob_file_cache');
 			}
@@ -46,16 +48,16 @@
 			if($redis !== false)
 			{
 				if(ob_redis_cache($redis, $url, $expire, true) === 0)
-					exit();
+					return true;
 
-				return true;
+				return false;
 			}
 
 			error_log(__FILE__.': Redis connection error - using ob_file_cache');
 		}
 
 		if(ob_file_cache(VAR_CACHE.'/ob_cache/cache_'.$url, $expire, true) === 0)
-			exit();
+			return true;
 
 		return false;
 	}

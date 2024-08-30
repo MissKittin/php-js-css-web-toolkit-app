@@ -17,6 +17,12 @@
 	//::	add(new ob_adapter_gunzip())
 	//::	start();
 
+	//if(
+	//	isset($_SERVER['HTTP_ACCEPT_ENCODING']) &&
+	//	str_contains($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip')
+	//)
+	//	ob_start('ob_gzhandler');
+
 	controller_name::main(
 		new model_name(
 			controller_name::model_params()

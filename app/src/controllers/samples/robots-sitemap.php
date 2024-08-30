@@ -17,7 +17,7 @@
 		if(file_exists(VAR_LIB.'/robots-sitemap/sitemap.xml'))
 		{
 			readfile(VAR_LIB.'/robots-sitemap/sitemap.xml');
-			exit();
+			return;
 		}
 
 		$proto='http';

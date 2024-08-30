@@ -11,7 +11,7 @@
 <hr>
 
 <h3>Websockets functions:</h3>
-<pre>
+<pre style="tab-size: 4;">
 &lt;?php
 	function websockets_main($client)
 	{

@@ -9,7 +9,11 @@
 		protected static $assets_path='/assets';
 		protected static $assets_filename='basic-template';
 		protected static $favicon=null;
-		protected static $inline_assets=false;
+		protected static $inline_assets=[
+			false,
+			'', // script nonce
+			'' // style nonce
+		];
 
 		protected $do_return_content;
 
@@ -25,41 +29,51 @@
 				'form-action'=>['\'self\'']
 			];
 		}
-		protected static function parse_headers($view)
+		protected static function parse_headers_top($view)
 		{
 			if(isset($view['csp_header']))
 			{
-				if(static::$inline_assets)
+				if(static::$inline_assets[0])
 				{
-					$view['csp_header']['script-src'][]='\'nonce-mainscript\'';
-					$view['csp_header']['style-src'][]='\'nonce-mainstyle\'';
+					if(!function_exists('rand_str_secure'))
+						require TK_LIB.'/rand_str.php';
+
+					static::$inline_assets[1]=rand_str_secure(32);
+					static::$inline_assets[2]=rand_str_secure(32);
+
+					$view['csp_header']['script-src'][]='\'nonce-'.static::$inline_assets[1].'\'';
+					$view['csp_header']['style-src'][]='\'nonce-'.static::$inline_assets[2].'\'';
 				}
 
 				?><meta http-equiv="Content-Security-Policy" content="<?php
-				foreach($view['csp_header'] as $csp_param=>$csp_values)
-				{
-					echo $csp_param;
+					foreach($view['csp_header'] as $csp_param=>$csp_values)
+					{
+						echo $csp_param;
 
-					foreach($csp_values as $csp_value)
-						echo ' '.$csp_value;
+						foreach($csp_values as $csp_value)
+							echo ' '.$csp_value;
 
-					echo ';';
-				}
+						echo ';';
+					}
 				?>"><?php
 			}
 
 			if(isset($view['meta_robots']))
 				{ ?><meta name="robots" content="<?php echo $view['meta_robots']; ?>"><?php }
+
 			if(isset($view['title']))
 				{ ?><meta property="og:title" content="<?php echo $view['title']; ?>"><?php }
+
 			if(isset($view['lang']))
 				{ ?><meta property="og:locale" content="<?php echo $view['lang']; ?>"><?php }
+
 			if(isset($view['meta_description']))
 				{ ?><meta name="description" property="og:description" content="<?php echo $view['meta_description']; ?>"><?php }
 
 			if(isset($view['meta_name']))
 				foreach($view['meta_name'] as $meta_name=>$meta_content)
 					{ ?><meta name="<?php echo $meta_name; ?>" content="<?php echo $meta_content; ?>"><?php }
+
 			if(isset($view['meta_property']))
 				foreach($view['meta_property'] as $meta_property=>$meta_content)
 					{ ?><meta property="<?php echo $meta_property; ?>" content="<?php echo $meta_content; ?>"><?php }
@@ -69,7 +83,44 @@
 
 			if(isset($view['styles']))
 				foreach($view['styles'] as $style)
-					{ ?><link rel="stylesheet" href="<?php echo $style; ?>"><?php }
+				{
+					?><link rel="stylesheet" href="<?php echo $style[0]; ?>"<?php
+						if($style[1] !== null)
+							{ ?> integrity="<?php echo $style[1]; ?>" crossorigin="<?php echo $style[2]; ?>"<?php }
+					?>><?php
+				}
+
+			if(static::$inline_assets[0])
+			{
+				?><style nonce="<?php echo static::$inline_assets[2]; ?>"><?php
+					readfile(__DIR__.'/assets/basic-template.css');
+				?></style><?php
+			}
+			else
+				{ ?><link rel="stylesheet" href="<?php echo static::$assets_path; ?>/<?php echo static::$assets_filename; ?>.css"><?php }
+
+			if(static::$favicon !== null)
+				readfile(static::$favicon);
+		}
+		protected static function parse_headers_bottom($view)
+		{
+			if(static::$inline_assets[0])
+			{
+				?><script nonce="<?php echo static::$inline_assets[1]; ?>"><?php
+					require __DIR__.'/assets/basic-template.js/main.php';
+				?></script><?php
+			}
+			else
+				{ ?><script src="<?php echo static::$assets_path; ?>/<?php echo static::$assets_filename; ?>.js"></script><?php }
+
+			if(isset($view['scripts']))
+				foreach($view['scripts'] as $script)
+				{
+					?><script src="<?php echo $script[0]; ?>"<?php
+						if($script[1] !== null)
+							{ ?> integrity="<?php echo $script[1]; ?>" crossorigin="<?php echo $script[2]; ?>"<?php }
+					?>></script><?php
+				}
 		}
 
 		public static function set_assets_path(string $path)
@@ -84,7 +135,7 @@
 		}
 		public static function set_inline_assets(bool $inline_assets)
 		{
-			static::$inline_assets=$inline_assets;
+			static::$inline_assets[0]=$inline_assets;
 			return static::class;
 		}
 		public static function set_favicon(string $path)
@@ -141,14 +192,80 @@
 			$this->registry['meta_property'][$property]=$content;
 			return $this;
 		}
-		public function add_style_header(string $path)
-		{
-			$this->registry['styles'][]=$path;
+		public function add_style_header(
+			string $path,
+			?string $integrity=null,
+			string $crossorigin='anonymous'
+		){
+			$this->registry['styles'][]=[$path, $integrity, $crossorigin];
 			return $this;
 		}
-		public function add_script_header(string $path)
-		{
-			$this->registry['scripts'][]=$path;
+		public function add_script_header(
+			string $path,
+			?string $integrity=null,
+			string $crossorigin='anonymous'
+		){
+			$this->registry['scripts'][]=[$path, $integrity, $crossorigin];
+			return $this;
+		}
+		public function add_inline_style(
+			string $content,
+			bool $add_csp_hash=true,
+			bool $add_csp_nonce=false
+		){
+			$this->add_html_header('<style');
+
+			if($add_csp_hash)
+			{
+				if(!function_exists('generate_csp_hash'))
+					require TK_LIB.'/generate_csp_hash.php';
+
+				$this->add_csp_header('style-src', generate_csp_hash($content));
+			}
+			else if($add_csp_nonce)
+			{
+				if(!function_exists('rand_str_secure'))
+					require TK_LIB.'/rand_str.php';
+
+				$nonce_value=rand_str_secure(32);
+
+				$this
+				->	add_csp_header('style-src', '\'nonce-'.$nonce_value.'\'')
+				->	add_html_header(' nonce="'.$nonce_value.'"');
+			}
+
+			$this->add_html_header('>'.$content.'</style>');
+
+			return $this;
+		}
+		public function add_inline_script(
+			string $content,
+			bool $add_csp_hash=true,
+			bool $add_csp_nonce=false
+		){
+			$this->add_html_header('<script');
+
+			if($add_csp_hash)
+			{
+				if(!function_exists('generate_csp_hash'))
+					require TK_LIB.'/generate_csp_hash.php';
+
+				$this->add_csp_header('script-src', generate_csp_hash($content));
+			}
+			else if($add_csp_nonce)
+			{
+				if(!function_exists('rand_str_secure'))
+					require TK_LIB.'/rand_str.php';
+
+				$nonce_value=rand_str_secure(32);
+
+				$this
+				->	add_csp_header('script-src', '\'nonce-'.$nonce_value.'\'')
+				->	add_html_header(' nonce="'.$nonce_value.'"');
+			}
+
+			$this->add_html_header('>'.$content.'</script>');
+
 			return $this;
 		}
 		public function view(string $view_path, string $page_content='page_content.php')

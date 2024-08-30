@@ -1,2 +1,2 @@
-<h1>View template</h1>
+<h1>View <?php $view['my_function']('template'); ?></h1>
 <?php echo $view['my_variable']; ?>

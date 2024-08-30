@@ -1,4 +1,5 @@
 <?php
+	$view['csp_header']['style-src'][]='\'unsafe-inline\'';
 	$view['csp_header']['script-src'][]='\'sha256-/X5PLF1RFAQnQE1exIRAG0cmaQJ4A4miMM25uzsWk6o=\'';
 
 	$view['lang']='en';
