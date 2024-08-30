@@ -1,7 +1,7 @@
 <?php
 	function pdo_instance(
-		string $db=null,
-		callable $on_error=null
+		?string $db=null,
+		?callable $on_error=null
 	){
 		/*
 		 * pdo_instance configuration via environment variables

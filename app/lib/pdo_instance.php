@@ -23,8 +23,8 @@
 			static::$default_db=$db;
 		}
 		public static function get(
-			string $db=null,
-			callable $on_error=null
+			?string $db=null,
+			?callable $on_error=null
 		){
 			if(static::$pdo_handler !== null)
 				return static::$pdo_handler;
