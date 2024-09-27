@@ -1,5 +1,5 @@
 <?php
-	if(app_env::getenv('REDIS_IGNORE_ENV') === 'true')
+	if(app_env('REDIS_IGNORE_ENV') === 'true')
 		$db_getenv=function($env, $default_value)
 		{
 			return $default_value;
@@ -7,12 +7,7 @@
 	else
 		$db_getenv=function($env, $default_value)
 		{
-			$value=app_env::getenv($env);
-
-			if($value === false)
-				return $default_value;
-
-			return $value;
+			return app_env($env, $default_value);
 		};
 
 	$db_config=[
@@ -23,10 +18,10 @@
 
 	// socket has priority over the host/port
 	if(
-		(app_env::getenv('REDIS_IGNORE_ENV') !== 'true') &&
-		(app_env::getenv('REDIS_SOCKET') !== false)
+		(app_env('REDIS_IGNORE_ENV') !== 'true') &&
+		(app_env('REDIS_SOCKET') !== false)
 	)
-		$db_config['socket']=app_env::getenv('REDIS_SOCKET');
+		$db_config['socket']=app_env('REDIS_SOCKET');
 
 	return $db_config;
 ?>

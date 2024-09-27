@@ -1,6 +1,7 @@
 * [Toolkit as a composer package](#toolkit-as-a-composer-package)
 * [A few words about design](#a-few-words-about-design)
 	* [Application standard library](#application-standard-library)
+	* [Upload tmp directory](#upload-tmp-directory)
 * [Creating The project](#creating-the-project)
 	* [GNU GPL](#gnu-gpl)
 	* [Hint - git](#hint---git)
@@ -69,7 +70,7 @@ Toolkit was not intended as a Composer package, but such usage is possible, e.g.
                     "type": "zip"
                 },
                 "require": {
-                    "php": ">=7.1"
+                    "php": "^7.1 || ^8.0"
                 }
             }
         }
@@ -119,7 +120,7 @@ or if you also want extras:
                     "type": "zip"
                 },
                 "require": {
-                    "php": ">=7.1"
+                    "php": "^7.1 || ^8.0"
                 }
             }
         },
@@ -142,7 +143,7 @@ or if you also want extras:
                     "type": "zip"
                 },
                 "require": {
-                    "php": ">=7.1"
+                    "php": "^7.1 || ^8.0"
                 }
             }
         }
@@ -182,20 +183,28 @@ It has its advantages and disadvantages - it is not a typical framework, so thin
 
 ### Application standard library
 The `app/lib/stdlib.php` library is the parent library of the application - it is loaded by the `app/entrypoint.php`.  
+All application elements except tools (components, libraries, controllers, routings etc.) assume that the library is already loaded.  
 Provides constants with paths to specific parts of the application.  
 If you pack the toolkit into a phar, the library will set the paths so that files are loaded from the archive.  
 The library also includes an application bootstrap that creates a `var` directory hierarchy.  
-Additionally, it provides classes:
-* `app_exception`
+Additionally, it provides:
+* `app_exception` class
 
 		throw new app_exception('Fehler!');
 
-* `app_env`  
+* `app_env` function  
 	that uses `dotenv.php` library  
 	see [app README DotEnv](app/README.md#dotenv)
 
-		$env_var=app_env::getenv('ENV_VAR_NAME', 'default_value');
+		$env_var=app_env('ENV_VAR_NAME', 'default_value');
 
+
+### Upload tmp directory
+You can set this path to the application temporary directory:
+```
+upload_tmp_dir = /absolute/path/to/php-js-css-web-toolkit-app/var/tmp
+```
+You have to do it manually because PHP allows changing this value only in the system `php.ini` file
 
 # Creating The project
 ```
@@ -293,6 +302,7 @@ php ./tk/bin/run-php-lib-tests.php ./tke/lib/tests
 php ./tk/bin/run-php-com-tests.php ./tke/com
 php ./tk/bin/run-phtml-tests.php ./tke/lib/tests
 ```
+If a test failed and you care about specific tools/components/libraries, run the test(s) manually
 
 ### Example application
 Instructions on how to run the sample application are in [app README](app/README.md)  
@@ -586,13 +596,10 @@ php ./tk/bin/link2file.php ./app
 ```
 
 ### Deploy on shared hosting in a subdirectory
-**Note:** all routings and asset paths in views must be appropriate:  
-**Hint:** just modify the switch argument in `app/entrypoint.php`:
-```
-// add a slash to $_SERVER['REQUEST_URI']
-// and increase the explode key according to the number of subdirectories
-switch(explode('/', strtok($_SERVER['REQUEST_URI'].'/', '?'))[2])
-```
+**Note:** the application itself finds the path to the assets (`public/assets`) directory (`app/lib/app_template.php` library)  
+    you don't have to worry about it  
+**Note:** the application itself removes subdirectories from the parameter path using the `app/lib/app_params.php` library  
+    there is no need to edit the switch argument in the `app/entrypoint.php` file
 
 * hosting with `public_html`
 	1. mkdir `./public_html` and `./your-app`
@@ -605,9 +612,10 @@ switch(explode('/', strtok($_SERVER['REQUEST_URI'].'/', '?'))[2])
 			php ./your-app/tk/bin/serve.php --docroot ./public_html
 
 		and open a web browser: `http://127.0.0.1:8080/app-name/`
-	6. upload `./public_html/app-name` directory to `public_html/app-name`  
+	6. `bin` and `tests` directories may no longer be needed - you can delete any `bin` and `tests` directories you find
+	7. upload `./public_html/app-name` directory to `public_html/app-name`  
 		(where the second `public_html` is document root in your hosting)
-	7. upload `./your-app` to `your-app`  
+	8. upload `./your-app` to `your-app`  
 		(next to the `public_html` directory in your hosting)
 
 * hosting without `public_html`
@@ -626,7 +634,8 @@ switch(explode('/', strtok($_SERVER['REQUEST_URI'].'/', '?'))[2])
 			php ./my-app/app-src/tk/bin/serve.php --docroot .
 
 		and open a web browser: `http://127.0.0.1:8080/app-name/`
-	7. upload project to `my-app`
+	7. `bin` and `tests` directories may no longer be needed - you can delete any `bin` and `tests` directories you find
+	8. upload project to `my-app`
 
 
 # Apache configuration

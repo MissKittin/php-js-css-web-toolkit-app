@@ -24,9 +24,15 @@ php ./tk/bin/serve.php
 
 
 # Materialized template
-To enable the materialized template for components, set the environment variable:  
+To enable the materialized template for components, set the environment variable:
 ```
 export APP_MATERIALIZED=yes
+```
+
+# Debug mode
+To switch the application to debug mode, set the environment variable:
+```
+export APP_ENV=dev
 ```
 
 # Session data in cookie
@@ -47,6 +53,7 @@ The application source code is located in the `app/src` directory:
 
 ### Routes
 * `about.php` - `/about` (About toolkit) (has view)
+* `bootstrap-test.php` - `/bootstrap-test` (Bootstrap framework test) (has view)
 * `check-date.php` - `/check-date` (`check_date()` test) (has view)
 * `database-test.php` - `/database-test` (Database libraries test) (has view)
 * `home.php` - `/` (has view)
@@ -123,6 +130,7 @@ You can configure the database connection through the following environment vari
 ### DotEnv
 Create `.env` file in parent directory:
 ```
+APP_ENV=dev
 APP_INLINE_ASSETS=no
 APP_MATERIALIZED=no
 APP_NO_SESSION_IN_COOKIE=no
@@ -158,6 +166,7 @@ REDIS_SOCKET=/var/run/redis/redis.sock
 ```
 
 ### Libraries
+* `app_params.php` - `$_SERVER['PATH_INFO']` replacement
 * `app_session.php` - session manager
 * `app_template.php` - default http headers and a basic_template overlay that saves typing
 * `ob_adapter.php` - modular output buffer

@@ -8,6 +8,10 @@
 		protected static $return_content='';
 		protected static $assets_path='/assets';
 		protected static $assets_filename='basic-template';
+		protected static $disable_default_assets=[
+			false, // styles
+			false // scripts
+		];
 		protected static $favicon=null;
 		protected static $inline_assets=[
 			false,
@@ -61,14 +65,43 @@
 			if(isset($view['meta_robots']))
 				{ ?><meta name="robots" content="<?php echo $view['meta_robots']; ?>"><?php }
 
-			if(isset($view['title']))
+			if(isset($view['opengraph_headers']))
+				foreach($view['opengraph_headers'] as $og_header)
+				{
+					switch($og_header[0])
+					{
+						case 'title':
+							$view['opengraph_headers']['_title_defined_']=true;
+						break;
+						case 'lang':
+							$view['opengraph_headers']['_lang_defined_']=true;
+						break;
+						case 'description':
+							$view['opengraph_headers']['_description_defined_']=true;
+					}
+
+					?><meta property="<?php echo 'og:'.$og_header[0]; ?>" content="<?php echo $og_header[1]; ?>"><?php
+				}
+
+			if(
+				(isset($view['title'])) &&
+				(!isset($view['opengraph_headers']['_title_defined_']))
+			)
 				{ ?><meta property="og:title" content="<?php echo $view['title']; ?>"><?php }
 
-			if(isset($view['lang']))
+			if(
+				(isset($view['lang'])) &&
+				(!isset($view['opengraph_headers']['_lang_defined_']))
+			)
 				{ ?><meta property="og:locale" content="<?php echo $view['lang']; ?>"><?php }
 
 			if(isset($view['meta_description']))
-				{ ?><meta name="description" property="og:description" content="<?php echo $view['meta_description']; ?>"><?php }
+			{
+				if(isset($view['opengraph_headers']['_description_defined_']))
+					{ ?><meta name="description" content="<?php echo $view['meta_description']; ?>"><?php }
+				else
+					{ ?><meta name="description" property="og:description" content="<?php echo $view['meta_description']; ?>"><?php }
+			}
 
 			if(isset($view['meta_name']))
 				foreach($view['meta_name'] as $meta_name=>$meta_content)
@@ -90,28 +123,34 @@
 					?>><?php
 				}
 
-			if(static::$inline_assets[0])
+			if(!static::$disable_default_assets[0])
 			{
-				?><style nonce="<?php echo static::$inline_assets[2]; ?>"><?php
-					readfile(__DIR__.'/assets/basic-template.css');
-				?></style><?php
+				if(static::$inline_assets[0])
+				{
+					?><style nonce="<?php echo static::$inline_assets[2]; ?>"><?php
+						readfile(__DIR__.'/assets/basic-template.css');
+					?></style><?php
+				}
+				else
+					{ ?><link rel="stylesheet" href="<?php echo static::$assets_path; ?>/<?php echo static::$assets_filename; ?>.css"><?php }
 			}
-			else
-				{ ?><link rel="stylesheet" href="<?php echo static::$assets_path; ?>/<?php echo static::$assets_filename; ?>.css"><?php }
 
 			if(static::$favicon !== null)
 				readfile(static::$favicon);
 		}
 		protected static function parse_headers_bottom($view)
 		{
-			if(static::$inline_assets[0])
+			if(!static::$disable_default_assets[1])
 			{
-				?><script nonce="<?php echo static::$inline_assets[1]; ?>"><?php
-					require __DIR__.'/assets/basic-template.js/main.php';
-				?></script><?php
+				if(static::$inline_assets[0])
+				{
+					?><script nonce="<?php echo static::$inline_assets[1]; ?>"><?php
+						require __DIR__.'/assets/basic-template.js/main.php';
+					?></script><?php
+				}
+				else
+					{ ?><script src="<?php echo static::$assets_path; ?>/<?php echo static::$assets_filename; ?>.js"></script><?php }
 			}
-			else
-				{ ?><script src="<?php echo static::$assets_path; ?>/<?php echo static::$assets_filename; ?>.js"></script><?php }
 
 			if(isset($view['scripts']))
 				foreach($view['scripts'] as $script)
@@ -123,6 +162,16 @@
 				}
 		}
 
+		public static function disable_default_styles(bool $value=true)
+		{
+			static::$disable_default_assets[0]=$value;
+			return static::class;
+		}
+		public static function disable_default_scripts(bool $value=true)
+		{
+			static::$disable_default_assets[1]=$value;
+			return static::class;
+		}
 		public static function set_assets_path(string $path)
 		{
 			static::$assets_path=$path;
@@ -190,6 +239,11 @@
 		public function add_meta_property_header(string $property, string $content)
 		{
 			$this->registry['meta_property'][$property]=$content;
+			return $this;
+		}
+		public function add_og_header(string $property, string $content)
+		{
+			$this->registry['opengraph_headers'][]=[$property, $content];
 			return $this;
 		}
 		public function add_style_header(

@@ -1,8 +1,4 @@
 <?php
-	// enable logging
-		define('LOGGER_APP_NAME', 'login-component-test');
-		require APP_LIB.'/samples/logger.php';
-
 	// enable translation
 		require TK_LIB.'/string_translator.php';
 
@@ -18,7 +14,7 @@
 			$labels_lang
 		));
 
-	login_com_reg::_()['credentials']=login_component_test_credentials::read_password(); // model
+	login_com_reg::_()['credentials']=$model::read_password();
 
 	// configure the login component
 		(function($array){
@@ -39,10 +35,10 @@
 			'loading_title'=>$labels('Loading...')
 		]);
 
-		if(app_env::getenv('APP_INLINE_ASSETS') === 'yes')
+		if(app_env('APP_INLINE_ASSETS') === 'yes')
 			login_com_reg_view::_()['inline_style']=true;
 
-		if(app_env::getenv('APP_MATERIALIZED') === 'yes')
+		if(app_env('APP_MATERIALIZED') === 'yes')
 			login_com_reg_view::_()['template']='materialized';
 		else if(
 			isset($_COOKIE['app_dark_theme']) &&
@@ -51,9 +47,6 @@
 			login_com_reg_view::_()['login_style']='login_default_dark.css';
 
 	// add bruteforce protection
-		require APP_LIB.'/samples/pdo_instance.php';
-		require TK_LIB.'/sec_bruteforce.php';
-
 		$sec_bruteforce=new bruteforce_timeout_pdo([
 			'pdo_handler'=>pdo_instance()
 		]);
@@ -129,7 +122,7 @@
 			{
 				require TK_COM.'/middleware_form/main.php';
 
-				if(app_env::getenv('APP_MATERIALIZED') === 'yes')
+				if(app_env('APP_MATERIALIZED') === 'yes')
 					$captcha_form=new middleware_form('materialized');
 				else
 					$captcha_form=new middleware_form();
@@ -157,7 +150,7 @@
 				->	add_csp_header('style-src', '\'unsafe-hashes\'')
 				->	add_csp_header('style-src', '\'sha256-N6tSydZ64AHCaOWfwKbUhxXx2fRFDxHOaL3e3CO7GPI=\'');
 
-				if(app_env::getenv('APP_MATERIALIZED') !== 'yes')
+				if(app_env('APP_MATERIALIZED') !== 'yes')
 				{
 					if(
 						isset($_COOKIE['app_dark_theme']) &&
@@ -172,7 +165,7 @@
 				->	add_config('title', $labels('Verification'))
 				->	add_config('submit_button_label', $labels('Next'));
 
-				if(app_env::getenv('APP_INLINE_ASSETS') === 'yes')
+				if(app_env('APP_INLINE_ASSETS') === 'yes')
 					$captcha_form->add_config('inline_style', true);
 
 				// now some magic: we place the generated image in $_SESSION
@@ -238,11 +231,11 @@
 			return true;
 		}
 
-		if(login_component_test_credentials::change_password_requested())
+		if($model::change_password_requested())
 		{
 			require TK_COM.'/middleware_form/main.php';
 
-			if(app_env::getenv('APP_MATERIALIZED') === 'yes')
+			if(app_env('APP_MATERIALIZED') === 'yes')
 				$change_password_form=new middleware_form('materialized');
 			else
 				$change_password_form=new middleware_form();
@@ -257,7 +250,7 @@
 					$labels
 				)
 			){
-				login_component_test_credentials::save_new_password($_POST['new_password']);
+				$model::save_new_password($_POST['new_password']);
 				log_infos()->info('Password updated');
 
 				// display reload page and exit
@@ -265,7 +258,7 @@
 					return true; // exit()
 			}
 
-			if(app_env::getenv('APP_MATERIALIZED') !== 'yes')
+			if(app_env('APP_MATERIALIZED') !== 'yes')
 			{
 				if(
 					isset($_COOKIE['app_dark_theme']) &&
@@ -280,7 +273,7 @@
 			->	add_config('title', $labels('Password change'))
 			->	add_config('submit_button_label', $labels('Change password'));
 
-			if(app_env::getenv('APP_INLINE_ASSETS') === 'yes')
+			if(app_env('APP_INLINE_ASSETS') === 'yes')
 				$change_password_form->add_config('inline_style', true);
 
 			$change_password_form

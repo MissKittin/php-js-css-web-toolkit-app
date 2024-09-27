@@ -16,6 +16,14 @@
 		 * to store session data in a cookie
 		 * If not, it starts the session with the SessionHandler
 		 *
+		 * Warning:
+		 *  openssl extension is recommended
+		 *  mbstring extension is recommended
+		 *  sec_lv_encrypter.php library is recommended
+		 *
+		 * Required $_SERVER variables:
+		 *  SERVER_NAME
+		 *
 		 * Usage:
 			app_session_start();
 			app_session_start(false); // do not store session in cookie
@@ -32,7 +40,8 @@
 
 			lv_cookie_session_handler::register_handler([
 				'key'=>file_get_contents(VAR_LIB.'/session_start/session_cookie_key'),
-				'cipher'=>'aes-256-gcm'
+				'cipher'=>'aes-256-gcm',
+				'cookie_domain'=>strtok($_SERVER['HTTP_HOST'], ':')
 			]);
 
 			lv_cookie_session_handler::session_start();
@@ -40,13 +49,34 @@
 			return;
 		}
 
+		$session_start_params=[
+			'use_cookies'=>1,
+			'use_only_cookies'=>1,
+			'use_strict_mode'=>1,
+			'cookie_domain'=>strtok($_SERVER['HTTP_HOST'], ':'),
+			'cookie_httponly'=>1,
+			'use_trans_sid'=>0,
+			'sid_length'=>'48',
+			'sid_bits_per_character'=>'6'
+		];
+
+		if(PHP_VERSION_ID >= 70300)
+			$session_start_params['cookie_samesite']='Strict';
+
 		if(is_dir(VAR_SESS))
 		{
 			// quick boot up (fallback)
 
 			session_save_path(VAR_SESS);
 			session_name('id');
-			session_start();
+
+			if(!session_start($session_start_params))
+			{
+				// invalid session cookie - remove it
+
+				$_COOKIE['id']='';
+				session_start($session_start_params);
+			}
 
 			return;
 		}
@@ -67,7 +97,8 @@
 
 			lv_cookie_session_handler::register_handler([
 				'key'=>file_get_contents(VAR_LIB.'/session_start/session_cookie_key'),
-				'cipher'=>'aes-256-gcm'
+				'cipher'=>'aes-256-gcm',
+				'cookie_domain'=>strtok($_SERVER['HTTP_HOST'], ':')
 			]);
 
 			lv_cookie_session_handler::session_start();
@@ -80,7 +111,14 @@
 
 		session_save_path(VAR_SESS);
 		session_name('id');
-		session_start();
+
+		if(!session_start($session_start_params))
+		{
+			// invalid session cookie - remove it
+
+			$_COOKIE['id']='';
+			session_start($session_start_params);
+		}
 	}
 	function app_session_clean(?callable $log_callback=null)
 	{

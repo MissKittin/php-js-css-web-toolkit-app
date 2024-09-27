@@ -1,5 +1,14 @@
 <?php
-	// Application builder
+	/*
+	 * Application builder
+	 *
+	 * Warning:
+	 *  install-assets.php app tool is required
+	 *  replace-public-index-with-link.php app tool is required
+	 *  assets-compiler.php tool is required
+	 *  composer.phar or get-composer.php tool is required
+	 *  matthiasmullie-minify.php tool is required
+	 */
 
 	if(file_exists(__DIR__.'/replace-public-index-with-link.php'))
 		system('"'.PHP_BINARY.'" '

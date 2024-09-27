@@ -3,6 +3,9 @@
 	 * Checks if it is possible to connect to Redis
 	 * if so, use Redis as cache, if not - dump the cache to a file
 	 *
+	 * Warning:
+	 *  __DIR__./logger.php library is required
+	 *
 	 * See:
 	 *  app/src/routes/samples/about.php
 	 *  app/src/routes/samples/check-date.php
@@ -19,7 +22,7 @@
 		if($expire === 0)
 			header('Cache-Control: public, max-age=31536000');
 
-		if(app_env::getenv('REDIS_PREDIS') === 'true')
+		if(app_env('REDIS_PREDIS') === 'true')
 		{
 			if(!function_exists('predis_connect_proxy'))
 				require TK_LIB.'/predis_connect.php';
@@ -34,7 +37,10 @@
 
 				return false;
 			} catch(Predis\Connection\ConnectionException $error) {
-				error_log(__FILE__.': Predis connection error: '.$error->getMessage().' - using ob_file_cache');
+				if(!function_exists('log_infos'))
+					require __DIR__.'/logger.php';
+
+				log_infos('app-library')->warn(__FILE__.': Predis connection error: '.$error->getMessage().' - using ob_file_cache');
 			}
 		}
 
@@ -53,7 +59,10 @@
 				return false;
 			}
 
-			error_log(__FILE__.': Redis connection error - using ob_file_cache');
+			if(!function_exists('log_infos'))
+				require __DIR__.'/logger.php';
+
+			log_infos('app-library')->warn(__FILE__.': Redis connection error - using ob_file_cache');
 		}
 
 		if(ob_file_cache(VAR_CACHE.'/ob_cache/cache_'.$url, $expire, true) === 0)

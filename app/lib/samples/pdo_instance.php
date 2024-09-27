@@ -8,6 +8,7 @@
 		 * also sets the sqlite database as the default
 		 *
 		 * Environment variables:
+		 *  APP_ENV=dev - enable PDO::ERRMODE_EXCEPTION
 		 *  DB_IGNORE_ENV=true - ignore all variables (default: false)
 		 *  DB_TYPE - select database from app/src/databases/samples
 		 *
@@ -20,12 +21,15 @@
 		{
 			require APP_LIB.'/pdo_instance.php';
 
-			if(app_env::getenv('DB_IGNORE_ENV') === 'true')
+			if(app_env('DB_IGNORE_ENV') === 'true')
 				pdo_instance::set_default_db('samples/sqlite');
-			else if(app_env::getenv('DB_TYPE') !== false)
-				pdo_instance::set_default_db('samples/'.app_env::getenv('DB_TYPE'));
+			else if(app_env('DB_TYPE') !== false)
+				pdo_instance::set_default_db('samples/'.app_env('DB_TYPE'));
 			else
 				pdo_instance::set_default_db('samples/sqlite');
+
+			if(app_env('APP_ENV') === 'dev')
+				pdo_instance::enable_exceptions();
 		}
 
 		return pdo_instance::get($db, $on_error);

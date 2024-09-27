@@ -56,11 +56,14 @@
 		error_log('Executed in '.$exec_time.' seconds, '.memory_get_peak_usage().' bytes used, '.count(get_included_files()).' scripts included');
 	});
 
-	switch(explode('/', strtok($_SERVER['REQUEST_URI'], '?'))[1])
+	require APP_LIB.'/app_params.php';
+
+	switch(explode('/', app_params(), 2)[0])
 	{
 		case '': require APP_ROUTE.'/samples/home.php'; break;
 
 		case 'about': require APP_ROUTE.'/samples/about.php'; break;
+		case 'bootstrap-test': require APP_ROUTE.'/samples/bootstrap-test.php'; break;
 		case 'check-date': require APP_ROUTE.'/samples/check-date.php'; break;
 		case 'database-test': require APP_ROUTE.'/samples/database-test.php'; break;
 		case 'obsfucate-html': require APP_ROUTE.'/samples/obsfucate-html.php'; break;

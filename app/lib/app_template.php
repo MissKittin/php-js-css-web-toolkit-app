@@ -13,12 +13,32 @@
 		/*
 		 * An overlay for the basic_template component
 		 * that saves typing
-		 * also loads the component on demand
+		 * also loads the component on demand,
+		 * sets the path to assets if the application's public directory is not in the document root
 		 * and calls fastcgi_finish_request() if available
+		 *
+		 * You can also get url to public directory:
+			app_template::get_public_dir_url() // returns empty string if root or '/subdir'
+		 *
+		 * Warning:
+		 *  basic_template component is required
+		 *
+		 * Required $_SERVER variables:
+		 *  $_SERVER['SCRIPT_NAME']
 		 */
+
+		protected static $public_dir=null;
 
 		protected $instance=null;
 		protected $return_content;
+
+		protected static function _auto_set_assets_path()
+		{
+			static::get_public_dir_url();
+
+			if(static::$public_dir !== '')
+				basic_template::set_assets_path(static::$public_dir.'/assets');
+		}
 
 		public static function __callStatic($method, $args)
 		{
@@ -28,10 +48,29 @@
 			return basic_template::$method(...$args);
 		}
 
+		public static function get_public_dir_url()
+		{
+			if(static::$public_dir !== null)
+				return static::$public_dir;
+
+			$script_dir=dirname($_SERVER['SCRIPT_NAME']);
+
+			if(($script_dir === '/') || ($script_dir === '\\'))
+			{
+				static::$public_dir='';
+				return '';
+			}
+
+			static::$public_dir=$script_dir;
+
+			return $script_dir;
+		}
 		public static function quick_view($view_path, $page_content='page_content.php')
 		{
 			if(!class_exists('basic_template'))
 				require APP_COM.'/basic_template/main.php';
+
+			static::_auto_set_assets_path();
 
 			basic_template::{__FUNCTION__}(
 				APP_VIEW.'/'.$view_path,
@@ -46,6 +85,8 @@
 		{
 			if(!class_exists('basic_template'))
 				require APP_COM.'/basic_template/main.php';
+
+			static::_auto_set_assets_path();
 
 			$this->return_content=$return_content;
 			$this->instance=new basic_template($return_content);

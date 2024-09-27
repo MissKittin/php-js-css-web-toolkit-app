@@ -1,4 +1,8 @@
 <?php
+	// enable logging
+	const LOGGER_APP_NAME='login-component-test';
+	require APP_LIB.'/samples/logger.php';
+
 	require APP_LIB.'/app_template.php';
 
 	if(
@@ -12,6 +16,10 @@
 
 	require TK_COM.'/login/main.php';
 
+	// add bruteforce protection
+	require APP_LIB.'/samples/pdo_instance.php';
+	require TK_LIB.'/sec_bruteforce.php';
+
 	// set custom session reloader
 	if(class_exists('lv_cookie_session_handler'))
 		login_com_reg_config::_()['session_reload']=function($lifetime)
@@ -22,6 +30,7 @@
 		};
 
 	require APP_MODEL.'/samples/login_component_test_credentials.php';
+	$model='login_component_test_credentials';
 
 	if(require APP_CTRL.'/samples/login-component-test.php')
 		return;

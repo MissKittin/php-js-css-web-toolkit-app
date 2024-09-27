@@ -29,3 +29,6 @@ ie_error(403, 'pl');
 // or show 401 page (english, dark theme)
 ie_error(401, 'en', true);
 ```
+
+## Portability
+This component does not use libraries, so it can be moved as is.

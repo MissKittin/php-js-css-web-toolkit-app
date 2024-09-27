@@ -6,8 +6,11 @@
 	 *  ob_adapter_obminifier - adapter for ob_minifier.php library
 	 *  ob_adapter_obsfucator - adapter for ob_sfucator.php library
 	 *  ob_adapter_gzip - ob_gzhandler replacement
+	 *   does not require additional libraries
 	 *  ob_adapter_filecache - basic file cache
+	 *   does not require additional libraries
 	 *  ob_adapter_gunzip - decompress if browser does not support gzip
+	 *   does not require additional libraries
 	 *
 	 * Usage:
 		if(ob_adapter

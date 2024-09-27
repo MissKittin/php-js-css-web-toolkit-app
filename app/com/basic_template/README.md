@@ -20,6 +20,8 @@ Throws an `basic_template_exception` on error
 	`<meta name="string_name" content="string_content">`
 * `add_meta_property_header(string_property, string_content)` [returns self]  
 	`<meta property="string_property" content="string_content">`
+* `add_og_header(string_property, string_content)` [returns self]  
+	`<meta property="og:string_property" content="string_content">`
 * `add_style_header(string_path, string_integrity_hash=null, string_crossorigin='anonymous')` [returns self]  
 	`<link rel="stylesheet"`  
 	if `string_integrity_hash` is not `null`, adds the `integrity` and `crossorigin` parameters for Subresource Integrity function
@@ -36,6 +38,10 @@ Throws an `basic_template_exception` on error
 	**note:** `add_csp_hash` takes priority over `add_csp_nonce`  
 	**warning:** if `add_csp_hash` is used, the `<script>` block cannot be postprocessed  
 	**warning:** if `add_csp_nonce` is used, the page should not be cached
+* **[static]** `disable_default_styles(bool_value=true)` [returns self]  
+	disable default template styles (use `disable_default_styles(false)` to re-enable)
+* **[static]** `disable_default_scripts(bool_value=true)` [returns self]  
+	disable default template scripts (use `disable_default_scripts(false)` to re-enable)
 * **[static]** `set_assets_path(string_path)` [returns self]  
 	set the url to the assets directory  
 	default: `/assets`
@@ -62,16 +68,22 @@ Throws an `basic_template_exception` on error
 ## Variables
 You can use `$template->variable='value'`, `$template['variable']='value'` and [setters](#methods)
 
-* `lang` [string]  
-	`<html lang="">` and `<meta property="og:locale">`
+* `lang` [string] (eg. `en_US`)  
+	`<html lang="en">` (via `strtok($lang, '_')`) and `<meta property="og:locale" content="en_US">` (can be overwritten by calling `add_og_header()`)
+* `head_prefix` [string]  
+	`<head prefix="string">`
 * `title` [string]  
-	`<title>` and `<meta property="og:title">`
+	`<title>` and `<meta property="og:title">` (can be overwritten by calling `add_og_header()`)
 * `csp_header` [assoc array]  
 	use `add_csp_header()`
+* `opengraph_headers` [assoc array]  
+	use `add_og_header()`
 * `meta_robots` [string]  
-	(no)index,(no)follow
+	`index,follow` or  
+	`noindex,nofollow`
 * `meta_description` [string]  
-	`<meta name="description" property="og:description">`
+	`<meta name="description" property="og:description">` or  
+	`<meta name="description">` if `add_og_header()` called
 * `meta_name` [assoc array]  
 	use `add_meta_name_header()`
 * `meta_property` [assoc array]  
@@ -94,7 +106,7 @@ Create a new directory, e.g. `my_view` and add the required files to it.
 	$view['csp_header']['style-src'][]='\'sha256-hash\'';
 
 	// basic settings
-	$view['lang']='en';
+	$view['lang']='en_US';
 	$view['title']='Page title';
 	$view['meta_description']='Page description';
 	$view['meta_robots']='index,follow';
@@ -104,6 +116,17 @@ Create a new directory, e.g. `my_view` and add the required files to it.
 	$view['meta_property']['my_meta_property']='my_meta_content';
 	$view['html_headers'].='<tag>content</tag>'; // note: .= can "PHP Notice:  Undefined variable $view['html_headers']"
 	//static::$favicon=__DIR__.'/favicon.html';
+
+	// Open Graph headers
+	$view['opengraph_headers'][]=['url', (empty($_SERVER['HTTPS']) ? 'http' : 'https').'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']];
+	$view['opengraph_headers'][]=['type', 'website'];
+	$view['opengraph_headers'][]=['site_name', 'My Awesome Website'];
+	//$view['opengraph_headers'][]=['image', (empty($_SERVER['HTTPS']) ? 'http' : 'https').'://'.$_SERVER[HTTP_HOST].'/assets/website-logo.jpg'];
+	//$view['opengraph_headers'][]=['image:type', 'image/jpeg'];
+	//$view['opengraph_headers'][]=['image:width', '400'];
+	//$view['opengraph_headers'][]=['image:height', '300'];
+	//$view['opengraph_headers'][]=['image:alt', 'Red Bone'];
+	//$view['opengraph_headers'][]=['locale:alternate', 'fr_FR'];
 
 	// custom styles
 	$view['styles'][]=['/assets/myStyle.css', null, null]; // or ['https://another.server/myStyle.css', 'sha384-hash', 'anonymous']
@@ -160,6 +183,34 @@ Quick view:
 	// or
 	basic_template::quick_view('path/to/my_view', 'custom_file.html'); // readfile custom_file.html
 ?>
+```
+
+## Integration with Bootstrap
+Just add options to `template_config.php`, eg:
+```
+// allow cdn.jsdelivr.net
+$view['csp_header']['style-src'][]='https://cdn.jsdelivr.net';
+$view['csp_header']['script-src'][]='https://cdn.jsdelivr.net';
+
+// you can disable default template styles and scripts
+static
+::	disable_default_styles()
+::	disable_default_scripts();
+
+// add bootstrap assets
+$view['styles'][]=['https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css', 'sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65', 'anonymous'];
+$view['scripts'][]=['https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js', 'sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4', 'anonymous'];
+```
+or if you want to host bootstrap resources on your server:
+```
+// you can disable default template styles and scripts
+static
+::	disable_default_styles()
+::	disable_default_scripts();
+
+// add bootstrap assets
+$view['styles'][]=['/assets/bootstrap.min.css', null, null];
+$view['scripts'][]=['/assets/bootstrap.bundle.min.js', null, null];
 ```
 
 ## Portability
