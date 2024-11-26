@@ -69,12 +69,12 @@
 		echo 'False';
 ?>
 
-<h1>Password hash</h1>
+<h1>Password hash (<?php echo app_env('APP_PASSWD_HASH', 'bcrypt'); ?>)</h1>
 <form action="" method="post">
 	<input type="password" name="passwdhash" placeholder="Password">
 	<input type="submit" value="Generate hash">
 	<?php
 		if(isset($_POST['passwdhash']))
-			echo 'Generated hash: '.string2bcrypt($_POST['passwdhash']);
+			echo 'Generated hash: '.string2hash($_POST['passwdhash']);
 	?>
 </form>

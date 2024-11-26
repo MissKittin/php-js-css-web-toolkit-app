@@ -1,8 +1,19 @@
 <?php
-	if(!class_exists('registry'))
-		require TK_LIB.'/registry.php';
-
 	class basic_template_exception extends Exception {}
+
+	if(!class_exists('registry'))
+	{
+		if(file_exists(__DIR__.'/lib/registry.php'))
+			require __DIR__.'/lib/registry.php';
+		else if(
+			defined('TK_LIB') &&
+			file_exists(TK_LIB.'/registry.php')
+		)
+			require TK_LIB.'/registry.php';
+		else
+			throw new basic_template_exception('registry.php library not found');
+	}
+
 	class basic_template extends registry
 	{
 		protected static $return_content='';
@@ -18,9 +29,31 @@
 			'', // script nonce
 			'' // style nonce
 		];
+		protected static $templating_engine=null;
 
 		protected $do_return_content;
 
+		protected static function load_function($function, $library)
+		{
+			if(function_exists($function))
+				return;
+
+			if(file_exists(__DIR__.'/lib/'.$library))
+			{
+				require __DIR__.'/lib/'.$library;
+				return;
+			}
+
+			if(
+				defined('TK_LIB') &&
+				file_exists(TK_LIB.'/'.$library)
+			){
+				require TK_LIB.'/'.$library;
+				return;
+			}
+
+			throw new basic_template_exception($library.' library not found');
+		}
 		protected static function default_csp_header()
 		{
 			return [
@@ -39,8 +72,7 @@
 			{
 				if(static::$inline_assets[0])
 				{
-					if(!function_exists('rand_str_secure'))
-						require TK_LIB.'/rand_str.php';
+					static::load_function('rand_str_secure', 'rand_str.php');
 
 					static::$inline_assets[1]=rand_str_secure(32);
 					static::$inline_assets[2]=rand_str_secure(32);
@@ -196,6 +228,11 @@
 
 			return static::class;
 		}
+		public static function set_templating_engine(callable $callback)
+		{
+			static::$templating_engine[0]=$callback;
+			return static::class;
+		}
 		public static function quick_view(string $view_path, string $page_content='page_content.php')
 		{
 			$view['csp_header']=static::default_csp_header();
@@ -228,6 +265,21 @@
 				$this->registry['html_headers']='';
 
 			$this->registry['html_headers'].=$header;
+
+			return $this;
+		}
+		public function add_link_header(array $params)
+		{
+			$this->add_html_header('<link');
+
+			foreach($params as $param=>$value)
+				$this->add_html_header(' '
+				.	$param
+				.	'='
+				.	'"'.$value.'"'
+				);
+
+			$this->add_html_header('>');
 
 			return $this;
 		}
@@ -271,15 +323,12 @@
 
 			if($add_csp_hash)
 			{
-				if(!function_exists('generate_csp_hash'))
-					require TK_LIB.'/generate_csp_hash.php';
-
+				static::load_function('generate_csp_hash', 'generate_csp_hash.php');
 				$this->add_csp_header('style-src', generate_csp_hash($content));
 			}
 			else if($add_csp_nonce)
 			{
-				if(!function_exists('rand_str_secure'))
-					require TK_LIB.'/rand_str.php';
+				static::load_function('rand_str_secure', 'rand_str.php');
 
 				$nonce_value=rand_str_secure(32);
 
@@ -301,15 +350,12 @@
 
 			if($add_csp_hash)
 			{
-				if(!function_exists('generate_csp_hash'))
-					require TK_LIB.'/generate_csp_hash.php';
-
+				static::load_function('generate_csp_hash', 'generate_csp_hash.php');
 				$this->add_csp_header('script-src', generate_csp_hash($content));
 			}
 			else if($add_csp_nonce)
 			{
-				if(!function_exists('rand_str_secure'))
-					require TK_LIB.'/rand_str.php';
+				static::load_function('rand_str_secure', 'rand_str.php');
 
 				$nonce_value=rand_str_secure(32);
 

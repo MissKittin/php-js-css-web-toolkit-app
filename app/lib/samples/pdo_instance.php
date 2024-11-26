@@ -8,7 +8,7 @@
 		 * also sets the sqlite database as the default
 		 *
 		 * Environment variables:
-		 *  APP_ENV=dev - enable PDO::ERRMODE_EXCEPTION
+		 *  APP_ENV=dev - enable PDO::ERRMODE_EXCEPTION and automatic database seeder
 		 *  DB_IGNORE_ENV=true - ignore all variables (default: false)
 		 *  DB_TYPE - select database from app/src/databases/samples
 		 *
@@ -29,7 +29,9 @@
 				pdo_instance::set_default_db('samples/sqlite');
 
 			if(app_env('APP_ENV') === 'dev')
-				pdo_instance::enable_exceptions();
+				pdo_instance
+				::	enable_exceptions()
+				::	enable_seeder();
 		}
 
 		return pdo_instance::get($db, $on_error);

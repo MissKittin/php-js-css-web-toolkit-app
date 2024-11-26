@@ -2,10 +2,13 @@
 	if(file_exists(__DIR__.'/../var/APP_IS_DOWN'))
 	{
 		readfile(__DIR__.'/../var/APP_IS_DOWN');
-		exit();
+		return false;
 	}
 
 	require __DIR__.'/lib/stdlib.php';
+
+	if(php_sapi_name() === 'cli-server')
+		require TK_LIB.'/cli_server_finish_request.php';
 
 	if(file_exists(APP_DIR.'/php_polyfill.php'))
 		require APP_DIR.'/php_polyfill.php';
@@ -23,7 +26,7 @@
 	){
 		require APP_CTRL.'/http_error.php';
 		http_error(400);
-		exit();
+		return false;
 	}
 
 	if(
@@ -32,7 +35,7 @@
 	){
 		require APP_CTRL.'/http_error.php';
 		http_error(400);
-		exit();
+		return false;
 	}
 
 	/*
@@ -57,8 +60,61 @@
 	});
 
 	require APP_LIB.'/app_params.php';
+	//require TK_LIB.'/uri_router.php';
+	//require TK_COM.'/superclosure_router/main.php';
 
-	switch(explode('/', app_params(), 2)[0])
+	//uri_router
+	//::	set_source(app_params())
+	//::	set_default_route(function(){
+	//		require APP_CTRL.'/http_error.php';
+
+	//		if(is_dir($_SERVER['DOCUMENT_ROOT'].strtok($_SERVER['REQUEST_URI'], '?')))
+	//		{
+	//			http_error(403);
+	//			return;
+	//		}
+
+	//		http_error(404);
+	//	})
+	//::	add_file([''], APP_ROUTE.'/route_template.php')
+	//::	add(['route'], function(){
+	//		//
+	//	})
+	//::	add(['route-b', 'route-b/(01|02|03|10)'], function($matches){
+	//		// $matches[1] can be not set, 01, 02, 03 or 10
+	//	}, true)
+	//::	route();
+
+	//if(file_exists(VAR_CACHE.'/superclosure_router_cache.php'))
+	//	require VAR_CACHE.'/superclosure_router_cache.php';
+	//else
+	//	superclosure_router
+	//	::	set_source(app_params())
+	//	::	set_default_route(function(){
+	//			require APP_CTRL.'/http_error.php';
+
+	//			if(is_dir($_SERVER['DOCUMENT_ROOT'].strtok($_SERVER['REQUEST_URI'], '?')))
+	//			{
+	//				http_error(403);
+	//				return;
+	//			}
+
+	//			http_error(404);
+	//		})
+	//	::	add_file([''], APP_ROUTE.'/route_template.php')
+	//	::	add(['route'], function(){
+	//			//
+	//		})
+	//	::	add(['route-b', 'route-b/(01|02|03|10)'], function($matches){
+	//			// $matches[1] can be not set, 01, 02, 03 or 10
+	//		}, true)
+
+	//	::	set_source_variable('app_params()')
+	//	::	set_request_method_variable("\$_SERVER['REQUEST_METHOD']")
+	//	::	dump_cache(VAR_CACHE.'/superclosure_router_cache.php')
+	//	::	route();
+
+	switch(app_params_explode(0))
 	{
 		case '': require APP_ROUTE.'/samples/home.php'; break;
 

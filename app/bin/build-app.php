@@ -53,4 +53,6 @@
 	.	'"'.__DIR__.'/../../tk/bin/matthiasmullie-minify.php" '
 	.	'--dir "'.__DIR__.'/../../public/assets"'
 	);
+
+	@unlink(__DIR__.'/git-init.php');
 ?>

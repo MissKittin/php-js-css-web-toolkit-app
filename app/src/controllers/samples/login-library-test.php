@@ -1,8 +1,4 @@
 <?php
-	require TK_LIB.'/check_var.php';
-	require TK_LIB.'/sec_csrf.php';
-	require TK_LIB.'/sec_login.php';
-
 	$view['login_failed_single']=false;
 	$view['login_failed_multi']=false;
 	$view['login_failed_callback']=false;

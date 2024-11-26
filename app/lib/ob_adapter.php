@@ -20,14 +20,19 @@
 			exit(); // or return;
 	 */
 
-	class ob_adapter
+	interface ob_adapter_module
+	{
+		public function exec($buffer);
+	}
+
+	abstract class ob_adapter
 	{
 		protected static $instances=[];
 		protected static $exit=false;
 
 		protected static function exec($buffer, $phase)
 		{
-			foreach((__CLASS__)::$instances as $instance)
+			foreach(static::$instances as $instance)
 				$buffer=$instance->exec($buffer, $phase);
 
 			return $buffer;
@@ -38,7 +43,7 @@
 			if(static::$exit)
 				return static::class;
 
-			(__CLASS__)::$instances[]=$instance;
+			static::$instances[]=$instance;
 
 			return static::class;
 		}
@@ -55,11 +60,6 @@
 		{
 			static::$exit=true;
 		}
-	}
-
-	interface ob_adapter_module
-	{
-		public function exec($buffer);
 	}
 
 	class ob_adapter_obminifier implements ob_adapter_module
@@ -109,6 +109,12 @@
 	class ob_adapter_filecache implements ob_adapter_module
 	{
 		protected $output_file;
+
+		public static function invalidate(string $output_file)
+		{
+			if(file_exists($output_file))
+				unlink($output_file);
+		}
 
 		public function __construct(
 			string $output_file,

@@ -1,5 +1,5 @@
 <?php
-	require APP_LIB.'/app_template.php';
+	require APP_LIB.'/samples/app_template_inline.php';
 
 	if(
 		isset($_SERVER['HTTP_ACCEPT_ENCODING']) &&
@@ -8,14 +8,24 @@
 		ob_start('ob_gzhandler');
 
 	require APP_LIB.'/samples/app_session.php';
+
 	app_session();
 
-	$view=new app_template();
+	require TK_LIB.'/check_var.php';
+	require TK_LIB.'/sec_csrf.php';
+	require APP_LIB.'/samples/app_setup_login_library.php'; // includes sec_login.php library
+
+	app_setup_login_library();
+
+	$view=new app_template_inline();
 
 	require APP_MODEL.'/samples/login_library_test_credentials.php'; // import credentials and callback_function()
 
 	if(require APP_CTRL.'/samples/login-library-test.php')
+	{
+		app_template_inline::finish_request();
 		return;
+	}
 
-	$view->view('samples/login-library-test');
+	$view->view('login-library-test');
 ?>

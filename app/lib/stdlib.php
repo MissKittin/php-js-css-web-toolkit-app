@@ -4,6 +4,9 @@
 	 * used by other libraries, entrypoint, database configurations and tools
 	 *
 	 * Warning:
+	 *  if you want to change the toolkit directory
+	 *   to local (./com, ./lib), phar (./tk.phar, ./tke.phar) or composer (./vendor)
+	 *   you need to remove the var/cache/stdlib_cache.php file
 	 *  dotenv.php library is required
 	 */
 
@@ -32,27 +35,78 @@
 		const VAR_SESS=VAR_LIB.'/sessions';
 		const VAR_TMP=VAR_DIR.'/tmp';
 
-		if(file_exists(APP_ROOT.'/tk.phar'))
-		{
-			define('TK_PHAR', APP_ROOT.'/tk.phar');
-			define('TK_COM', TK_PHAR.'/com');
-			define('TK_LIB', TK_PHAR.'/lib');
-		}
-		else
-		{
-			define('TK_COM', APP_ROOT.'/tk/com');
-			define('TK_LIB', APP_ROOT.'/tk/lib');
-		}
+		if(
+			file_exists(VAR_CACHE.'/stdlib_cache.php') &&
+			(require VAR_CACHE.'/stdlib_cache.php')
+		)
+			unlink(VAR_CACHE.'/stdlib_cache.php');
 
-		if(is_dir(APP_ROOT.'/tke'))
+		if(!defined('APP_STDLIB_CACHE'))
 		{
-			if(file_exists(APP_ROOT.'/tke.phar'))
+			if(is_file(APP_ROOT.'/tk.phar'))
 			{
-				define('TKE_PHAR', APP_ROOT.'/tke.phar');
-				define('TKE_LIB', TKE_PHAR.'/lib');
+				define('TK_PHAR', APP_ROOT.'/tk.phar');
+				define('TK_COM', TK_PHAR.'/com');
+				define('TK_LIB', TK_PHAR.'/lib');
+			}
+			else if(is_dir(APP_ROOT.'/tk'))
+			{
+				define('TK_COM', APP_ROOT.'/tk/com');
+				define('TK_LIB', APP_ROOT.'/tk/lib');
 			}
 			else
-				define('TKE_LIB', APP_ROOT.'/tke');
+			{
+				if(is_dir(APP_ROOT.'/com'))
+				{
+					define('TK_COM', APP_ROOT.'/com');
+					define('TKE_COM', APP_ROOT.'/com');
+				}
+				else if(is_dir(APP_ROOT.'/vendor/misskittin/php-js-css-web-toolkit/com'))
+					define(
+						'TK_COM',
+						APP_ROOT.'/vendor/misskittin/php-js-css-web-toolkit/com'
+					);
+
+				if(is_dir(APP_ROOT.'/lib'))
+				{
+					define('TK_LIB', APP_ROOT.'/lib');
+					define('TKE_LIB', APP_ROOT.'/lib');
+				}
+				else if(is_dir(APP_ROOT.'/vendor/misskittin/php-js-css-web-toolkit/lib'))
+					define(
+						'TK_COM',
+						APP_ROOT.'/vendor/misskittin/php-js-css-web-toolkit/lib'
+					);
+			}
+
+			if(
+				(!defined('TKE_COM')) &&
+				(!defined('TKE_LIB'))
+			){
+				if(is_file(APP_ROOT.'/tke.phar')){
+					define('TKE_PHAR', APP_ROOT.'/tke.phar');
+					define('TKE_COM', TKE_PHAR.'/com');
+					define('TKE_LIB', TKE_PHAR.'/lib');
+				}
+				else if(is_dir(APP_ROOT.'/tke'))
+				{
+					define('TKE_COM', APP_ROOT.'/tke/com');
+					define('TKE_LIB', APP_ROOT.'/tke/lib');
+				}
+				else if(is_dir(
+					APP_ROOT.'/vendor/misskittin/php-js-css-web-toolkit-extras'
+				)){
+					define(
+						'TKE_COM',
+						APP_ROOT.'/vendor/misskittin/php-js-css-web-toolkit-extras/com'
+					);
+
+					define(
+						'TKE_LIB',
+						APP_ROOT.'/vendor/misskittin/php-js-css-web-toolkit-extras/lib'
+					);
+				}
+			}
 		}
 
 	// functions
@@ -93,4 +147,40 @@
 							'APP STDLIB: mkdir '.$directory.' failed'
 						);
 			})();
+
+		if(!file_exists(VAR_CACHE.'/stdlib_cache.php'))
+		{
+			file_put_contents(VAR_CACHE.'/stdlib_cache.php', '<?php '
+			.	"if(APP_ROOT !== '".APP_ROOT."')"
+			.		'return true;'
+			);
+
+			if(defined('TK_PHAR'))
+				file_put_contents(VAR_CACHE.'/stdlib_cache.php', ''
+				.	"const TK_PHAR='".TK_PHAR."';"
+				,	FILE_APPEND
+				);
+
+			if(defined('TKE_PHAR'))
+				file_put_contents(VAR_CACHE.'/stdlib_cache.php', ''
+				.	"const TKE_PHAR='".TKE_PHAR."';"
+				,	FILE_APPEND
+				);
+
+			if(defined('TKE_COM'))
+				file_put_contents(VAR_CACHE.'/stdlib_cache.php', ''
+				.	"const TKE_COM='".TKE_COM."';"
+				.	"const TKE_LIB='".TKE_LIB."';"
+				,	FILE_APPEND
+				);
+
+			file_put_contents(VAR_CACHE.'/stdlib_cache.php', ''
+			.	"const TK_COM='".TK_COM."';"
+			.	"const TK_LIB='".TK_LIB."';"
+			.	'const APP_STDLIB_CACHE=1;'
+			.	'return false;'
+			.	' ?>'
+			,	FILE_APPEND
+			);
+		}
 ?>

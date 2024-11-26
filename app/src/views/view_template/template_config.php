@@ -9,7 +9,7 @@
 	$view['opengraph_headers'][]=['url', (empty($_SERVER['HTTPS']) ? 'http' : 'https').'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']];
 	$view['opengraph_headers'][]=['type', 'website'];
 	$view['opengraph_headers'][]=['site_name', 'My Awesome Website'];
-	//$view['opengraph_headers'][]=['image', (empty($_SERVER['HTTPS']) ? 'http' : 'https').'://'.$_SERVER[HTTP_HOST].'/assets/website-logo.jpg'];
+	//$view['opengraph_headers'][]=['image', (empty($_SERVER['HTTPS']) ? 'http' : 'https').'://'.$_SERVER['HTTP_HOST'].'/assets/website-logo.jpg'];
 	//$view['opengraph_headers'][]=['image:type', 'image/jpeg'];
 	//$view['opengraph_headers'][]=['image:width', '400'];
 	//$view['opengraph_headers'][]=['image:height', '300'];

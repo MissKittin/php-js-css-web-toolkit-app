@@ -1,8 +1,10 @@
 * [Toolkit as a composer package](#toolkit-as-a-composer-package)
 * [A few words about design](#a-few-words-about-design)
 	* [Application standard library](#application-standard-library)
+	* [Removing unused libraries](#removing-unused-libraries)
 	* [Upload tmp directory](#upload-tmp-directory)
 * [Creating The project](#creating-the-project)
+	* [Toolkit libraries used by extra tools](#toolkit-libraries-used-by-extra-tools)
 	* [GNU GPL](#gnu-gpl)
 	* [Hint - git](#hint---git)
 	* [Hint - index.php](#hint---indexphp)
@@ -15,6 +17,7 @@
 	* [Packing the toolkit into Phar](#packing-the-toolkit-into-phar)
 	* [Installing Composer](#installing-composer)
 	* [Installing Predis](#installing-predis)
+	* [Memcached without PECL](#memcached-without-pecl)
 * [How to create application](#how-to-create-application)
 	* [Templates](#templates)
 	* [Tests](#tests)
@@ -40,6 +43,7 @@
 * [nginx configuration](#nginx-configuration)
 
 # Toolkit as a composer package
+**Hint:** to simplify this step significantly, see the `php-js-css-web-toolkit-pkg` repository.  
 Toolkit was not intended as a Composer package, but such usage is possible, e.g.:
 ```
 {
@@ -82,8 +86,8 @@ Toolkit was not intended as a Composer package, but such usage is possible, e.g.
             "@mktkc php_polyfill mkcache",
             "@mktk autoloader-generator --in ./vendor/misskittin/php-js-css-web-toolkit/com --in ./vendor/misskittin/php-js-css-web-toolkit/lib --ignore bin/ --out ./vendor/misskittin/php-js-css-web-toolkit/autoload.php"
         ],
-        "mktk": "@php -r \"$_bin=$argv[1]; array_shift($argv); array_shift($argv); if(is_file('./vendor/misskittin/php-js-css-web-toolkit/bin/'.$_bin.'.php')) require './vendor/misskittin/php-js-css-web-toolkit/bin/'.$_bin.'.php'; else exit(1);\"",
-        "mktkc": "@php -r \"$_com=$argv[1]; $_bin=$argv[2]; array_shift($argv); array_shift($argv); array_shift($argv); if(is_file('./vendor/misskittin/php-js-css-web-toolkit/com/'.$_com.'/bin/'.$_bin.'.php')) require './vendor/misskittin/php-js-css-web-toolkit/com/'.$_com.'/bin/'.$_bin.'.php'; else exit(1);\""
+        "mktk": "@php -r \"array_shift($argv); if(is_file('./vendor/misskittin/php-js-css-web-toolkit/bin/'.$argv[0].'.php')) require './vendor/misskittin/php-js-css-web-toolkit/bin/'.$argv[0].'.php'; else exit(1);\"",
+        "mktkc": "@php -r \"$_com=$argv[1]; array_shift($argv); array_shift($argv); if(is_file('./vendor/misskittin/php-js-css-web-toolkit/com/'.$_com.'/bin/'.$argv[0].'.php')) require './vendor/misskittin/php-js-css-web-toolkit/com/'.$_com.'/bin/'.$argv[0].'.php'; else exit(1);\""
     },
     "require": {
         "misskittin/php-js-css-web-toolkit": "*"
@@ -156,8 +160,8 @@ or if you also want extras:
             "@mktkc php_polyfill mkcache",
             "@mktk autoloader-generator --in ./vendor/misskittin/php-js-css-web-toolkit/com --in ./vendor/misskittin/php-js-css-web-toolkit/lib --in ./vendor/misskittin/php-js-css-web-toolkit-extras/lib --ignore bin/ --out ./vendor/misskittin/php-js-css-web-toolkit/autoload.php"
         ],
-        "mktk": "@php -r \"$_bin=$argv[1]; array_shift($argv); array_shift($argv); if(is_file('./vendor/misskittin/php-js-css-web-toolkit/bin/'.$_bin.'.php')) require './vendor/misskittin/php-js-css-web-toolkit/bin/'.$_bin.'.php'; else if(is_file('./vendor/misskittin/php-js-css-web-toolkit-extras/bin/'.$_bin.'.php')) require './vendor/misskittin/php-js-css-web-toolkit-extras/bin/'.$_bin.'.php'; else exit(1);\"",
-        "mktkc": "@php -r \"$_com=$argv[1]; $_bin=$argv[2]; array_shift($argv); array_shift($argv); array_shift($argv); if(is_file('./vendor/misskittin/php-js-css-web-toolkit/com/'.$_com.'/bin/'.$_bin.'.php')) require './vendor/misskittin/php-js-css-web-toolkit/com/'.$_com.'/bin/'.$_bin.'.php'; else exit(1);\""
+        "mktk": "@php -r \"putenv('TK_LIB=./vendor/misskittin/php-js-css-web-toolkit/lib'); array_shift($argv); if(is_file('./vendor/misskittin/php-js-css-web-toolkit/bin/'.$argv[0].'.php')) require './vendor/misskittin/php-js-css-web-toolkit/bin/'.$argv[0].'.php'; else if(is_file('./vendor/misskittin/php-js-css-web-toolkit-extras/bin/'.$argv[0].'.php')) require './vendor/misskittin/php-js-css-web-toolkit-extras/bin/'.$argv[0].'.php'; else exit(1);\"",
+        "mktkc": "@php -r \"$_com=$argv[1]; array_shift($argv); array_shift($argv); if(is_file('./vendor/misskittin/php-js-css-web-toolkit/com/'.$_com.'/bin/'.$argv[0].'.php')) require './vendor/misskittin/php-js-css-web-toolkit/com/'.$_com.'/bin/'.$argv[0].'.php'; else if(is_file('./vendor/misskittin/php-js-css-web-toolkit-extras/com/'.$_com.'/bin/'.$argv[0].'.php')) require './vendor/misskittin/php-js-css-web-toolkit-extras/com/'.$_com.'/bin/'.$argv[0].'.php'; else exit(1);\""
     },
     "require": {
         "misskittin/php-js-css-web-toolkit": "*",
@@ -183,10 +187,14 @@ It has its advantages and disadvantages - it is not a typical framework, so thin
 
 ### Application standard library
 The `app/lib/stdlib.php` library is the parent library of the application - it is loaded by the `app/entrypoint.php`.  
-All application elements except tools (components, libraries, controllers, routings etc.) assume that the library is already loaded.  
+All application elements except tools (components, libraries, controllers, routes etc.) assume that the library is already loaded.  
 Provides constants with paths to specific parts of the application.  
 If you pack the toolkit into a phar, the library will set the paths so that files are loaded from the archive.  
+Also, if you don't use git, you can install the toolkit as a composer package.  
+**Note:** in this situation you can use both autoloader and `load_function('function_name');` or without autoloading (`require TK_LIB.'/library.php';`). For more info see `php-js-css-web-toolkit-pkg` repository.  
 The library also includes an application bootstrap that creates a `var` directory hierarchy.  
+When you first run the application or change the location of the application directory, the library creates a cache file (`var/cache/stdlib_cache.php`).  
+**Warning:** if you want to change the location of the toolkit to local (`com`, `lib`), phar (`tk.phar`, `tke.phar`) or composer (`vendor`), you need to remove this file.  
 Additionally, it provides:
 * `app_exception` class
 
@@ -199,6 +207,17 @@ Additionally, it provides:
 		$env_var=app_env('ENV_VAR_NAME', 'default_value');
 
 
+### Removing unused libraries
+The standard library will set the `TK_COM`, `TK_LIB`, `TKE_COM` and `TKE_LIB` constants to the `com` and `lib` directories in the project root if it finds them.  
+This allows you to remove unused components and libraries from the project once your application is complete.  
+It's up to you how you track and copy them, as well as automate copying and updating.  
+**Warning:** remember that tools and components have dependencies!  
+**Hint:** after copying libraries and components, you can simply deinit git submodules:
+```
+git submodule deinit tk
+git submodule deinit tke
+```
+
 ### Upload tmp directory
 You can set this path to the application temporary directory:
 ```
@@ -207,19 +226,30 @@ upload_tmp_dir = /absolute/path/to/php-js-css-web-toolkit-app/var/tmp
 You have to do it manually because PHP allows changing this value only in the system `php.ini` file
 
 # Creating The project
+**Hint:** to automate this process, use the `create-php-toolkit-app.php` tool from the `php-js-css-web-toolkit-extras` repository
 ```
 git clone --recursive --depth 1 --shallow-submodules -b stable "https://github.com/MissKittin/php-js-css-web-toolkit-app.git" my-awesome-project
+cd my-awesome-project
+php ./app/bin/git-init.php
 ```
 To add unofficial extras, run:
 ```
-git clone --depth 1 "https://github.com/MissKittin/php-js-css-web-toolkit-extras.git" tke
+git submodule add --depth 1 -b stable "https://github.com/MissKittin/php-js-css-web-toolkit-extras.git" tke
+```
+
+### Toolkit libraries used by extra tools
+Some extra tools require toolkit libraries and they don't know where they are.  
+Tell them this via environment variables:
+```
+export TK_COM=./tk/com
+export TK_LIB=./tk/lib
 ```
 
 ### GNU GPL
 It happens that GPL license is not wanted - if you link to a GPL-licensed library, your project must also be GPL-licensed.  
 If you are in such a situation, you can remove them:
 ```
-php ./tk/bin/remove-gpl.php --yes
+php ./tke/bin/remove-gpl.php --yes
 ```
 
 ### Hint - git
@@ -411,18 +441,36 @@ php ./tk/bin/composer.phar --optimize-autoloader --no-cache require predis/predi
 ```
 For more information, see the `predis_connect.php` library  
 **Note:** Predis requires PHP >= 7.2, for PHP >= 5.3.9 use Predis v1.1.10  
-**Hint:** It is possible to install Predis without Composer using Git (not recommended):
+**Hint:** it is possible to install Predis without Composer using Git (not recommended):
 ```
 php -r "file_put_contents('./composer.json', '');"
 git clone "https://github.com/predis/predis.git" ./vendor
 ```
 
+### Memcached without PECL
+You can use Memcached without the PECL extension via the memcached.php package.  
+To install memcached.php, run:
+```
+php ./tk/bin/composer.phar --optimize-autoloader --no-cache require clickalicious/memcached.php
+```
+Then include the `clickalicious_memcached.php` library:
+```
+if(!class_exists('Memcached'))
+	require APP_LIB.'/clickalicious_memcached.php';
+```
+This library works with the `memcached_connect.php` and `cache_container.php`.
+
 # How to create application
 
 ### Templates
-Copy them and start creating.
+Copy them and start creating  
+**Hint:** you can edit controller and model templates and inherit from them - this way you will keep the DRY rule  
+**Note:** you can define in the models which database you will use or you can use the default database (`pdo_instance::set_default_db()`)
+
 * `app/src/controllers/controller_template.php`
-* `app/src/models/model_template.php`
+* `app/src/databases` - default configurations for `pdo connect.php` library
+* `app/src/models/cache_model_template.php`
+* `app/src/models/pdo_model_template.php`
 * `app/src/routes/route_template.php`
 * `app/src/views/view_template`
 * `app/tests/ns_test_template.php` - allows you to create mock PHP functions and classes
@@ -519,8 +567,9 @@ php ./tk/bin/file-watch.php
 ```
 
 ### Minifying assets - webdev.sh client
+**Note:** before using it you need to add the extras submodule, see [here](#creating-the-project)
 ```
-php ./tk/bin/webdev.sh --dir ./public/assets
+php ./tke/bin/webdev.sh --dir ./public/assets
 ```
 All css and js files in `public/assets` will be minified.
 
@@ -535,9 +584,10 @@ php ./tk/bin/composer.phar --optimize-autoloader --no-cache --working-dir=./tk/b
 ### Seeding database offline with pdo_connect() (optional)
 To offline seed database, run:
 ```
-php ./tk/bin/pdo-connect.php --db ./app/databases/database-name
+php ./tk/bin/pdo-connect.php --db ./app/src/databases/database-name
 ```
-**Note:** database can be seeded automatically on first start.
+If you need a more advanced system, you can use the `pdo_migrate.php` library.  
+**Note:** database can be seeded automatically on first start (see [app README Debug mode](app/README.md#debug-mode)).
 
 ### Running dev server
 In this directory run:
@@ -564,15 +614,21 @@ php ./app/bin/app-down.php status && echo "App up" || echo "App down"
 ```
 
 ### Preloading application
-To take advantage of the possibility of preloading the application,  
-you can generate the preloader script using the `opcache-preload-generator.php` tool.  
-For more info, run:
-```
-php ./tk/bin/opcache-preload-generator.php
-```
-However, if you use an autoloader, this method may not be optimal. You will need to write your own preloader:  
+You have to write the preloader yourself:
 * if the script only defines a constants, functions, classes, traits or interfaces, use `require`
 * in other cases use `opcache_compile_file`
+
+and set the `opcache.preload` value in `php.ini`:
+```
+opcache.preload=/absolute/path/to/preload.php
+```
+
+If your application does not use autoloader, constants or variables in `include`/`require` directives,  
+you can use `opcache-preload-generator.php` tool from [php-js-css-web-toolkit-extras](#creating-the-project) repository.  
+For more info, run:
+```
+php ./tke/bin/opcache-preload-generator.php
+```
 
 ### Task scheduling
 For info, run:

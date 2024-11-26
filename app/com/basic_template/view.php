@@ -8,7 +8,12 @@
 	</head>
 	<body>
 		<?php
-			if(substr($page_content, -4) === '.php')
+			if(static::$templating_engine !== null)
+				static::$templating_engine[0](
+					$view_path.'/'.$page_content,
+					$view
+				);
+			else if(substr($page_content, -4) === '.php')
 				require $view_path.'/'.$page_content;
 			else
 				readfile($view_path.'/'.$page_content);

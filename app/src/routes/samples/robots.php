@@ -16,4 +16,7 @@
 	require APP_CTRL.'/samples/robots-sitemap.php';
 
 	robots();
+
+	if(function_exists('fastcgi_finish_request'))
+		fastcgi_finish_request();
 ?>

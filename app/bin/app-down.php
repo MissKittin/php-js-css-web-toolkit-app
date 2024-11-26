@@ -1,7 +1,8 @@
 <?php
 	// Break technically
 
-	require __DIR__.'/../lib/stdlib.php';
+	if(!defined('APP_STDLIB'))
+		require __DIR__.'/../lib/stdlib.php';
 
 	if(!file_exists(APP_VIEW.'/maintenance_info.html'))
 	{

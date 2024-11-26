@@ -1,4 +1,12 @@
 <?php
+	/*
+	 * App input parameter manipulation library
+	 *
+	 * Functions:
+	 *  app_params - $_SERVER['PATH_INFO'] replacement
+	 *  app_params_explode - wrapper that converts a string to an array
+	 */
+
 	function app_params()
 	{
 		/*
@@ -63,5 +71,42 @@
 		$cache=trim(strtok($request_uri, '?'), '/');
 
 		return $cache;
+	}
+	function app_params_explode(int $element)
+	{
+		/*
+		 * An app_params() wrapper that converts a string to an array
+		 *
+		 * Note:
+		 *  the conversion result will be copied
+		 *  after the first use of the function
+		 *
+		 * Usage:
+			switch(app_params_explode(0))
+			{
+				case 'arg1': // eg: 'arg1/arg2/arg3' from app_params()
+					if(app_params_explode(1) === 'arg2')
+						// arg2 is defined (arg1/arg2)
+
+					if(app_params_explode(2) === 'arg3')
+						// arg3 is defined (arg1/???/arg3)
+				break;
+				case '':
+					// home page
+				break;
+				default:
+					// 404 Not found
+			}
+		 */
+
+		static $cache=null;
+
+		if($cache === null)
+			$cache=explode('/', app_params());
+
+		if(isset($cache[$element]))
+			return $cache[$element];
+
+		return '';
 	}
 ?>

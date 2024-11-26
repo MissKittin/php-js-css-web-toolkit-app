@@ -58,12 +58,14 @@
 			preg_replace_callback(
 				'/{((?:[^{}]*|(?R))*)}/x',
 				function($match){
+					// register_shutdown_function
 					if(substr(ltrim($match[1]), 0, 10) === '$exec_time')
 						return ''
 						.	'{'
 						.		"\n\t\t".'//'
 						.	"\n\t".'}';
-					else if(strpos($match[0], 'case') !== false)
+
+					if(strpos($match[0], 'case') !== false)
 						return ''
 						.	'{'
 						.		"\n\t\t".'case \'\': require APP_ROUTE.\'/route_template.php\'; break;'
@@ -71,17 +73,20 @@
 						.		"\n\t\t".'default: //'
 						.	"\n\t".'}';
 
-					return ''
-					.	'{'
-					.		"\n\t\t".'//'
-					.		"\n\t\t".'exit();'
-					.	"\n\t".'}';
+					// if REQUEST_URI REQUEST_METHOD (conflict with uri_router and superclosure_router)
+					//return ''
+					//.	'{'
+					//.		"\n\t\t".'//'
+					//.		"\n\t\t".'exit();'
+					//.	"\n\t".'}';
+
+					return $match[0];
 				},
 				$entrypoint
 			)
 		);
 		$entrypoint=file_get_contents('./entrypoint.php');
-		$entrypoint=str_replace("\n\n\t".'error_log(basename(__FILE__).\' finished\');', '', $entrypoint);;
+		$entrypoint=str_replace('error_log(basename(__FILE__).\' finished\');', '//', $entrypoint);;
 		file_put_contents('./entrypoint.php', $entrypoint);
 		unset($entrypoint);
 	echo ' [ OK ]'.PHP_EOL;
@@ -100,6 +105,16 @@
 
 	echo ' -> Removing README.md';
 		if(@unlink('./README.md'))
+			echo ' [ OK ]';
+		else
+			echo ' [FAIL]';
+		if(@unlink('../README.md'))
+			echo ' [ OK ]'.PHP_EOL;
+		else
+			echo ' [FAIL]'.PHP_EOL;
+
+	echo ' -> Removing HOWTO.md';
+		if(@unlink('../HOWTO.md'))
 			echo ' [ OK ]'.PHP_EOL;
 		else
 			echo ' [FAIL]'.PHP_EOL;

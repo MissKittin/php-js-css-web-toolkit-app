@@ -1,5 +1,5 @@
 <?php
-	require APP_LIB.'/app_template.php';
+	require APP_LIB.'/samples/app_template_inline.php';
 	require TK_LIB.'/check_var.php';
 
 	if(defined('TK_PHAR'))
@@ -10,7 +10,7 @@
 		)
 			ob_start('ob_gzhandler');
 
-		app_template::quick_view('samples/tk-test', 'phar_not_allowed.html');
+		app_template_inline::quick_view('tk-test', 'phar_not_allowed.html');
 
 		return;
 	}
@@ -37,7 +37,11 @@
 	require APP_LIB.'/samples/ob_cache.php';
 
 	if(ob_cache(ob_url2file(), 0))
+	{
+		app_template_inline::finish_request();
 		return;
+	}
 
-	get_tests(new app_template())->view('samples/tk-test');
+	get_tests(new app_template_inline())
+	->	view('tk-test');
 ?>

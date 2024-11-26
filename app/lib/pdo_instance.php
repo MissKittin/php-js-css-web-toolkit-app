@@ -16,15 +16,17 @@
 		 * Usage:
 			pdo_instance::set_default_db('my-default-db'); // returns self
 			pdo_instance::enable_exceptions(); // set PDO::ATTR_ERRMODE from PDO::ERRMODE_SILENT to PDO::ERRMODE_EXCEPTION, returns self
-			$pdo_handler=pdo_instance::get('my-db', function($error){
+			pdo_instance::enable_seeder(); // enable automatic database seeder, returns self
+			$pdo_handle=pdo_instance::get('my-db', function($error){
 				my_log_function('pdo_instance: '.$error->getMessage());
 			});
 			pdo_instance::close();
 		 */
 
-		protected static $pdo_handler=null;
+		protected static $pdo_handle=null;
 		protected static $default_db=null;
 		protected static $pdo_exceptions=false;
+		protected static $enable_seeder=false;
 
 		public static function set_default_db(string $db)
 		{
@@ -36,13 +38,18 @@
 			static::$pdo_exceptions=true;
 			return static::class;
 		}
+		public static function enable_seeder()
+		{
+			static::$enable_seeder=true;
+			return static::class;
+		}
 
 		public static function get(
 			?string $db=null,
 			?callable $on_error=null
 		){
-			if(static::$pdo_handler !== null)
-				return static::$pdo_handler;
+			if(static::$pdo_handle !== null)
+				return static::$pdo_handle;
 
 			if($db === null)
 			{
@@ -58,24 +65,35 @@
 			if(!is_dir(APP_DB.'/'.$db))
 				throw new app_exception(APP_DB.'/'.$db.' not exists');
 
-			static::$pdo_handler=pdo_connect(
+			static::$pdo_handle=pdo_connect(
 				APP_DB.'/'.$db,
-				$on_error
+				$on_error,
+				static::$enable_seeder
 			);
 
-			if(static::$pdo_handler === false)
+			if(static::$pdo_handle === false)
 				throw new app_exception('Connection to the database failed');
 
 			if(static::$pdo_exceptions)
-				static::$pdo_handler->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-			else
-				static::$pdo_handler->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+			{
+				static::$pdo_handle->setAttribute(
+					PDO::ATTR_ERRMODE,
+					PDO::ERRMODE_EXCEPTION
+				);
 
-			return static::$pdo_handler;
+				return static::$pdo_handle;
+			}
+
+			static::$pdo_handle->setAttribute(
+				PDO::ATTR_ERRMODE,
+				PDO::ERRMODE_SILENT
+			);
+
+			return static::$pdo_handle;
 		}
 		public static function close()
 		{
-			static::$pdo_handler=null;
+			static::$pdo_handle=null;
 		}
 	}
 ?>

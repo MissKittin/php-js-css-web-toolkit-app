@@ -2,7 +2,7 @@
 A simple application based on PHP-JS-CSS web toolkit  
 Minimum PHP version: 7.1  
 Recommended PHP version: 7.4 or newer  
-Supported relational databases: PostgreSQL, MySQL, SQLite3  
+Supported relational databases (PDO): PostgreSQL, MySQL, SQLite3  
 Supported cache databases: Redis, Memcached, APCu
 
 ## Principles

@@ -1,0 +1,9 @@
+<?php
+	if(!function_exists('app_db_migrate'))
+		require APP_LIB.'/app_db_migrate.php';
+
+	app_db_migrate([
+		'pdo_handle'=>$pdo_handle,
+		'directory'=>__DIR__.'/migrations'
+	]);
+?>

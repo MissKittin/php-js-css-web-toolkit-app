@@ -16,6 +16,8 @@ Throws an `basic_template_exception` on error
 	where `string_section` is eg `'script-src'` and `string_value` is `'\'unsafe-hashes\''`
 * `add_html_header(string_header)` [returns self]  
 	eg `<my-header-tag content="my-content">`
+* `add_link_header([string_param=>string_value])` [returns self]  
+	adds eg `<link string_param="string_value">` to the `<head>`
 * `add_meta_name_header(string_name, string_content)` [returns self]  
 	`<meta name="string_name" content="string_content">`
 * `add_meta_property_header(string_property, string_content)` [returns self]  
@@ -55,15 +57,17 @@ Throws an `basic_template_exception` on error
 * **[static]** `set_inline_assets(bool_option)` [returns self]  
 	compiles styles and scripts and adds them to the inline tag instead of `<link rel="stylesheet"` and `<script src=""` (not recommended)  
 	default: `false`
+* **[static]** `set_templating_engine(callable_callback)` [returns self]  
+	use the provided callback instead of the default `require`/`readfile`
 * `set_variable(string_variable, value)` [returns self]  
 	add value to registry  
 	see [Variables](#variables)
 * `view(string_view_path, string_page_content='page_content.php')` [returns `null`|`string_content`]  
 	load configuration files from `string_view_path` and run template with contents from `string_view_path/string_page_content`  
-	**note:** if `string_page_content` ends with `.php`, `require` will be used instead of `readfile`
+	**note:** if the `set_templating_engine` method was not used and if `string_page_content` ends with `.php`, `require` will be used instead of `readfile`
 * **[static]** `quick_view(string_view_path, string_page_content='page_content.php')`  
 	same as the `view()`, use when you don't need to set any additional variables  
-	**note:** if `string_page_content` ends with `.php`, `require` will be used instead of `readfile`
+	**note:** if the `set_templating_engine` method was not used and if `string_page_content` ends with `.php`, `require` will be used instead of `readfile`
 
 ## Variables
 You can use `$template->variable='value'`, `$template['variable']='value'` and [setters](#methods)
@@ -213,5 +217,42 @@ $view['styles'][]=['/assets/bootstrap.min.css', null, null];
 $view['scripts'][]=['/assets/bootstrap.bundle.min.js', null, null];
 ```
 
+# Integration with Twig
+Before firing the `view` or `quick_view` method, add a callback:
+```
+basic_template::set_templating_engine(function($file, $view){
+	// $file is the full path to the file from the view or quick_view method
+	// and $view comes from template_config.php
+
+	echo (new \Twig\Environment(
+		new \Twig\Loader\FilesystemLoader(
+			dirname($file)
+		)
+	))->render(
+		basename($file),
+		$view
+	);
+});
+```
+`page_content.php` file will look like this:
+```
+<h1>Hello {{ my_variable }}</h1>
+```
+
+# Integration with trivial templating engine
+Same as for Twig, just change the callback:
+```
+require TK_LIB.'/trivial_templating_engine.php';
+
+basic_template::set_templating_engine(function($file, $view){
+	echo trivial_templating_engine(
+		file_get_contents($file),
+		$view
+	);
+});
+```
+
 ## Portability
-This component is part of the application and is not designed for use outside of it.
+Create a `./lib` directory  
+and copy the required libraries to this directory.  
+Libraries in this directory have priority over `TK_LIB`.

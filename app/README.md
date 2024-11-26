@@ -16,7 +16,7 @@ php ./tk/bin/serve.php
 	and follow the prompts  
 	or you can use inline assets (but this is not recommended)
 
-		export APP_INLINE_ASSETS=yes
+		export APP_INLINE_ASSETS=false
 
 2. Compile assets to the public directory:
 
@@ -26,22 +26,34 @@ php ./tk/bin/serve.php
 # Materialized template
 To enable the materialized template for components, set the environment variable:
 ```
-export APP_MATERIALIZED=yes
+export APP_MATERIALIZED=true
 ```
 
 # Debug mode
+**Note:** without this the automatic seeder will not start  
 To switch the application to debug mode, set the environment variable:
 ```
 export APP_ENV=dev
 ```
 
+# Password hash algorithm
+To change the hash algorithm, set the environment variable:
+```
+export APP_PASSWD_HASH=argon2id
+```
+Available options: `bcrypt`, `argon2i`, `argon2id`
+
 # Session data in cookie
 By default (if possible) the application stores session data in an encrypted cookie using the `sec_lv_encrypter.php` library.  
 To switch the application to server-side session data storage mode, set the environment variable:
 ```
-export APP_NO_SESSION_IN_COOKIE=yes
+export APP_NO_SESSION_IN_COOKIE=true
 ```
-
+For security reasons you can pass the key via an environment variable:
+```
+APP_SESSION_COOKIE_KEY=string-key
+```
+**Note:** the application will create a file for the key but will not save it there
 
 # Application content
 The application source code is located in the `app/src` directory:  
@@ -131,9 +143,10 @@ You can configure the database connection through the following environment vari
 Create `.env` file in parent directory:
 ```
 APP_ENV=dev
-APP_INLINE_ASSETS=no
-APP_MATERIALIZED=no
-APP_NO_SESSION_IN_COOKIE=no
+APP_PASSWD_HASH=bcrypt
+APP_INLINE_ASSETS=false
+APP_MATERIALIZED=false
+APP_NO_SESSION_IN_COOKIE=false
 PGSQL_HOST=127.0.0.1
 PGSQL_PORT=5432
 PGSQL_DBNAME=sampledb
@@ -158,6 +171,8 @@ REDIS_IGNORE_ENV=false
 ```
 You can also use the following values:
 ```
+APP_SESSION_COOKIE_KEY=string-key
+
 PGSQL_SOCKET=/var/run/postgresql
 MYSQL_SOCKET=/var/run/mysqld/mysqld.sock
 SQLITE_PATH=path/to/database.sqlite3
@@ -166,14 +181,26 @@ REDIS_SOCKET=/var/run/redis/redis.sock
 ```
 
 ### Libraries
-* `app_params.php` - `$_SERVER['PATH_INFO']` replacement
-* `app_session.php` - session manager
+* `app_db_migrate.php` - `pdo_migrate.php` library integration with `pdo-connect.php` tool
+* `app_params.php` - app input parameter manipulation library
+* `app_session.php` - modular session backend
 * `app_template.php` - default http headers and a basic_template overlay that saves typing
+* `clickalicious_memcached.php` - Memcached polyfill - memcached.php proxy
 * `ob_adapter.php` - modular output buffer
+* `ob_cache.php` - a modular overlay for functions from the `ob_cache.php` library
+* `pdo_instance.php` - get PDO handle
+* `setup_login_library.php` - includes `sec_login.php` library and sets hashing algorithm
 * `stdlib.php` - application standard library
-* `pdo_instance.php` - get PDO handler
+
+### Sample libraries
+* `app_db_migrate_log.php` - rubber cover for `app_db_migrate` that writes journals
+* `app_setup_login_library.php` - `setup_login_library` configuration via environment variable
+* `app_template_inline.php` - rubber overlay that implements `APP_INLINE_ASSETS` support for the `app_template.php` library
+* `app_session.php` - implements `APP_NO_SESSION_IN_COOKIE` switch and `APP_SESSION_COOKIE_KEY` key for `app_session_mod_cookie`
 * `logger.php` - logging functions
-* `ob_cache.php`
+* `ob_adapter.php` - modular output buffer (additional modules)
+* `ob_cache.php` - checks if it is possible to connect to Redis
+* `pdo_instance.php` - get PDO handle (overlay)
 
 ### Components
 * `basic_template` - simple template management

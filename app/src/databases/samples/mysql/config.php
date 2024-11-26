@@ -1,6 +1,6 @@
 <?php
 	if(!defined('APP_STDLIB'))
-		require __DIR__.'/../../../lib/stdlib.php';
+		require __DIR__.'/../../../../lib/stdlib.php';
 
 	if(app_env('DB_IGNORE_ENV') === 'true')
 		$db_getenv=function($env, $default_value)

@@ -33,11 +33,14 @@
 				'ob_adapter'
 			))
 		::	add(new ob_adapter_gunzip())
-		::	start())
+		::	start()){
+			app_template::finish_request();
 			return;
+		}
 
 		require APP_COM.'/ie_error/main.php';
 
 		ie_error($error_code, $lang, $dark_theme);
+		app_template::finish_request();
 	}
 ?>

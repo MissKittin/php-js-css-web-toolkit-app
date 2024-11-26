@@ -1,7 +1,11 @@
 <?php
 	/*
-	 * Controls the $use_lv_encrypter parameter
-	 * of the app_session_start function
+	 * Implements APP_NO_SESSION_IN_COOKIE switch
+	 * and APP_SESSION_COOKIE_KEY key
+	 * for app_session_mod_cookie
+	 *
+	 * Note:
+	 *  throws an app_exception if session cannot be started
 	 *
 	 * See:
 	 *  app/src/routes/samples/database-test.php
@@ -11,12 +15,21 @@
 
 	function app_session()
 	{
-		if(!function_exists('app_session_start'))
+		if(!class_exists('app_session_backend'))
 			require APP_LIB.'/app_session.php';
 
-		if(app_env('APP_NO_SESSION_IN_COOKIE') === 'yes')
-			return app_session_start(false);
+		if(app_env('APP_NO_SESSION_IN_COOKIE') !== 'true')
+			app_session::add(new app_session_mod_cookie(
+				app_env('APP_SESSION_COOKIE_KEY', null)
+			));
 
-		app_session_start(true);
+		if(!
+			app_session
+			::	add(new app_session_mod_files())
+			::	session_start()
+		)
+			throw new app_exception(
+				'Session cannot be started'
+			);
 	}
 ?>

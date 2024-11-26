@@ -1,7 +1,7 @@
 <?php
 	class preprocessed_cache
 	{
-		private $cache_file_handler;
+		private $cache_file_handle;
 
 		public static function main($view)
 		{
@@ -37,18 +37,18 @@
 
 		public function __construct($output_file)
 		{
-			$this->cache_file_handler=fopen($output_file, 'w');
-			fwrite($this->cache_file_handler, '<?php ');
+			$this->cache_file_handle=fopen($output_file, 'w');
+			fwrite($this->cache_file_handle, '<?php ');
 		}
 		public function __destruct()
 		{
-			fwrite($this->cache_file_handler, ' ?>');
-			fclose($this->cache_file_handler);
+			fwrite($this->cache_file_handle, ' ?>');
+			fclose($this->cache_file_handle);
 		}
 
 		public function push($input)
 		{
-			fwrite($this->cache_file_handler, $input);
+			fwrite($this->cache_file_handle, $input);
 		}
 	}
 ?>

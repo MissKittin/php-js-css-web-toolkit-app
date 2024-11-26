@@ -1,4 +1,7 @@
 <?php
+	// login_single or login_callback
+		$login_method='login_single';
+
 	// enable translation
 		require TK_LIB.'/string_translator.php';
 
@@ -14,15 +17,20 @@
 			$labels_lang
 		));
 
-	login_com_reg::_()['credentials']=$model::read_password();
+	// set up credentials
+		login_com_reg::_()['credentials']=$model::read_password('test'); // for login_single
+		login_com_reg::_()['callback']=function($login) use($model) // for login_callback
+		{
+			return $model::read_password($login)[1];
+		};
 
 	// configure the login component
-		(function($array){
-			login_com_reg_config::_()['method']='login_single';
+		(function($login_method, $array){
+			login_com_reg_config::_()['method']=$login_method;
 
 			foreach($array as $key=>$value)
 				login_com_reg_view::_()[$key]=$value;
-		})([
+		})($login_method, [
 			'lang'=>$labels_lang,
 			'title'=>$labels('Login'),
 			'login_style'=>'login_default_bright.css',
@@ -35,10 +43,10 @@
 			'loading_title'=>$labels('Loading...')
 		]);
 
-		if(app_env('APP_INLINE_ASSETS') === 'yes')
+		if(app_env('APP_INLINE_ASSETS') === 'true')
 			login_com_reg_view::_()['inline_style']=true;
 
-		if(app_env('APP_MATERIALIZED') === 'yes')
+		if(app_env('APP_MATERIALIZED') === 'true')
 			login_com_reg_view::_()['template']='materialized';
 		else if(
 			isset($_COOKIE['app_dark_theme']) &&
@@ -47,35 +55,41 @@
 			login_com_reg_view::_()['login_style']='login_default_dark.css';
 
 	// add bruteforce protection
-		$sec_bruteforce=new bruteforce_timeout_pdo([
-			'pdo_handler'=>pdo_instance()
-		]);
+		$sec_bruteforce=null;
 
-		if($sec_bruteforce->check())
+		if(!is_logged())
 		{
-			// disabled login prompt
-
-			log_infos()->info('IP '.$_SERVER['REMOTE_ADDR'].' is banned');
-
-			$_GET=[];
-			$_POST=[];
-
-			// remove this block to hide from the user any info that has been banned
-			(function($array) use($labels){
-				login_com_reg::_()['wrong_credentials']=true;
-				login_com_reg_view::_()['wrong_credentials_label']=$labels('You have been banned. Come back later.');
-
-				foreach($array as $key)
-					login_com_reg_view::_()[$key]=true;
-			})([
-				'login_box_disabled',
-				'password_box_disabled',
-				'remember_me_box_disabled',
-				'submit_button_disabled'
+			$sec_bruteforce=new bruteforce_timeout_pdo([
+				'pdo_handle'=>pdo_instance()
 			]);
 
-			if(login_com())
+			if($sec_bruteforce->check())
+			{
+				// disabled login prompt
+
+				log_infos()->info('IP '.$_SERVER['REMOTE_ADDR'].' is banned');
+
+				$_GET=[];
+				$_POST=[];
+
+				// remove this block to hide from the user any info that has been banned
+				(function($array) use($labels){
+					login_com_reg::_()['wrong_credentials']=true;
+					login_com_reg_view::_()['wrong_credentials_label']=$labels('You have been banned. Come back later.');
+
+					foreach($array as $key)
+						login_com_reg_view::_()[$key]=true;
+				})([
+					'login_box_disabled',
+					'password_box_disabled',
+					'remember_me_box_disabled',
+					'submit_button_disabled'
+				]);
+
+				login_com(); // display disabled login prompt
+
 				return true; // exit()
+			}
 		}
 
 	// define callbacks for the login component
@@ -122,7 +136,7 @@
 			{
 				require TK_COM.'/middleware_form/main.php';
 
-				if(app_env('APP_MATERIALIZED') === 'yes')
+				if(app_env('APP_MATERIALIZED') === 'true')
 					$captcha_form=new middleware_form('materialized');
 				else
 					$captcha_form=new middleware_form();
@@ -150,7 +164,7 @@
 				->	add_csp_header('style-src', '\'unsafe-hashes\'')
 				->	add_csp_header('style-src', '\'sha256-N6tSydZ64AHCaOWfwKbUhxXx2fRFDxHOaL3e3CO7GPI=\'');
 
-				if(app_env('APP_MATERIALIZED') !== 'yes')
+				if(app_env('APP_MATERIALIZED') !== 'true')
 				{
 					if(
 						isset($_COOKIE['app_dark_theme']) &&
@@ -165,14 +179,14 @@
 				->	add_config('title', $labels('Verification'))
 				->	add_config('submit_button_label', $labels('Next'));
 
-				if(app_env('APP_INLINE_ASSETS') === 'yes')
+				if(app_env('APP_INLINE_ASSETS') === 'true')
 					$captcha_form->add_config('inline_style', true);
 
 				// now some magic: we place the generated image in $_SESSION
 				// and in case of an incorrect answer we save CPU time,
 				// and after giving the correct answer we delete it
 				if(!isset($_SESSION['captcha_image']))
-					$_SESSION['captcha_image']=base64_encode(captcha_get_once('captcha_gd2'));
+					$_SESSION['captcha_image']=base64_encode(captcha_get_once(new captcha_gd2()));
 
 				$captcha_form
 				->	add_field([
@@ -235,7 +249,7 @@
 		{
 			require TK_COM.'/middleware_form/main.php';
 
-			if(app_env('APP_MATERIALIZED') === 'yes')
+			if(app_env('APP_MATERIALIZED') === 'true')
 				$change_password_form=new middleware_form('materialized');
 			else
 				$change_password_form=new middleware_form();
@@ -258,7 +272,7 @@
 					return true; // exit()
 			}
 
-			if(app_env('APP_MATERIALIZED') !== 'yes')
+			if(app_env('APP_MATERIALIZED') !== 'true')
 			{
 				if(
 					isset($_COOKIE['app_dark_theme']) &&
@@ -273,7 +287,7 @@
 			->	add_config('title', $labels('Password change'))
 			->	add_config('submit_button_label', $labels('Change password'));
 
-			if(app_env('APP_INLINE_ASSETS') === 'yes')
+			if(app_env('APP_INLINE_ASSETS') === 'true')
 				$change_password_form->add_config('inline_style', true);
 
 			$change_password_form
