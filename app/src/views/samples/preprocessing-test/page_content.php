@@ -3,3 +3,5 @@
 <h2>Is HTTP server is built-in php? <?php echo $view['builtin_server']? 'Yes' : 'No'; ?></h2>
 
 <?php if($view['cache_created']) { ?><h3>Cache file was created</h3><?php } ?>
+
+<?php php_debugbar::get_page_content(); ?>

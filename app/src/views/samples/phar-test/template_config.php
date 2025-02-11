@@ -1,12 +1,17 @@
 <?php
-	$view['csp_header']['style-src'][]='\'sha256-Cccgmc9inkViNhOVWZetVV760aISEwpy7qiKnRigEps=\'';
+	php_debugbar::get_template_config($view);
 
-	$view['lang']='en_US';
-	$view['title']='Phar test';
-	$view['meta_description']='Use toolkit in Phar';
-	$view['meta_robots']='index,follow';
+	require APP_LIB.'/basic_template_config.php';
+	basic_template_config($view, static::class)
 
-	$view['opengraph_headers'][]=['url', (empty($_SERVER['HTTPS']) ? 'http' : 'https').'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']];
-	$view['opengraph_headers'][]=['type', 'website'];
-	$view['opengraph_headers'][]=['site_name', 'PHP JS CSS Web Toolkit App'];
-?>
+	::	csp('style-src', '\'sha256-Cccgmc9inkViNhOVWZetVV760aISEwpy7qiKnRigEps=\'')
+
+	::	lang('en_US')
+	::	title('Phar test')
+	::	meta_description('Use toolkit in Phar')
+	::	meta_robots('index,follow')
+
+	::	og('url', (empty($_SERVER['HTTPS']) ? 'http' : 'https').'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'])
+	::	og('type', 'website')
+	::	og('site_name', 'PHP JS CSS Web Toolkit App')
+; ?>

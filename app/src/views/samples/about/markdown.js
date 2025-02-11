@@ -12,14 +12,19 @@ document.addEventListener('DOMContentLoaded', function(){
 		var code_block_opened=false;
 		var ul_list_opened=false;
 		var ul_2_list_opened=false;
+		var ul_3_list_opened=false;
 		var ol_list_opened=false;
 		var markdown=input.innerHTML
+		.	replace('`SPDX-License-Identifier: MIT OR GPL-2.0-only`', '')
 		.	replace(/\n\n\t\t\t([\s\S]*?)\n\n/g, function(match){
 				// code block embedded in list
 
 				return ''
 				+	'<br><br><div class="md_inline_code_block">'
-				+		match.trim().replace(/\n/g, '<br>')
+				+		match
+				.		trim()
+				.		replace(/\n/g, '<br>')
+				.		replace(/\t\t\t/g, '')
 				+	'</div><br>\n';
 			})
 		.	replace(/\n\n\t\t([\s\S]*?)\n\n/g, function(match){
@@ -30,7 +35,10 @@ document.addEventListener('DOMContentLoaded', function(){
 
 				return ''
 				+	'<br><br><div class="md_inline_code_block">'
-				+		match.trim().replace(/\n/g, '<br>')
+				+		match
+				.		trim()
+				.		replace(/\n/g, '<br>')
+				.		replace(/\t\t/g, '')
 				+	'</div><br>\n';
 			})
 		.	split('\n');
@@ -38,7 +46,17 @@ document.addEventListener('DOMContentLoaded', function(){
 		for(var i=0; i<markdown.length; i++)
 		{
 			// headers
-			if(markdown[i].substring(0, 3) === '###')
+			if(markdown[i].substring(0, 4) === '####')
+				html+='<h4 id="'+markdown[i]
+				.	substring(4)
+				.	trim()
+				.	toLowerCase()
+				.	replace(/\W/g, '-')
+				+	'">'
+				+	markdown[i]
+				.	slice(5)
+				+	'</h4>';
+			else if(markdown[i].substring(0, 3) === '###')
 				html+='<h3 id="'+markdown[i]
 				.	substring(3)
 				.	trim()
@@ -61,7 +79,10 @@ document.addEventListener('DOMContentLoaded', function(){
 				+	markdown[i]
 				.	slice(3)
 				+	'</h2>';
-			else if(markdown[i].substring(0, 1) === '#')
+			else if(
+				(!code_block_opened) &&
+				(markdown[i].substring(0, 1) === '#')
+			)
 				html+='<h1 id="'+markdown[i]
 				.	substring(1)
 				.	trim()
@@ -133,8 +154,27 @@ document.addEventListener('DOMContentLoaded', function(){
 			// regular text/lists closing/code blocks linebreaks
 			else
 			{
+				if(markdown[i].substring(0, 4) === "\t\t* ")
+				{
+					if(!ul_3_list_opened)
+					{
+						html+='<ul>';
+						ul_3_list_opened=true;
+					}
+
+					html+='<li>'
+					+	markdown[i]
+					.	slice(3)
+					+	'</li>';
+				}
 				if(markdown[i].substring(0, 3) === "\t* ")
 				{
+					if(ul_3_list_opened)
+					{
+						html+='</ul>';
+						ul_3_list_opened=false;
+					}
+
 					if(!ul_2_list_opened)
 					{
 						html+='<ul>';
@@ -155,6 +195,7 @@ document.addEventListener('DOMContentLoaded', function(){
 						html+='</ol>';
 						ol_list_opened=false;
 					}
+
 					if(ul_list_opened)
 					{
 						html+='</ul>';
@@ -178,7 +219,12 @@ document.addEventListener('DOMContentLoaded', function(){
 		// links
 		output.innerHTML=html
 		.	replace(/\[([^\]]+)\]\(#([^\)]+)\)/gm, '<span class="md_link"><a href="#$2">$1</a></span>') // headlink hash
-		.	replace(/\[([^\]]+)\]\(([^\)]+)\)/gm, '<span class="md_link">$2</span>');
+		.	replace(/\[([^\]]+)\]\(([^\)]+)\)/gm, function(match, p1, p2){
+				if(match === '[HOWTO](HOWTO.md)')
+					return '<span class="md_link"><a href="#howto">'+p2.slice(0, -3)+'</a></span>';
+
+				return '<span class="md_link">'+p2+'</span>';
+			});
 	}
 
 	var markdowns=document.getElementsByClassName('markdown');

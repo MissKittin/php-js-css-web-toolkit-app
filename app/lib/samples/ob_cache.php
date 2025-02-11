@@ -42,7 +42,7 @@
 
 			$redis_handle=redis_connect(APP_DB.'/samples/redis');
 
-			if($redis === false)
+			if($redis_handle === false)
 			{
 				$this->log('Redis connection error');
 				return;

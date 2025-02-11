@@ -25,6 +25,8 @@
 		::	session_start();
 	 */
 
+	class app_session_exception extends Exception {}
+
 	interface app_session_mod
 	{
 		public function boot(): bool;
@@ -442,12 +444,12 @@
 		 * Note:
 		 *  you can execute this from application
 		 *   but it is better to run it from cron
-		 *  throws an app_exception on error
+		 *  throws an app_session_exception on error
 		 *
 		 * Usage (without log):
 			try {
 				app_session_mod_files::session_clean();
-			} catch(app_exception $error) {}
+			} catch(app_session_exception $error) {}
 		 *
 		 * Usage (with log):
 			try {
@@ -455,7 +457,7 @@
 					// you don't have to define this function
 					my_log_function('session-clean:'. $file.' removed');
 				});
-			} catch(app_exception $error) {
+			} catch(app_session_exception $error) {
 				my_log_function('session-clean:'. $error->getMessage());
 			}
 		 */
@@ -463,7 +465,7 @@
 		public static function session_clean(?callable $log_callback=null)
 		{
 			if(!is_dir(VAR_SESS))
-				throw new app_exception(
+				throw new app_session_exception(
 					VAR_SESS.' is not a directory'
 				);
 

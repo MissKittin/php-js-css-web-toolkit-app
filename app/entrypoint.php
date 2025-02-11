@@ -7,8 +7,13 @@
 
 	require __DIR__.'/lib/stdlib.php';
 
-	if(php_sapi_name() === 'cli-server')
-		require TK_LIB.'/cli_server_finish_request.php';
+	switch(php_sapi_name())
+	{
+		case 'apache2handler':
+		case 'cgi-fcgi':
+		case 'cli-server':
+			require TK_LIB.'/cli_server_finish_request.php';
+	}
 
 	if(file_exists(APP_DIR.'/php_polyfill.php'))
 		require APP_DIR.'/php_polyfill.php';
@@ -17,8 +22,20 @@
 
 	chdir(APP_ROOT);
 
-	if(file_exists(APP_ROOT.'/composer.json'))
+	if(file_exists(APP_ROOT.'/vendor.phar'))
+		require 'phar://'
+		.	APP_ROOT.'/vendor.phar'
+		.	'/vendor/autoload.php';
+	else if(file_exists(APP_ROOT.'/composer.json'))
 		require APP_ROOT.'/vendor/autoload.php';
+
+	if(app_env('APP_ENV') === 'dev')
+	{
+		if(class_exists('\Symfony\Component\ErrorHandler\Debug'))
+			Symfony\Component\ErrorHandler\Debug::enable();
+		else if(class_exists('\Symfony\Component\Debug\Debug'))
+			Symfony\Component\Debug\Debug::enable();
+	}
 
 	if(
 		(!isset($_SERVER['REQUEST_URI'])) ||
@@ -62,6 +79,20 @@
 	require APP_LIB.'/app_params.php';
 	//require TK_LIB.'/uri_router.php';
 	//require TK_COM.'/superclosure_router/main.php';
+
+	require APP_LIB.'/maximebf_debugbar.php';
+	if(php_debugbar
+	::	enable((app_env('APP_ENV') === 'dev'))
+	::	set_vendor_dir('phar://'
+		.	APP_ROOT.'/vendor.phar'
+		.	'/vendor'
+		)
+	::	set_vendor_dir(APP_ROOT.'/vendor')
+	::	collectors([
+			'pdo'=>(class_exists('\DebugBar\DataCollector\PDO\PDOCollector'))? new DebugBar\DataCollector\PDO\PDOCollector() : new php_debugbar_dummy()
+		])
+	::	route('/'.app_params()))
+		exit();
 
 	//uri_router
 	//::	set_source(app_params())
@@ -122,6 +153,7 @@
 		case 'bootstrap-test': require APP_ROUTE.'/samples/bootstrap-test.php'; break;
 		case 'check-date': require APP_ROUTE.'/samples/check-date.php'; break;
 		case 'database-test': require APP_ROUTE.'/samples/database-test.php'; break;
+		case 'multipage-test': require APP_ROUTE.'/samples/multipage-test.php'; break;
 		case 'obsfucate-html': require APP_ROUTE.'/samples/obsfucate-html.php'; break;
 		case 'login-library-test': require APP_ROUTE.'/samples/login-library-test.php'; break;
 		case 'login-component-test': require APP_ROUTE.'/samples/login-component-test.php'; break;

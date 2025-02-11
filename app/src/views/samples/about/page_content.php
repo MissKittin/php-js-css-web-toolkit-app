@@ -17,6 +17,8 @@
 		</div>
 	<?php } ?>
 
+	<hr>
+
 	<?php if(file_exists(APP_ROOT.'/HOWTO.md')) { ?>
 		<div id="howto" class="markdown">
 			<h1>How to</h1>
@@ -24,13 +26,27 @@
 		</div>
 	<?php } ?>
 
-	<?php if(file_exists(APP_ROOT.'/LICENSE')) { ?>
+	<?php if(file_exists(APP_ROOT.'/LICENSE.MIT')) { ?>
 		<div class="license">
 			<h1>License</h1>
-			<pre><?php echo htmlspecialchars(file_get_contents(APP_ROOT.'/LICENSE')); ?></pre>
+			<pre><?php echo htmlspecialchars(file_get_contents(APP_ROOT.'/LICENSE.MIT')); ?></pre>
+		</div>
+	<?php } ?>
+	<?php if(file_exists(APP_ROOT.'/LICENSE.GPL-2.0-only')) { ?>
+		<div class="license">
+			<h1>GPL License</h1>
+			<pre><?php echo htmlspecialchars(file_get_contents(APP_ROOT.'/LICENSE.GPL-2.0-only')); ?></pre>
+		</div>
+	<?php } ?>
+
+	<?php if(file_exists(TK_LIB.'/../LICENSE')) { ?>
+		<div class="license">
+			<h1>Toolkit License</h1>
+			<pre><?php echo htmlspecialchars(file_get_contents(TK_LIB.'/../LICENSE')); ?></pre>
 		</div>
 	<?php } ?>
 </div>
 
 <style><?php readfile(__DIR__.'/markdown.css'); ?></style>
 <script><?php readfile(__DIR__.'/markdown.js'); ?></script>
+<?php php_debugbar::get_page_content(); ?>

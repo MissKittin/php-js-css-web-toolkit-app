@@ -6,3 +6,5 @@ Now you can click this fancy button below:<br>
 	<input type="submit" name="logout" value="Logout">
 	<input type="hidden" name="<?php echo csrf_print_token('parameter'); ?>" value="<?php echo csrf_print_token('value'); ?>">
 </form>
+
+<?php php_debugbar::get_page_content(); ?>

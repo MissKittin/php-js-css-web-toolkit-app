@@ -5,7 +5,7 @@
 	 * for app_session_mod_cookie
 	 *
 	 * Note:
-	 *  throws an app_exception if session cannot be started
+	 *  throws an app_session_exception if session cannot be started
 	 *
 	 * See:
 	 *  app/src/routes/samples/database-test.php
@@ -28,7 +28,7 @@
 			::	add(new app_session_mod_files())
 			::	session_start()
 		)
-			throw new app_exception(
+			throw new app_session_exception(
 				'Session cannot be started'
 			);
 	}

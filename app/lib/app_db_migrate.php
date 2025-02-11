@@ -18,7 +18,7 @@
 	 *  just add "callback_" prefix e.g:
 		$params['callback_on_begin']=function($migration)
 		{
-			//
+			echo ' -> '.$migration;
 		};
 	 */
 
@@ -51,51 +51,58 @@
 
 			$rollback_all=check_argv('--rollback-all');
 			$rollback=check_argv_next_param('--rollback');
-
-			$params['table_name']='migrations';
-			$params['mode']='apply';
 			$migration_failed=false;
 
-			$params['on_begin']=function($migration) use($params)
-			{
-				echo ' -> '.$migration;
+			$params=array_merge($params, [
+				'table_name'=>'migrations',
+				'mode'=>'apply',
+				'on_begin'=>function($migration) use($params)
+				{
+					echo ' -> '.$migration;
 
-				if(isset($params['callback_on_begin']))
-					$params['callback_on_begin']($migration);
-			};
-			$params['on_skip']=function($migration) use($params)
-			{
-				echo ' [SKIP]'.PHP_EOL;
+					if(isset($params['callback_on_begin']))
+						$params['callback_on_begin']($migration);
+				},
+				'on_skip'=>function($migration) use($params)
+				{
+					echo ' [SKIP]'.PHP_EOL;
 
-				if(isset($params['callback_on_skip']))
-					$params['callback_on_skip']($migration);
-			};
-			$params['on_error']=function($migration) use($params, &$migration_failed)
-			{
-				echo PHP_EOL.' <- '.$migration;
+					if(isset($params['callback_on_skip']))
+						$params['callback_on_skip']($migration);
+				},
+				'on_error'=>function($migration) use($params, &$migration_failed)
+				{
+					echo PHP_EOL.' <- '.$migration;
 
-				$migration_failed=true;
+					$migration_failed=true;
 
-				if(isset($params['callback_on_error']))
-					$params['callback_on_error']($migration);
-			};
-			$params['on_error_rollback']=function($migration) use($params)
-			{
-				echo ' [FAIL]'.PHP_EOL;
+					if(isset($params['callback_on_error']))
+						$params['callback_on_error']($migration);
+				},
+				'on_error_rollback'=>function($migration) use($params)
+				{
+					echo ' [FAIL]'.PHP_EOL;
 
-				if(isset($params['callback_error_rollback']))
-					$params['callback_error_rollback']($migration);
-			};
-			$params['on_end']=function($migration) use($params, &$migration_failed)
-			{
-				if(!$migration_failed)
-					echo ' [ OK ]'.PHP_EOL;
+					if(isset($params['callback_error_rollback']))
+						$params['callback_error_rollback']($migration);
+				},
+				'on_end'=>function($migration, $skipped) use($params, &$migration_failed)
+				{
+					if(
+						(!$migration_failed) &&
+						(!$skipped)
+					)
+						echo ' [ OK ]'.PHP_EOL;
 
-				if(isset($params['callback_on_end']))
-					$params['callback_on_end']($migration);
-			};
+					if(isset($params['callback_on_end']))
+						$params['callback_on_end']($migration, $skipped);
+				}
+			]);
 
-			if((!$rollback_all) && ($rollback === null))
+			if(
+				(!$rollback_all) &&
+				($rollback === null)
+			)
 				return pdo_migrate($params);
 
 			$params['mode']='rollback';
@@ -106,44 +113,9 @@
 				return pdo_migrate($params);
 			}
 
-			if(!is_numeric($rollback))
-				throw new app_db_migrate_exception('rollback option must be an integer');
+			$params['count']=(int)$rollback;
 
-			if(!isset($params['directory']))
-				throw new app_db_migrate_exception('The directory parameter was not specified');
-
-			if(!is_string($params['directory']))
-				throw new app_db_migrate_exception('The input array parameter directory is not a string');
-
-			if(!is_dir($params['directory']))
-				throw new app_db_migrate_exception($params['directory'].' is not a directory');
-
-			$rollback=(int)$rollback;
-			$migrations=array_reverse(array_diff(
-				scandir($params['directory']),
-				['.', '..']
-			));
-			$migrations_len=count($migrations);
-			$i=0;
-
-			if($rollback < 1)
-				throw new app_db_migrate_exception('rollback option must be greater than 0');
-
-			if($rollback > $migrations_len)
-				throw new app_db_migrate_exception('Too many migrations were given to be rolled back - there are '.$migrations_len.' of them');
-
-			if($rollback === $migrations_len)
-				echo '<- !!! rolling back all migrations !!!'.PHP_EOL;
-
-			foreach($migrations as $migration)
-			{
-				if($i++ === $rollback)
-					break;
-
-				echo '<- '.pathinfo($migration, PATHINFO_FILENAME).PHP_EOL;
-
-				pdo_migrate($params, $migration);
-			}
+			pdo_migrate($params);
 		}
 	}
 	else
@@ -167,9 +139,9 @@
 							'The input array parameter callback_'.$param.' is not callable'
 						);
 
-					$params[$param]=function($migration) use($params, $param)
+					$params[$param]=function($migration, $skipped=false) use($params, $param)
 					{
-						$params['callback_'.$param]($migration);
+						$params['callback_'.$param]($migration, $skipped);
 					};
 				}
 

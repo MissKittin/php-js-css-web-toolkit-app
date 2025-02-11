@@ -67,7 +67,9 @@
 			{
 				// disabled login prompt
 
-				log_infos()->info('IP '.$_SERVER['REMOTE_ADDR'].' is banned');
+				log_infos()->info(
+					'IP '.$_SERVER['REMOTE_ADDR'].' is banned'
+				);
 
 				$_GET=[];
 				$_POST=[];
@@ -75,7 +77,9 @@
 				// remove this block to hide from the user any info that has been banned
 				(function($array) use($labels){
 					login_com_reg::_()['wrong_credentials']=true;
-					login_com_reg_view::_()['wrong_credentials_label']=$labels('You have been banned. Come back later.');
+					login_com_reg_view::_()['wrong_credentials_label']=$labels(
+						'You have been banned. Come back later.'
+					);
 
 					foreach($array as $key)
 						login_com_reg_view::_()[$key]=true;
@@ -95,20 +99,29 @@
 	// define callbacks for the login component
 		login_com_reg_config::_()['on_login_prompt']=function()
 		{
-			log_infos()->info('Login prompt requested');
+			log_infos()->info(
+				'Login prompt requested'
+			);
 		};
 		login_com_reg_config::_()['on_login_success']=function()
 		{
-			log_infos()->info('User logged in');
+			log_infos()->info(
+				'User logged in'
+			);
 		};
 		login_com_reg_config::_()['on_login_failed']=function() use($sec_bruteforce)
 		{
-			log_fails()->info($_SERVER['REMOTE_ADDR'].' login failed');
+			log_fails()->info(
+				$_SERVER['REMOTE_ADDR'].' login failed'
+			);
+
 			$sec_bruteforce->add();
 		};
 		login_com_reg_config::_()['on_logout']=function()
 		{
-			log_infos()->info('User logged out');
+			log_infos()->info(
+				'User logged out'
+			);
 		};
 
 	// display login prompt and exit
@@ -121,7 +134,10 @@
 
 		if(!extension_loaded('gd'))
 		{
-			log_fails()->warn('gd extension not installed - CAPTCHA test disabled');
+			log_fails()->warn(
+				'gd extension not installed - CAPTCHA test disabled'
+			);
+
 			$_SESSION['captcha_verified']=true;
 		}
 
@@ -132,8 +148,10 @@
 			require TK_LIB.'/sec_captcha.php';
 			require TK_LIB.'/generate_csp_hash.php';
 
-			if((!isset($_POST['captcha'])) || (!captcha_check($_POST['captcha'])))
-			{
+			if(
+				(!isset($_POST['captcha'])) ||
+				(!captcha_check($_POST['captcha']))
+			){
 				require TK_COM.'/middleware_form/main.php';
 
 				if(app_env('APP_MATERIALIZED') === 'true')
@@ -186,7 +204,11 @@
 				// and in case of an incorrect answer we save CPU time,
 				// and after giving the correct answer we delete it
 				if(!isset($_SESSION['captcha_image']))
-					$_SESSION['captcha_image']=base64_encode(captcha_get_once(new captcha_gd2()));
+					$_SESSION['captcha_image']=base64_encode(
+						captcha_get_once(
+							new captcha_gd2()
+						)
+					);
 
 				$captcha_form
 				->	add_field([
@@ -208,6 +230,7 @@
 					]);
 
 				$captcha_form->view();
+
 				return true; // exit()
 			}
 
@@ -222,23 +245,40 @@
 		// captcha test passed, change password on first login
 
 		// validate passwords
-		function are_passwords_valid($old_password, $new_password, $change_password_form, $labels)
-		{
+		function are_passwords_valid(
+			$old_password,
+			$new_password,
+			$change_password_form,
+			$labels
+		){
 			if($old_password === $new_password)
 			{
-				$change_password_form->add_error_message($labels('The new password cannot be the same as the old one'));
+				$change_password_form->add_error_message($labels(
+					'The new password cannot be the same as the old one'
+				));
+
 				return false;
 			}
 
-			if(password_verify($new_password, login_com_reg::_()['credentials'][1]))
-			{
-				$change_password_form->add_error_message($labels('The new password cannot be the same as the old one'));
+			if(login_password_hash::password_verify(
+				$new_password,
+				login_com_reg::_()['credentials'][1]
+			)){
+				$change_password_form->add_error_message($labels(
+					'The new password cannot be the same as the old one'
+				));
+
 				return false;
 			}
 
-			if(!password_verify($old_password, login_com_reg::_()['credentials'][1]))
-			{
-				$change_password_form->add_error_message($labels('The old password is incorrect'));
+			if(!login_password_hash::password_verify(
+				$old_password,
+				login_com_reg::_()['credentials'][1]
+			)){
+				$change_password_form->add_error_message($labels(
+					'The old password is incorrect'
+				));
+
 				return false;
 			}
 
@@ -264,8 +304,12 @@
 					$labels
 				)
 			){
-				$model::save_new_password($_POST['new_password']);
-				log_infos()->info('Password updated');
+				$model::save_new_password(
+					$_POST['new_password']
+				);
+				log_infos()->info(
+					'Password updated'
+				);
 
 				// display reload page and exit
 					login_com_reload();
@@ -305,6 +349,7 @@
 				]);
 
 			$change_password_form->view();
+
 			return true; // exit()
 		}
 

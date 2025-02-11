@@ -13,22 +13,26 @@
 .markdown {
 	tab-size: 4;
 }
-.markdown .md_inline_code_block {
+.markdown .md_inline_code_block,
+.markdown .md_code_block,
+.markdown .md_code_block,
+.markdown .md_link {
 	font-family: monospace;
 	font-weight: bold;
 	border-radius: 5px;
+}
+.markdown .md_inline_code_block,
+.markdown .md_code_block {
+	white-space: pre;
+	border-radius: 5px;
 	color: #000000;
 	background-color: #aaaaaa;
+}
+.markdown .md_inline_code_block {
 	padding: 2px;
 }
 .markdown .md_code_block {
-	font-family: monospace;
-	font-weight: bold;
-	white-space: pre;
 	overflow: auto;
-	border-radius: 5px;
-	color: #000000;
-	background-color: #aaaaaa;
 	margin-top: 5px;
 	margin-bottom: 5px;
 	padding-top: 20px;
@@ -37,9 +41,6 @@
 	padding-right: 5px;
 }
 .markdown .md_link {
-	font-family: monospace;
-	font-weight: bold;
-	border-radius: 5px;
 	color: #ff0000;
 	background-color: #ffffff;
 	padding: 2px;

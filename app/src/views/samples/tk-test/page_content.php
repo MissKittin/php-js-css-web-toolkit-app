@@ -15,4 +15,6 @@
 		foreach($tests as $test_name)
 			echo '<a href="?type=com&com='.$com_name.'&name='.$test_name.'" target="_blank">'.$test_name.'</a><br>';
 	}
+
+	php_debugbar::get_page_content();
 ?>

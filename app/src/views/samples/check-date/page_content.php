@@ -13,3 +13,5 @@
 <?php } else { ?>
 	No. You get nothing.
 <?php } ?>
+
+<?php php_debugbar::get_page_content(); ?>

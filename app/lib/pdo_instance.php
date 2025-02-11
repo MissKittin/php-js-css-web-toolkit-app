@@ -1,4 +1,5 @@
 <?php
+	class pdo_instance_exception extends Exception {}
 	class pdo_instance
 	{
 		/*
@@ -9,6 +10,7 @@
 		 *
 		 * Note:
 		 *  sets PDO::ATTR_ERRMODE to PDO::ERRMODE_SILENT
+		 *  throws an pdo_instance_exception on error
 		 *
 		 * Setting default database:
 			pdo_instance::set_default_db('mydb'); // APP_DB/mydb
@@ -54,7 +56,9 @@
 			if($db === null)
 			{
 				if(static::$default_db === null)
-					throw new app_exception('db parameter nor the default database is not set');
+					throw new pdo_instance_exception(
+						'db parameter nor the default database is not set'
+					);
 
 				$db=static::$default_db;
 			}
@@ -63,7 +67,9 @@
 				require TK_LIB.'/pdo_connect.php';
 
 			if(!is_dir(APP_DB.'/'.$db))
-				throw new app_exception(APP_DB.'/'.$db.' not exists');
+				throw new pdo_instance_exception(
+					APP_DB.'/'.$db.' not exists'
+				);
 
 			static::$pdo_handle=pdo_connect(
 				APP_DB.'/'.$db,
@@ -72,7 +78,9 @@
 			);
 
 			if(static::$pdo_handle === false)
-				throw new app_exception('Connection to the database failed');
+				throw new pdo_instance_exception(
+					'Connection to the database failed'
+				);
 
 			if(static::$pdo_exceptions)
 			{

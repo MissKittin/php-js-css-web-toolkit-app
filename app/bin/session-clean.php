@@ -22,7 +22,7 @@
 		foreach($modules as $module=>$params)
 			try {
 				$module::session_clean(...$params);
-			} catch(app_exception $error) {
+			} catch(app_session_exception $error) {
 				$errors[]=$error->getMessage();
 				$failed=true;
 			}

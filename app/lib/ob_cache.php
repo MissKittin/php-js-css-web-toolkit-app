@@ -3,6 +3,9 @@
 	 * A modular overlay for functions from the ob_cache.php library
 	 * For more info see ob_cache.php library
 	 *
+	 * Note:
+	 *  throws an app_ob_cache_exception on error
+	 *
 	 * Modules:
 	 *  ob_cache_redis - adapter for ob_redis_cache()
 	 *   new ob_cache_redis($redis_handle)
@@ -25,6 +28,8 @@
 		::	start())
 			exit();
 	 */
+
+	class app_ob_cache_exception extends Exception {}
 
 	interface ob_cache_module
 	{
@@ -55,7 +60,7 @@
 		public static function start()
 		{
 			if(static::$url === null)
-				throw new app_exception(
+				throw new app_ob_cache_exception(
 					'url is not set'
 				);
 
@@ -169,7 +174,7 @@
 			if(!function_exists('ob_file_cache'))
 				require TK_LIB.'/ob_cache.php';
 
-			if(!file_exists($cache_dir)
+			if(!file_exists($cache_dir))
 				mkdir($cache_dir, 0777, true);
 
 			$this->cache_dir=$cache_dir;

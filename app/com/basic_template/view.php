@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html<?php if(isset($view['lang'])) echo ' lang="'.strtok($view['lang'], '_').'"'; ?>>
-	<head<?php if(isset($view['head_prefix'])) echo ' prefix="'.$view['head_prefix'].'"'; ?>>
-		<?php if(isset($view['title'])) echo '<title>'.$view['title'].'</title>'; ?>
+<html<?php if(isset($view['_lang'])) echo ' lang="'.strtok($view['_lang'], '_').'"'; ?>>
+	<head<?php if(isset($view['_head_prefix'])) echo ' prefix="'.$view['_head_prefix'].'"'; ?>>
+		<?php if(isset($view['_title'])) echo '<title>'.$view['_title'].'</title>'; ?>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width,initial-scale=1">
 		<?php static::parse_headers_top($view); ?>

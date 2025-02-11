@@ -23,6 +23,7 @@
 			false, // styles
 			false // scripts
 		];
+		protected static $disable_registry_reference=false;
 		protected static $favicon=null;
 		protected static $inline_assets=[
 			false,
@@ -68,7 +69,7 @@
 		}
 		protected static function parse_headers_top($view)
 		{
-			if(isset($view['csp_header']))
+			if(isset($view['_csp_header']))
 			{
 				if(static::$inline_assets[0])
 				{
@@ -77,12 +78,12 @@
 					static::$inline_assets[1]=rand_str_secure(32);
 					static::$inline_assets[2]=rand_str_secure(32);
 
-					$view['csp_header']['script-src'][]='\'nonce-'.static::$inline_assets[1].'\'';
-					$view['csp_header']['style-src'][]='\'nonce-'.static::$inline_assets[2].'\'';
+					$view['_csp_header']['script-src'][]='\'nonce-'.static::$inline_assets[1].'\'';
+					$view['_csp_header']['style-src'][]='\'nonce-'.static::$inline_assets[2].'\'';
 				}
 
 				?><meta http-equiv="Content-Security-Policy" content="<?php
-					foreach($view['csp_header'] as $csp_param=>$csp_values)
+					foreach($view['_csp_header'] as $csp_param=>$csp_values)
 					{
 						echo $csp_param;
 
@@ -94,63 +95,63 @@
 				?>"><?php
 			}
 
-			if(isset($view['meta_robots']))
-				{ ?><meta name="robots" content="<?php echo $view['meta_robots']; ?>"><?php }
+			if(isset($view['_html_headers']))
+				echo $view['_html_headers'];
 
-			if(isset($view['opengraph_headers']))
-				foreach($view['opengraph_headers'] as $og_header)
+			if(isset($view['_meta_robots']))
+				{ ?><meta name="robots" content="<?php echo $view['_meta_robots']; ?>"><?php }
+
+			if(isset($view['_opengraph_headers']))
+				foreach($view['_opengraph_headers'] as $og_header)
 				{
 					switch($og_header[0])
 					{
 						case 'title':
-							$view['opengraph_headers']['_title_defined_']=true;
+							$view['_opengraph_headers']['_title_defined_']=true;
 						break;
 						case 'lang':
-							$view['opengraph_headers']['_lang_defined_']=true;
+							$view['_opengraph_headers']['_lang_defined_']=true;
 						break;
 						case 'description':
-							$view['opengraph_headers']['_description_defined_']=true;
+							$view['_opengraph_headers']['_description_defined_']=true;
 					}
 
 					?><meta property="<?php echo 'og:'.$og_header[0]; ?>" content="<?php echo $og_header[1]; ?>"><?php
 				}
 
 			if(
-				(isset($view['title'])) &&
-				(!isset($view['opengraph_headers']['_title_defined_']))
+				(isset($view['_title'])) &&
+				(!isset($view['_opengraph_headers']['_title_defined_']))
 			)
-				{ ?><meta property="og:title" content="<?php echo $view['title']; ?>"><?php }
+				{ ?><meta property="og:title" content="<?php echo $view['_title']; ?>"><?php }
 
 			if(
-				(isset($view['lang'])) &&
-				(!isset($view['opengraph_headers']['_lang_defined_']))
+				(isset($view['_lang'])) &&
+				(!isset($view['_opengraph_headers']['_lang_defined_']))
 			)
-				{ ?><meta property="og:locale" content="<?php echo $view['lang']; ?>"><?php }
+				{ ?><meta property="og:locale" content="<?php echo $view['_lang']; ?>"><?php }
 
-			if(isset($view['meta_description']))
+			if(isset($view['_meta_description']))
 			{
-				if(isset($view['opengraph_headers']['_description_defined_']))
-					{ ?><meta name="description" content="<?php echo $view['meta_description']; ?>"><?php }
+				if(isset($view['_opengraph_headers']['_description_defined_']))
+					{ ?><meta name="description" content="<?php echo $view['_meta_description']; ?>"><?php }
 				else
-					{ ?><meta name="description" property="og:description" content="<?php echo $view['meta_description']; ?>"><?php }
+					{ ?><meta name="description" property="og:description" content="<?php echo $view['_meta_description']; ?>"><?php }
 			}
 
-			if(isset($view['meta_name']))
-				foreach($view['meta_name'] as $meta_name=>$meta_content)
+			if(isset($view['_meta_name']))
+				foreach($view['_meta_name'] as $meta_name=>$meta_content)
 					{ ?><meta name="<?php echo $meta_name; ?>" content="<?php echo $meta_content; ?>"><?php }
 
-			if(isset($view['meta_property']))
-				foreach($view['meta_property'] as $meta_property=>$meta_content)
+			if(isset($view['_meta_property']))
+				foreach($view['_meta_property'] as $meta_property=>$meta_content)
 					{ ?><meta property="<?php echo $meta_property; ?>" content="<?php echo $meta_content; ?>"><?php }
 
-			if(isset($view['html_headers']))
-				echo $view['html_headers'];
-
-			if(isset($view['styles']))
-				foreach($view['styles'] as $style)
+			if(isset($view['_styles']))
+				foreach($view['_styles'] as $style)
 				{
 					?><link rel="stylesheet" href="<?php echo $style[0]; ?>"<?php
-						if($style[1] !== null)
+						if(isset($style[1]))
 							{ ?> integrity="<?php echo $style[1]; ?>" crossorigin="<?php echo $style[2]; ?>"<?php }
 					?>><?php
 				}
@@ -160,7 +161,14 @@
 				if(static::$inline_assets[0])
 				{
 					?><style nonce="<?php echo static::$inline_assets[2]; ?>"><?php
-						readfile(__DIR__.'/assets/basic-template.css');
+						foreach(
+							array_diff(
+								scandir(__DIR__.'/assets/basic-template.css'),
+								['.', '..']
+							)
+							as $inline_style
+						)
+							readfile(__DIR__.'/assets/basic-template.css/'.$inline_style);
 					?></style><?php
 				}
 				else
@@ -169,6 +177,21 @@
 
 			if(static::$favicon !== null)
 				readfile(static::$favicon);
+
+			if(isset($view['_scripts_top']))
+				foreach($view['_scripts_top'] as $script)
+				{
+					?><script <?php
+						if(isset($script[3]))
+							echo 'type="'.$script[3].'" ';
+					?>src="<?php echo $script[0]; ?>"<?php
+						if(isset($script[1]))
+							{ ?> integrity="<?php echo $script[1]; ?>" crossorigin="<?php echo $script[2]; ?>"<?php }
+
+						if(isset($script[4]))
+							echo ' '.$script[4];
+					?>></script><?php
+				}
 		}
 		protected static function parse_headers_bottom($view)
 		{
@@ -184,10 +207,13 @@
 					{ ?><script src="<?php echo static::$assets_path; ?>/<?php echo static::$assets_filename; ?>.js"></script><?php }
 			}
 
-			if(isset($view['scripts']))
-				foreach($view['scripts'] as $script)
+			if(isset($view['_scripts']))
+				foreach($view['_scripts'] as $script)
 				{
-					?><script src="<?php echo $script[0]; ?>"<?php
+					?><script <?php
+						if(isset($script[3]))
+							echo 'type="'.$script[3].'" ';
+					?>src="<?php echo $script[0]; ?>"<?php
 						if($script[1] !== null)
 							{ ?> integrity="<?php echo $script[1]; ?>" crossorigin="<?php echo $script[2]; ?>"<?php }
 					?>></script><?php
@@ -235,7 +261,7 @@
 		}
 		public static function quick_view(string $view_path, string $page_content='page_content.php')
 		{
-			$view['csp_header']=static::default_csp_header();
+			$view['_csp_header']=static::default_csp_header();
 
 			if(file_exists($view_path.'/template_config.php'))
 				include $view_path.'/template_config.php';
@@ -245,10 +271,15 @@
 
 		public function __construct(bool $return_content=false)
 		{
-			$this->registry['csp_header']=static::default_csp_header();
+			$this->registry['_csp_header']=static::default_csp_header();
 			$this->do_return_content=$return_content;
 		}
 
+		public function disable_registry_reference(bool $value=true)
+		{
+			$this->disable_registry_reference=$value;
+			return $this;
+		}
 		public function set_variable(string $variable, $value)
 		{
 			$this->registry[$variable]=$value;
@@ -256,15 +287,15 @@
 		}
 		public function add_csp_header(string $section, string $value)
 		{
-			$this->registry['csp_header'][$section][]=$value;
+			$this->registry['_csp_header'][$section][]=$value;
 			return $this;
 		}
 		public function add_html_header(string $header)
 		{
-			if(!isset($this->registry['html_headers']))
-				$this->registry['html_headers']='';
+			if(!isset($this->registry['_html_headers']))
+				$this->registry['_html_headers']='';
 
-			$this->registry['html_headers'].=$header;
+			$this->registry['_html_headers'].=$header;
 
 			return $this;
 		}
@@ -285,17 +316,17 @@
 		}
 		public function add_meta_name_header(string $name, string $content)
 		{
-			$this->registry['meta_name'][$name]=$content;
+			$this->registry['_meta_name'][$name]=$content;
 			return $this;
 		}
 		public function add_meta_property_header(string $property, string $content)
 		{
-			$this->registry['meta_property'][$property]=$content;
+			$this->registry['_meta_property'][$property]=$content;
 			return $this;
 		}
 		public function add_og_header(string $property, string $content)
 		{
-			$this->registry['opengraph_headers'][]=[$property, $content];
+			$this->registry['_opengraph_headers'][]=[$property, $content];
 			return $this;
 		}
 		public function add_style_header(
@@ -303,15 +334,44 @@
 			?string $integrity=null,
 			string $crossorigin='anonymous'
 		){
-			$this->registry['styles'][]=[$path, $integrity, $crossorigin];
+			$this->registry['_styles'][]=[
+				$path,
+				$integrity,
+				$crossorigin
+			];
+
 			return $this;
 		}
 		public function add_script_header(
 			string $path,
 			?string $integrity=null,
-			string $crossorigin='anonymous'
+			string $crossorigin='anonymous',
+			?string $type=null
 		){
-			$this->registry['scripts'][]=[$path, $integrity, $crossorigin];
+			$this->registry['_scripts'][]=[
+				$path,
+				$integrity,
+				$crossorigin,
+				$type
+			];
+
+			return $this;
+		}
+		public function add_script_header_top(
+			string $path,
+			?string $integrity=null,
+			string $crossorigin='anonymous',
+			?string $type=null,
+			?string $options=null
+		){
+			$this->registry['_scripts_top'][]=[
+				$path,
+				$integrity,
+				$crossorigin,
+				$type,
+				$options
+			];
+
 			return $this;
 		}
 		public function add_inline_style(
@@ -370,7 +430,10 @@
 		}
 		public function view(string $view_path, string $page_content='page_content.php')
 		{
-			$view=$this->registry;
+			if($this->disable_registry_reference)
+				$view=$this->registry;
+			else
+				$view=&$this->registry;
 
 			if($this->do_return_content)
 				ob_start(function($content){

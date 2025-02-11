@@ -37,3 +37,5 @@
 <script>
 	<?php readfile(__DIR__.'/ws-test.js'); ?>
 </script>
+
+<?php php_debugbar::get_page_content(); ?>

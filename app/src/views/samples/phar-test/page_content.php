@@ -11,3 +11,5 @@
 
 <h2>Defined functions:</h2>
 <pre><?php echo $view['defined_functions']; ?></pre>
+
+<?php php_debugbar::get_page_content(); ?>

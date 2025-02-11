@@ -1,7 +1,8 @@
 * [Toolkit as a composer package](#toolkit-as-a-composer-package)
 * [A few words about design](#a-few-words-about-design)
+	* [Application libraries](#application-libraries)
 	* [Application standard library](#application-standard-library)
-	* [Removing unused libraries](#removing-unused-libraries)
+	* [Removing unused toolkit libraries](#removing-unused-toolkit-libraries)
 	* [Upload tmp directory](#upload-tmp-directory)
 * [Creating The project](#creating-the-project)
 	* [Toolkit libraries used by extra tools](#toolkit-libraries-used-by-extra-tools)
@@ -14,11 +15,16 @@
 	* [Removing documentation](#removing-documentation)
 	* [PHP polyfill Component Cache](#php-polyfill-component-cache)
 	* [JavaScript polyfills](#javascript-polyfills)
-	* [Packing the toolkit into Phar](#packing-the-toolkit-into-phar)
+	* [Packing into Phar](#packing-into-phar)
+		* [The toolkit](#the-toolkit)
+		* [The application](#the-application)
+		* [The Composer](#the-composer)
 	* [Installing Composer](#installing-composer)
 	* [Installing Predis](#installing-predis)
 	* [Memcached without PECL](#memcached-without-pecl)
 * [How to create application](#how-to-create-application)
+	* [Debug Bar](#debug-bar)
+	* [Symfony error handler](#symfony-error-handler)
 	* [Templates](#templates)
 	* [Tests](#tests)
 	* [Autoloading](#autoloading)
@@ -31,6 +37,7 @@
 	* [Compiling assets](#compiling-assets)
 	* [Minifying assets - webdev.sh client](#minifying-assets---webdevsh-client)
 	* [Minifying assets - matthiasmullie's minifier](#minifying-assets---matthiasmullies-minifier)
+	* [Single Page Application](#single-page-application)
 	* [Seeding database offline with pdo_connect()](#seeding-database-offline-with-pdo_connect-optional)
 	* [Running dev server](#running-dev-server)
 	* [Maintenance break](#maintenance-break)
@@ -183,12 +190,49 @@ PHP does not have an autoloader for functions, so you have to load the function 
 The application design does not define the paradigm in which individual parts of the application will be written.  
 You decide what will be written procedurally, functionally and object-oriented, as well as what type of routing you will use.  
 It has its advantages and disadvantages - it is not a typical framework, so think about whether you need something like Symfony or Laravel.  
-**Remember about safety!** Treat all data coming from the user as untrusted. Filter them before sending them back. **Keep your code clean.**
+You can edit everything except the toolkit files (`tk`) and its extras (`tke`) - this gives you the ability to update the toolkit by updating the git submodule.  
+**Remember about safety!**  
+**Treat all data coming from the user as untrusted. Filter them before sending them back.**  
+**Keep your code clean.**
+
+### Application libraries
+All files in the `app/lib` directory are facades for toolkit libraries and components.  
+You can edit them, you can extend them - you decide how to design your application.  
+They implement additional features such as operation cache, environment variables, modularization of code over regular functions etc  
+The core algorithms remain in the toolkit repositories.  
+All except
 
 ### Application standard library
 The `app/lib/stdlib.php` library is the parent library of the application - it is loaded by the `app/entrypoint.php`.  
 All application elements except tools (components, libraries, controllers, routes etc.) assume that the library is already loaded.  
-Provides constants with paths to specific parts of the application.  
+Provides constants with paths to specific parts of the application:
+* `APP_STDLIB` - it's always `1`
+* `APP_STDLIB_CACHE` - `1` if constants were imported from cache
+* `APP_ROOT` - path to the application's root directory
+* `APP_DIR` - path to `app` directory (`APP_ROOT/app`)
+* `APP_COM` - path to `app/com` directory
+* `APP_LIB` - path to `app/lib` directory
+* `APP_SRC` - path to `app/src` directory
+* `APP_CTRL` - path to `app/src/controllers` directory
+* `APP_DB` - path to `app/src/databases` directory
+* `APP_MODEL` - path to `app/src/models` directory
+* `APP_ROUTE` - path to `app/src/routes` directory
+* `APP_VIEW` - path to `app/src/views` directory
+* `TK_PHAR` - path to `tk.phar` file (`APP_ROOT/tk.phar`)
+* `TK_COM` - path to `tk/com` or `tk.phar/com` directory
+* `TK_LIB` - path to `tk/lib` or `tk.phar/lib` directory
+* `TKE_PHAR` - path to `tke.phar` file (`APP_ROOT/tke.phar`)
+* `TKE_COM` - path to `tke/com` or `tke.phar/com` directory
+* `TKE_LIB` - path to `tke/lib` or `tke.phar/lib` directory
+* `VAR_DIR` - path to `var` directory (`APP_ROOT/var`)
+* `VAR_CACHE` - path to `var/cache` directory
+* `VAR_LIB` - path to `var/lib` directory
+* `VAR_DB` - path to `var/lib/databases` directory
+* `VAR_SESS` - var/lib/sessions` directory
+* `VAR_LOG` - path to `var/log` directory
+* `VAR_RUN` - path to `var/run` directory
+* `VAR_TMP` - path to `var/tmp` directory
+
 If you pack the toolkit into a phar, the library will set the paths so that files are loaded from the archive.  
 Also, if you don't use git, you can install the toolkit as a composer package.  
 **Note:** in this situation you can use both autoloader and `load_function('function_name');` or without autoloading (`require TK_LIB.'/library.php';`). For more info see `php-js-css-web-toolkit-pkg` repository.  
@@ -204,10 +248,11 @@ Additionally, it provides:
 	that uses `dotenv.php` library  
 	see [app README DotEnv](app/README.md#dotenv)
 
+		$env_var=app_env('ENV_VAR_NAME');
 		$env_var=app_env('ENV_VAR_NAME', 'default_value');
 
 
-### Removing unused libraries
+### Removing unused toolkit libraries
 The standard library will set the `TK_COM`, `TK_LIB`, `TKE_COM` and `TKE_LIB` constants to the `com` and `lib` directories in the project root if it finds them.  
 This allows you to remove unused components and libraries from the project once your application is complete.  
 It's up to you how you track and copy them, as well as automate copying and updating.  
@@ -241,8 +286,14 @@ git submodule add --depth 1 -b stable "https://github.com/MissKittin/php-js-css-
 Some extra tools require toolkit libraries and they don't know where they are.  
 Tell them this via environment variables:
 ```
+# nix
 export TK_COM=./tk/com
 export TK_LIB=./tk/lib
+```
+```
+rem windows
+set TK_COM=.\tk\com
+set TK_LIB=.\tk\lib
 ```
 
 ### GNU GPL
@@ -379,7 +430,12 @@ I gra gitara :)
 The Toolkit does not support ECMAScript older than 6.  
 If you need compatibility with very old browsers, you must take care of it yourself.
 
-### Packing the toolkit into Phar
+### Packing into Phar
+You can bundle individual parts of a project.  
+This will save disk space and make it much easier to transfer them.  
+However, this will negatively impact performance - **use it wisely**.
+
+#### The toolkit
 If a better option is to pack the libraries and components into one file, use the `mkphar.php` utility:
 ```
 cd ./tk
@@ -425,6 +481,29 @@ php -d phar.readonly=0 ./bin/mkphar.php --compress=gz --source=lib --ignore=test
 ```
 you can also use `--include-regex` option.
 
+#### The application
+First you need to edit the `app/lib/stdlib.php` library.  
+There is a commented out block of code that sets the `APP_ROOT` constant. Follow the instructions in the comment above that block.  
+Then run in the project's root directory:
+```
+php -d phar.readonly=0 ./tk/bin/mkphar.php --compress=gz --source=app --ignore=bin/ --ignore=tests/ --ignore=README.md --output=app.phar
+```
+You can add the `--ignore=assets/` if you are not using inline assets.  
+To improve performance you can disable compression by removing the `--compress` argument.  
+The last step is to edit the `public/index.php`:
+```
+<?php require 'phar://../app.phar/app/entrypoint.php'; ?>
+```
+The `app/lib/stdlib.php` library will recognize if the application is bundled, you don't have to worry about it.
+
+#### The Composer
+Run in the project's root directory:
+```
+php -d phar.readonly=0 ./tk/bin/mkphar.php --compress=gz --source=vendor --ignore=bin/ --ignore=build/ --ignore=doc/ --ignore=docs/ --ignore=Test/ --ignore=Tests/ --ignore=tests/ --ignore=.codeclimate --ignore=.doctrine-project.json --ignore=.github/ --ignore=.codeclimate.yml --ignore=.editorconfig --ignore=.gitattributes --ignore=.gitignore --ignore=.gitmodules --ignore=build.properties --ignore=build.xml --ignore=CHANGELOG --ignore=CHANGELOG.md --ignore=composer.json --ignore=composer.lock --ignore=CONTRIBUTING.md --ignore=extension.neon --ignore=Makefile --ignore=psalm.xml --ignore=renovate.json --ignore=.php_cs --ignore=.phpstorm.meta.php --ignore=.rmt.yml --ignore=.scrutinizer.yml --ignore=.sensiolabs.yml --ignore=.styleci.yml --ignore=.travis.yml --ignore=.whitesource "--ignore-regex=.dist$"  "--ignore-regex=.sh$" "--ignore-regex=(?i)README.md$" --output=vendor.phar
+```
+To improve performance you can disable compression by removing the `--compress` argument.  
+`app/entrypoint.php` is already prepared for this, you don't need to edit anything.
+
 ### Installing Composer
 To install Composer, run:
 ```
@@ -437,7 +516,7 @@ Predis is supported but not directly - the PHPRedis API (`redis` PHP extension) 
 For Predis, a `predis_phpredis_proxy` class from the `predis_connect.php` library is needed.  
 To install Predis, run:
 ```
-php ./tk/bin/composer.phar --optimize-autoloader --no-cache require predis/predis
+php ./tk/bin/composer.phar require predis/predis
 ```
 For more information, see the `predis_connect.php` library  
 **Note:** Predis requires PHP >= 7.2, for PHP >= 5.3.9 use Predis v1.1.10  
@@ -451,7 +530,7 @@ git clone "https://github.com/predis/predis.git" ./vendor
 You can use Memcached without the PECL extension via the memcached.php package.  
 To install memcached.php, run:
 ```
-php ./tk/bin/composer.phar --optimize-autoloader --no-cache require clickalicious/memcached.php
+php ./tk/bin/composer.phar require clickalicious/memcached.php
 ```
 Then include the `clickalicious_memcached.php` library:
 ```
@@ -461,6 +540,34 @@ if(!class_exists('Memcached'))
 This library works with the `memcached_connect.php` and `cache_container.php`.
 
 # How to create application
+
+### Debug Bar
+A useful function that allows you to have insight into what is happening inside the application.  
+The `app/lib/maximebf_debugbar.php` library provides support for the package and if it is not active it uses a dummy class - there is no need to remove the debugging code.  
+You just need to install the package:
+```
+php ./tk/bin/composer.phar require --dev maximebf/debugbar
+```
+DebugBar will only be activated if the `APP_ENV` variable is set appropriately:
+```
+export APP_ENV=dev
+```
+For more info see the `app/lib/maximebf_debugbar.php` library, [the package's test page](http://phpdebugbar.com/) and its [documentation](http://phpdebugbar.com/docs/).
+
+### Symfony error handler
+To make exceptions more readable, you can install the error handler from Symfony.  
+The code that starts the handler is already in `app/entrypoint.php`, you just need to install the package:
+```
+php ./tk/bin/composer.phar require --dev symfony/error-handler
+```
+If you are using older versions of PHP, you can use the abandoned package:
+```
+php ./tk/bin/composer.phar require --dev symfony/debug
+```
+Error handler will only be activated if the `APP_ENV` variable is set appropriately:
+```
+export APP_ENV=dev
+```
 
 ### Templates
 Copy them and start creating  
@@ -472,7 +579,9 @@ Copy them and start creating
 * `app/src/models/cache_model_template.php`
 * `app/src/models/pdo_model_template.php`
 * `app/src/routes/route_template.php`
-* `app/src/views/view_template`
+* `app/src/views/view_template`  
+	`template_config_ng.php` file contains configuration template via `app/lib/basic_template_config.php` library  
+	to apply, rename `template_config_ng.php` to `template_config.php`
 * `app/tests/ns_test_template.php` - allows you to create mock PHP functions and classes
 * `app/tests/test_template.php`
 
@@ -514,8 +623,8 @@ Use the preprocessed asset: in `main.php`
 
 But if you don't любишь java in "script" version (like me), you can do it in PHP too:
 ```
-php ./tk/bin/composer.phar require scssphp/scssphp
-php ./tk/bin/composer.phar require leafo/lessphp
+php ./tk/bin/composer.phar require --dev scssphp/scssphp
+php ./tk/bin/composer.phar require --dev leafo/lessphp
 ```
 Use the preprocessed asset: in `main.php`
 ```
@@ -578,8 +687,73 @@ The way of using `./tk/bin/matthiasmullie-minify.php` is the same as in the webd
 **Note:** before use, you need to install the composer and minifier package:
 ```
 mkdir ./tk/bin/composer
-php ./tk/bin/composer.phar --optimize-autoloader --no-cache --working-dir=./tk/bin/composer require matthiasmullie/minify
+php ./tk/bin/composer.phar --working-dir=./tk/bin/composer require matthiasmullie/minify
 ```
+if the toolkit project is a composer package, you just need to install the package:
+```
+composer require --dev matthiasmullie/minify
+```
+and run the tool:
+```
+composer tk matthiasmullie-minify --dir ./public/assets
+```
+
+### Single Page Application
+I won't give you a ready-made method, you have to design it yourself.  
+You have to decide whether the frontend will be a separate project or maybe in the application repository.  
+I can give you a hint: the magic is all in the bundler configuration.  
+For example, for VITE you need to add to the `vite.config.js`:
+```
+import { fileURLToPath, URL } from 'node:url'
+
+//
+
+export default defineConfig({
+  //
+
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./app/ui', import.meta.url)) // instead of ./src
+    }
+  },
+  root: './app/ui', // instead of ./src
+  build: {
+    outDir: '../../public', // instead of ../dist
+    emptyOutDir: false // do not purge public dir
+  }
+})
+```
+For convenience, add scripts to `package.json`:
+```
+{
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  }
+}
+```
+To add the frontend source code to your application, follow these steps:
+* install npm packages
+* configure bundler
+* create `app/ui` directory - this will be your `src` directory
+* create file `app/ui/index.html` - this will be the entrypoint of the application frontend
+* create a directory `public/api` and move files `public/index.php` and `public/.htaccess` to it
+* correct `../app/entrypoint.php` to `../../app/entrypoint.php` in `public/api/index.php`
+* add to the `app/entrypoint.php` to disable CORS restrictions during development:
+
+		if(app_env('APP_ENV') === 'dev')
+		{
+			header('Access-Control-Allow-Origin: *');
+			header('Access-Control-Allow-Credentials: true');
+		}
+
+* configure the frontend API support so that for the development environment the URL points to `http://localhost:8080/api`, but for the production environment it points to `/api`
+* `npm run dev`  
+	run also `APP_ENV=dev php ./tk/bin/serve.php` in background to access API, kill when done
+* `npm run build`
+* `php ./tk/bin/serve.php`  
+	from now on, the frontend is served by a built-in PHP server
 
 ### Seeding database offline with pdo_connect() (optional)
 To offline seed database, run:
@@ -792,17 +966,17 @@ server {
 	listen [::]:8080;
 
 	root /absolute/path/to/php-js-css-web-toolkit-app/public;
-	index index.php index.html index.htm;
+	index index.php index.html;
 
 	# Enable directory listing
 	#autoindex on;
 
 	location / {
 		# Allow directory listing
-		#try_files $uri $uri/ /index.php?$query_string;
+		#try_files $uri $uri/ /index.php;
 
 		# Disallow directory listing
-		try_files $uri /index.php?$query_string;
+		try_files $uri /index.php;
 	}
 
 	# Proxy to the websockets.php server
@@ -836,8 +1010,16 @@ server {
 	#}
 
 	location ~ \.php$ {
-		include snippets/fastcgi-php.conf;
-		fastcgi_pass unix:/run/php/php-fpm.sock;
+		# snippets/fastcgi-php.conf;
+		try_files $fastcgi_script_name /index.php;
+		fastcgi_split_path_info ^(.+?\.php)(/.*)$;
+		set $path_info $fastcgi_path_info;
+		fastcgi_param PATH_INFO $path_info;
+		fastcgi_index index.php;
+		fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+		include fastcgi.conf;
+
+		fastcgi_pass unix:/run/php/php7.4-fpm.sock;
 
 		# Remove the following code
 		# if the application is to be
@@ -861,7 +1043,7 @@ server {
 	listen [::]:80;
 
 	root /absolute/path/to/php-js-css-web-toolkit-app/public;
-	index index.php index.html index.htm;
+	index index.php index.html;
 
 	server_name myapp.com www.myapp.com;
 
@@ -870,10 +1052,10 @@ server {
 
 	location / {
 		# Allow directory listing
-		#try_files $uri $uri/ /index.php?$query_string;
+		#try_files $uri $uri/ /index.php;
 
 		# Disallow directory listing
-		try_files $uri /index.php?$query_string;
+		try_files $uri /index.php;
 	}
 
 	# Proxy to the websockets.php server
@@ -907,8 +1089,16 @@ server {
 	#}
 
 	location ~ \.php$ {
-		include snippets/fastcgi-php.conf;
-		fastcgi_pass unix:/run/php/php-fpm.sock;
+		# snippets/fastcgi-php.conf;
+		try_files $fastcgi_script_name /index.php;
+		fastcgi_split_path_info ^(.+?\.php)(/.*)$;
+		set $path_info $fastcgi_path_info;
+		fastcgi_param PATH_INFO $path_info;
+		fastcgi_index index.php;
+		fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+		include fastcgi.conf;
+
+		fastcgi_pass unix:/run/php/php7.4-fpm.sock;
 
 		# Remove the following code
 		# if the application is to be
@@ -938,18 +1128,24 @@ server {
 	listen 443 ssl http2;
 	listen [::]:443 ssl http2;
 
-	include snippets/ssl-myapp.com.conf;
-	include snippets/ssl-params.conf;
+	#include snippets/ssl-myapp.com.conf;
+		ssl_certificate /etc/letsencrypt/live/myapp.com/fullchain.pem;
+		ssl_certificate_key /etc/letsencrypt/live/myapp.com/privkey.pem;
+	#include snippets/ssl-params.conf;
+		ssl_protocols TLSv1.2 TLSv1.3; # Requires nginx >= 1.13.0 else use TLSv1.2
+		ssl_ciphers ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384;
+		ssl_prefer_server_ciphers on;
+		ssl_session_cache shared:SSL:10m;
+		ssl_dhparam /etc/ssl/certs/dhparam.pem;
+		ssl_ecdh_curve secp384r1; # Requires nginx >= 1.1.0
 
 	ssl_session_cache shared:SSL:10m;
 	ssl_session_timeout 10m;
 	keepalive_timeout 70;
-	ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
-	ssl_ciphers HIGH:!aNULL:!MD5;
 	add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
 
 	root /absolute/path/to/php-js-css-web-toolkit-app/public;
-	index index.php index.html index.htm;
+	index index.php index.html;
 
 	server_name myapp.com www.myapp.com;
 
@@ -958,10 +1154,10 @@ server {
 
 	location / {
 		# Allow directory listing
-		#try_files $uri $uri/ /index.php?$query_string;
+		#try_files $uri $uri/ /index.php;
 
 		# Disallow directory listing
-		try_files $uri /index.php?$query_string;
+		try_files $uri /index.php;
 	}
 
 	# Proxy to the websockets.php server
@@ -995,8 +1191,16 @@ server {
 	#}
 
 	location ~ \.php$ {
-		include snippets/fastcgi-php.conf;
-		fastcgi_pass unix:/run/php/php-fpm.sock;
+		# snippets/fastcgi-php.conf;
+		try_files $fastcgi_script_name /index.php;
+		fastcgi_split_path_info ^(.+?\.php)(/.*)$;
+		set $path_info $fastcgi_path_info;
+		fastcgi_param PATH_INFO $path_info;
+		fastcgi_index index.php;
+		fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+		include fastcgi.conf;
+
+		fastcgi_pass unix:/run/php/php7.4-fpm.sock;
 
 		# Remove the following code
 		# if the application is to be

@@ -22,10 +22,7 @@
 	require APP_MODEL.'/samples/login_library_test_credentials.php'; // import credentials and callback_function()
 
 	if(require APP_CTRL.'/samples/login-library-test.php')
-	{
-		app_template_inline::finish_request();
 		return;
-	}
 
 	$view->view('login-library-test');
 ?>

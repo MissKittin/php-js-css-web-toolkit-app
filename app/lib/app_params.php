@@ -3,29 +3,27 @@
 	 * App input parameter manipulation library
 	 *
 	 * Functions:
-	 *  app_params - $_SERVER['PATH_INFO'] replacement
+	 *  app_params - cache for switch_path_info.php library
 	 *  app_params_explode - wrapper that converts a string to an array
 	 */
+
+	class app_params_exception extends Exception {}
 
 	function app_params()
 	{
 		/*
-		 * $_SERVER['PATH_INFO'] replacement
-		 *
-		 * If the application's public directory is in subdirectories,
-		 * removes them from the path
-		 *
-		 * Note:
-		 *  on cli-server if the file doesn't exist,
-		 *  the $_SERVER['SCRIPT_FILENAME'] will contain
-		 *  the path to the router file.
-		 *  in this case the function won't work,
-		 *  but this is not a bug - it's a feature
+		 * Cache for switch_path_info.php library
 		 *
 		 * Required $_SERVER variables:
 		 *  REQUEST_URI
 		 *  SCRIPT_FILENAME
 		 *  DOCUMENT_ROOT
+		 *
+		 * Warning:
+		 *  switch_path_info.php library is required
+		 *
+		 * Note:
+		 *  throws an app_params_exception on error
 		 *
 		 * Usage:
 			switch(app_params())
@@ -43,32 +41,23 @@
 
 		static $cache=null;
 
-		if($cache !== null)
-			return $cache;
-
-		$request_uri=$_SERVER['REQUEST_URI'];
-		$script_relative_path=strtr(substr(
-			dirname($_SERVER['SCRIPT_FILENAME']),
-			strlen($_SERVER['DOCUMENT_ROOT'])
-		), '\\', '/');
-
-		if(strcmp($script_relative_path, $request_uri) === 1)
-			$i_len=strlen($request_uri);
-		else
-			$i_len=strlen($script_relative_path);
-
-		for($i=0; $i<$i_len; ++$i)
+		if($cache === null)
 		{
-			if($script_relative_path[$i] === $request_uri[$i])
-				continue;
+			if(!function_exists('switch_path_info'))
+				require TK_LIB.'/switch_path_info.php';
 
-			break;
+			foreach(['REQUEST_URI', 'SCRIPT_FILENAME', 'DOCUMENT_ROOT'] as $param)
+				if(!isset($_SERVER[$param]))
+					throw new app_params_exception(
+						'$_SERVER["'.$param.'"] is not set'
+					);
+
+			$cache=switch_path_info(
+				$_SERVER['REQUEST_URI'],
+				$_SERVER['SCRIPT_FILENAME'],
+				$_SERVER['DOCUMENT_ROOT']
+			);
 		}
-
-		if($i !== 0)
-			$request_uri=substr($request_uri, $i);
-
-		$cache=trim(strtok($request_uri, '?'), '/');
 
 		return $cache;
 	}
@@ -78,8 +67,11 @@
 		 * An app_params() wrapper that converts a string to an array
 		 *
 		 * Note:
-		 *  the conversion result will be copied
+		 *  the conversion result will be cached
 		 *  after the first use of the function
+		 *
+		 * Warning:
+		 *  app_params function is required
 		 *
 		 * Usage:
 			switch(app_params_explode(0))

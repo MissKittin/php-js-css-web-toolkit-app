@@ -78,3 +78,5 @@
 			echo 'Generated hash: '.string2hash($_POST['passwdhash']);
 	?>
 </form>
+
+<?php php_debugbar::get_page_content(); ?>

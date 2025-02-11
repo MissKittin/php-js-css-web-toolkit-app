@@ -33,6 +33,8 @@
 			]);
 
 			$this->query_builder->set_fetch_mode(PDO::FETCH_NUM);
+
+			php_debugbar::get_collector('pdo')->addConnection(pdo_instance());
 		}
 		private function disconnect()
 		{
@@ -74,7 +76,10 @@
 
 			$query=$this->query_builder->query();
 
-			// the layout of the database is known
+			if($query !== false)
+			{
+				// the layout of the database is known
+
 				$query_size=count($query);
 
 				for($i=0; $i<$query_size; ++$i)
@@ -83,6 +88,7 @@
 						htmlspecialchars($query[$i][1], ENT_QUOTES, 'UTF-8'),
 						htmlspecialchars($query[$i][2], ENT_QUOTES, 'UTF-8')
 					];
+			}
 
 			// now close the database connection if this is the last call to the model
 			if(

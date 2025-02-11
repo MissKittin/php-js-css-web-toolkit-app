@@ -46,3 +46,5 @@
 		<input type="hidden" name="<?php echo csrf_print_token('parameter'); ?>" value="<?php echo csrf_print_token('value'); ?>">
 	</form>
 </div>
+
+<?php php_debugbar::get_page_content(); ?>

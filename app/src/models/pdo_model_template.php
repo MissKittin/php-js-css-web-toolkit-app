@@ -45,6 +45,8 @@
 				}
 			);
 
+			php_debugbar::get_collector('pdo')->addConnection($this->pdo_handle);
+
 			//$this->query_builder=new pdo_crud_builder([
 			//	'pdo_handle'=>$this->pdo_handle
 			//]);

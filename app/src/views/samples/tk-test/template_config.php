@@ -1,10 +1,15 @@
 <?php
-	$view['lang']='en_US';
-	$view['title']='Toolkit tests';
-	$view['meta_description']='Toolkit test';
-	$view['meta_robots']='noindex,nofollow';
+	php_debugbar::get_template_config($view);
 
-	$view['opengraph_headers'][]=['url', (empty($_SERVER['HTTPS']) ? 'http' : 'https').'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']];
-	$view['opengraph_headers'][]=['type', 'website'];
-	$view['opengraph_headers'][]=['site_name', 'PHP JS CSS Web Toolkit App'];
-?>
+	require APP_LIB.'/basic_template_config.php';
+	basic_template_config($view, static::class)
+
+	::	lang('en_US')
+	::	title('Toolkit tests')
+	::	meta_description('Toolkit test')
+	::	meta_robots('noindex,nofollow')
+
+	::	og('url', (empty($_SERVER['HTTPS']) ? 'http' : 'https').'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'])
+	::	og('type', 'website')
+	::	og('site_name', 'PHP JS CSS Web Toolkit App')
+; ?>

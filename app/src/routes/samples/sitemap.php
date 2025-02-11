@@ -16,11 +16,14 @@
 	require APP_CTRL.'/samples/robots-sitemap.php';
 
 	sitemap([
+		'/',
 		'/about',
+		'/bootstrap-test',
 		'/check-date',
 		'/database-test',
-		'/obsfucate-html',
 		'/login-library-test',
+		'/multipage-test',
+		'/obsfucate-html',
 		'/phar-test',
 		'/preprocessing-test'
 	]);

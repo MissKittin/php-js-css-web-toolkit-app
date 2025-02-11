@@ -16,6 +16,18 @@
 		const APP_DIR=__DIR__.'/..';
 		const APP_ROOT=APP_DIR.'/..';
 
+		/*
+		 * If you want to package your application into phar
+		 * you need to remove the const APP_ROOT above
+		 * and uncomment the block below
+		 */
+		//if(Phar::running(false) === '')
+		//	define('APP_ROOT', APP_DIR.'/..');
+		//else
+		//	define('APP_ROOT', dirname(
+		//		Phar::running(false)
+		//	));
+
 		const APP_COM=APP_DIR.'/com';
 		const APP_LIB=__DIR__;
 
@@ -46,8 +58,8 @@
 			if(is_file(APP_ROOT.'/tk.phar'))
 			{
 				define('TK_PHAR', APP_ROOT.'/tk.phar');
-				define('TK_COM', TK_PHAR.'/com');
-				define('TK_LIB', TK_PHAR.'/lib');
+				define('TK_COM', 'phar://'.TK_PHAR.'/com');
+				define('TK_LIB', 'phar://'.TK_PHAR.'/lib');
 			}
 			else if(is_dir(APP_ROOT.'/tk'))
 			{
@@ -85,8 +97,8 @@
 			){
 				if(is_file(APP_ROOT.'/tke.phar')){
 					define('TKE_PHAR', APP_ROOT.'/tke.phar');
-					define('TKE_COM', TKE_PHAR.'/com');
-					define('TKE_LIB', TKE_PHAR.'/lib');
+					define('TKE_COM', 'phar://'.TKE_PHAR.'/com');
+					define('TKE_LIB', 'phar://'.TKE_PHAR.'/lib');
 				}
 				else if(is_dir(APP_ROOT.'/tke'))
 				{

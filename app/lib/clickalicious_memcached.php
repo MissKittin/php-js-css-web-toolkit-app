@@ -5,10 +5,18 @@
 	 * Warning:
 	 *  you can only connect to the first server, the rest will be ignored
 	 *  clickalicious/memcached.php package is required
+	 *
+	 * Note:
+	 *  throws an clickalicious_memcached_exception on error
 	 */
 
+	if(class_exists('Memcached'))
+		return false;
+
+	class clickalicious_memcached_exception extends Exception {}
+
 	if(!class_exists('\Clickalicious\Memcached\Client'))
-		throw new app_exception(
+		throw new clickalicious_memcached_exception(
 			'clickalicious/memcached.php package is not installed'
 		);
 

@@ -43,6 +43,8 @@
 					// $error->getMessage();
 				}
 			);
+
+			php_debugbar::get_collector('pdo')->addConnection($this->pdo_handle);
 		}
 		protected function connect_redis()
 		{

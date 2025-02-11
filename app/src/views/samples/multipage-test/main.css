@@ -1,0 +1,9 @@
+#app,
+#menu {
+	display: none;
+}
+#menu,
+.page_title,
+#not_found {
+	text-align: center;
+}

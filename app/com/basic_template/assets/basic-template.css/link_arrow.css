@@ -1,0 +1,6 @@
+a:after {
+	content: " \2500\25B6";
+}
+.link_no_arrow:after {
+	content: "";
+}

@@ -53,6 +53,10 @@
 						'time_cost'=>PASSWORD_ARGON2_DEFAULT_TIME_COST, // int() (default: 2)
 						'threads'=>PASSWORD_ARGON2_DEFAULT_THREADS // int (default: 2)
 					]);
+			break;
+			case 'plaintext':
+				login_password_hash::algo(null);
+			break;
 			default:
 				throw new app_exception('Unknown password hash algorithm');
 		}

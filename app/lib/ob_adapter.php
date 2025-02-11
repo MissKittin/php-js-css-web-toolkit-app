@@ -6,11 +6,15 @@
 	 *  ob_adapter_obminifier - adapter for ob_minifier.php library
 	 *  ob_adapter_obsfucator - adapter for ob_sfucator.php library
 	 *  ob_adapter_gzip - ob_gzhandler replacement
+	 *   zlib extension is required
 	 *   does not require additional libraries
+	 *   throws an ob_adapter_exception on error
 	 *  ob_adapter_filecache - basic file cache
 	 *   does not require additional libraries
 	 *  ob_adapter_gunzip - decompress if browser does not support gzip
+	 *   zlib extension is required
 	 *   does not require additional libraries
+	 *   throws an ob_adapter_exception on error
 	 *
 	 * Usage:
 		if(ob_adapter
@@ -19,6 +23,8 @@
 		::	start())
 			exit(); // or return;
 	 */
+
+	class ob_adapter_exception extends Exception {}
 
 	interface ob_adapter_module
 	{
@@ -98,6 +104,11 @@
 	{
 		public function __construct()
 		{
+			if(!function_exists('gzencode'))
+				throw new ob_adapter_exception(
+					'zlib extension is not loaded'
+				);
+
 			header('Content-Encoding: gzip');
 		}
 
@@ -155,6 +166,16 @@
 	}
 	class ob_adapter_gunzip implements ob_adapter_module
 	{
+		public function __construct()
+		{
+			if(function_exists('gzdecode'))
+				return;
+
+			throw new ob_adapter_exception(
+				'zlib extension is not loaded'
+			);
+		}
+
 		public function exec($buffer)
 		{
 			if(

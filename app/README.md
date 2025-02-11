@@ -35,13 +35,15 @@ To switch the application to debug mode, set the environment variable:
 ```
 export APP_ENV=dev
 ```
+This variable will also enable the DebugBar and Symfony error handling if packages are installed.
 
 # Password hash algorithm
 To change the hash algorithm, set the environment variable:
 ```
 export APP_PASSWD_HASH=argon2id
 ```
-Available options: `bcrypt`, `argon2i`, `argon2id`
+Available options: `bcrypt`, `argon2i`, `argon2id`, `plaintext`  
+**warning:** `plaintext` can only be used in a dev env (`export APP_ENV=dev`)
 
 # Session data in cookie
 By default (if possible) the application stores session data in an encrypted cookie using the `sec_lv_encrypter.php` library.  
@@ -185,7 +187,9 @@ REDIS_SOCKET=/var/run/redis/redis.sock
 * `app_params.php` - app input parameter manipulation library
 * `app_session.php` - modular session backend
 * `app_template.php` - default http headers and a basic_template overlay that saves typing
+* `basic_template_config.php` - configuration interface
 * `clickalicious_memcached.php` - Memcached polyfill - memcached.php proxy
+* `maximebf_debugbar.php` - facade for DebugBar
 * `ob_adapter.php` - modular output buffer
 * `ob_cache.php` - a modular overlay for functions from the `ob_cache.php` library
 * `pdo_instance.php` - get PDO handle
