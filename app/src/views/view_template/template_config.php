@@ -1,17 +1,21 @@
 <?php
 	php_debugbar::get_template_config($view);
 
+	$cache['host_url']=(empty($_SERVER['HTTPS']) ? 'http' : 'https').'://'.$_SERVER['HTTP_HOST'];
+	$cache['canonical']=$cache['host_url'].$_SERVER['REQUEST_URI'];
+
 	//$view['_csp_header']['script-src'][]='\'sha256-something\'';
 
 	$view['_lang']='en';
 	$view['_title']='Page title';
 	$view['_meta_description']='Page description';
 	$view['_meta_robots']='index,follow';
+	if(!isset($view['_html_headers'])) $view['_html_headers']=''; $view['_html_headers'].='<link rel="canonical" href="'.$cache['canonical'].'">';
 
-	$view['_opengraph_headers'][]=['url', (empty($_SERVER['HTTPS']) ? 'http' : 'https').'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']];
+	$view['_opengraph_headers'][]=['url', $cache['canonical']];
 	$view['_opengraph_headers'][]=['type', 'website'];
 	$view['_opengraph_headers'][]=['site_name', 'My Awesome Website'];
-	//$view['_opengraph_headers'][]=['image', (empty($_SERVER['HTTPS']) ? 'http' : 'https').'://'.$_SERVER['HTTP_HOST'].app_template::get_public_dir_url().'/assets/website-logo.jpg'];
+	//$view['_opengraph_headers'][]=['image', $cache['host_url'].app_template::get_public_dir_url().'/assets/website-logo.jpg'];
 	//$view['_opengraph_headers'][]=['image:type', 'image/jpeg'];
 	//$view['_opengraph_headers'][]=['image:width', '400'];
 	//$view['_opengraph_headers'][]=['image:height', '300'];
@@ -51,7 +55,7 @@
 
 	$view['my_function']=function($text)
 	{
-		return '<span style="color: red;">'.$text.'</span>';
+		return '<code>'.$text.'</code>';
 	};
 
 	$view['my_variable']='my variables value';

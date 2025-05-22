@@ -1,19 +1,21 @@
 <?php
+	$_cache=basename(__DIR__);
+
 	if(!defined('APP_STDLIB'))
 		require __DIR__.'/../../../lib/stdlib.php';
 
-	if(!file_exists(VAR_DB.'/mysql'))
-		mkdir(VAR_DB.'/mysql');
+	if(!file_exists(VAR_DB.'/'.$_cache))
+		mkdir(VAR_DB.'/'.$_cache);
 
 	return [
 		'db_type'=>'mysql',
-		'host'=>'127.0.0.1',
-		'port'=>'3306',
-		//'socket'=>'/tmp/mysql.sock',
-		'db_name'=>'dbname',
-		'charset'=>'utf8mb4',
-		'user'=>'username',
-		'password'=>'password',
-		'seeded_path'=>VAR_DB.'/mysql'
+		'host'=>app_env('MYSQL_HOST', '127.0.0.1'),
+		'port'=>app_env('MYSQL_PORT', '3306'),
+		'socket'=>app_env('MYSQL_SOCKET', null), // 'socket'=>app_env('MYSQL_SOCKET', '/var/run/mysqld/mysqld.sock'),
+		'db_name'=>app_env('MYSQL_DBNAME', 'dbname'),
+		'charset'=>app_env('MYSQL_CHARSET', 'utf8mb4'),
+		'user'=>app_env('MYSQL_USER', 'username'),
+		'password'=>app_env('MYSQL_PASSWORD', 'password'),
+		'seeded_path'=>VAR_DB.'/'.$_cache
 	];
 ?>

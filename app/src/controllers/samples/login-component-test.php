@@ -47,10 +47,18 @@
 			login_com_reg_view::_()['inline_style']=true;
 
 		if(app_env('APP_MATERIALIZED') === 'true')
+		{
 			login_com_reg_view::_()['template']='materialized';
+
+			if(
+				isset($_COOKIE['app_theme']) &&
+				($_COOKIE['app_theme'] === 'dark') // from app/com/basic_template/assets/basic-template.js/appTheme.js
+			)
+				login_com_reg_view::_()['login_style']='login_materialized_dark.css';
+		}
 		else if(
-			isset($_COOKIE['app_dark_theme']) &&
-			($_COOKIE['app_dark_theme'] === 'true') // from app/com/basic_template/assets/default.js/darkTheme.js
+			isset($_COOKIE['app_theme']) &&
+			($_COOKIE['app_theme'] === 'dark') // from app/com/basic_template/assets/basic-template.js/appTheme.js
 		)
 			login_com_reg_view::_()['login_style']='login_default_dark.css';
 
@@ -182,15 +190,14 @@
 				->	add_csp_header('style-src', '\'unsafe-hashes\'')
 				->	add_csp_header('style-src', '\'sha256-N6tSydZ64AHCaOWfwKbUhxXx2fRFDxHOaL3e3CO7GPI=\'');
 
-				if(app_env('APP_MATERIALIZED') !== 'true')
-				{
-					if(
-						isset($_COOKIE['app_dark_theme']) &&
-						($_COOKIE['app_dark_theme'] === 'true') // from app/com/basic_template/assets/default.js/darkTheme.js
-					)
-						$captcha_form->add_config('middleware_form_style', 'middleware_form_default_dark.css');
-					else
-						$captcha_form->add_config('middleware_form_style', 'middleware_form_default_bright.css');
+				if(
+					isset($_COOKIE['app_theme']) &&
+					($_COOKIE['app_theme'] === 'dark') // from app/com/basic_template/assets/basic-template.js/appTheme.js
+				){
+					$captcha_form->add_config('middleware_form_style', 'middleware_form_default_dark.css');
+
+					if(app_env('APP_MATERIALIZED') === 'true')
+						$captcha_form->add_config('middleware_form_style', 'middleware_form_materialized_dark.css');
 				}
 
 				$captcha_form
@@ -316,15 +323,14 @@
 					return true; // exit()
 			}
 
-			if(app_env('APP_MATERIALIZED') !== 'true')
-			{
-				if(
-					isset($_COOKIE['app_dark_theme']) &&
-					($_COOKIE['app_dark_theme'] === 'true') // from app/com/basic_template/assets/default.js/darkTheme.js
-				)
-					$change_password_form->add_config('middleware_form_style', 'middleware_form_default_dark.css');
-				else
-					$change_password_form->add_config('middleware_form_style', 'middleware_form_default_bright.css');
+			if(
+				isset($_COOKIE['app_theme']) &&
+				($_COOKIE['app_theme'] === 'dark') // from app/com/basic_template/assets/basic-template.js/appTheme.js
+			){
+				$change_password_form->add_config('middleware_form_style', 'middleware_form_default_dark.css');
+
+				if(app_env('APP_MATERIALIZED') === 'true')
+					$change_password_form->add_config('middleware_form_style', 'middleware_form_materialized_dark.css');
 			}
 
 			$change_password_form

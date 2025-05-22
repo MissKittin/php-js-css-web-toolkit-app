@@ -138,6 +138,27 @@
 
 			return $registry->getenv($variable, $default_value);
 		}
+		function app_ioc(?string $name=null)
+		{
+			static $container=null;
+
+			if($container !== null)
+			{
+				if($name !== null)
+					return $container->get(
+						$name
+					);
+
+				return $container;
+			}
+
+			if(!class_exists('ioc_autowired_container'))
+				require TK_LIB.'/ioc_container.php';
+
+			$container=new ioc_autowired_container(true);
+
+			return $container;
+		}
 
 	// classes
 		class app_exception extends Exception {}

@@ -4,6 +4,8 @@
 	require APP_LIB.'/basic_template_config.php';
 	basic_template_config($view, static::class)
 
+	::	cache('canonical', (empty($_SERVER['HTTPS']) ? 'http' : 'https').'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'])
+
 	::	csp('style-src', '\'unsafe-hashes\'')
 	::	csp('style-src', '\'sha256-Ls1729j3r2TF/b4LA4PWZuspbwvcg6xE5uxyBKBeXrI=\'')
 	::	csp('style-src', '\'sha256-LpG2EGpPl462t81FieLddfap21+YrF49ronG6DL+7A8=\'')
@@ -12,8 +14,9 @@
 	::	title('Check date test')
 	::	meta_description('PHP library test')
 	::	meta_robots('index,follow')
+	::	link_canonical(basic_template_cache('canonical'))
 
-	::	og('url', (empty($_SERVER['HTTPS']) ? 'http' : 'https').'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'])
+	::	og('url', basic_template_cache('canonical'))
 	::	og('type', 'website')
 	::	og('site_name', 'PHP JS CSS Web Toolkit App')
 ; ?>

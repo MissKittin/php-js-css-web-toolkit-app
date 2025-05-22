@@ -1,4 +1,14 @@
 <?php
+	if(app_params_explode(1) === 'api')
+	{
+		echo json_encode([
+			'text'=>'This string comes from API',
+			'number'=>rand(0, 10)
+		], JSON_UNESCAPED_UNICODE);
+
+		return;
+	}
+
 	require APP_LIB.'/samples/app_template_inline.php';
 	require APP_LIB.'/samples/ob_cache.php';
 

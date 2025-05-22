@@ -4,12 +4,15 @@
 	require APP_LIB.'/basic_template_config.php';
 	basic_template_config($view, static::class)
 
+	::	cache('canonical', (empty($_SERVER['HTTPS']) ? 'http' : 'https').'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'])
+
 	::	lang('en_US')
 	::	title('Database')
 	::	meta_description('App test - relational database part')
 	::	meta_robots('index,follow')
+	::	link_canonical(basic_template_cache('canonical'))
 
-	::	og('url', (empty($_SERVER['HTTPS']) ? 'http' : 'https').'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'])
+	::	og('url', basic_template_cache('canonical'))
 	::	og('type', 'website')
 	::	og('site_name', 'PHP JS CSS Web Toolkit App')
 

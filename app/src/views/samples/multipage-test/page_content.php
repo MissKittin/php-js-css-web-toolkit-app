@@ -5,7 +5,8 @@
 <div id="menu">
 	<a href="#!home">Home</a> |
 	<a href="#!about">About</a> |
-	<a href="#!products">Articles</a> |
+	<a href="#!products">Products</a> |
+	<a id="menu_api" href="#!api">API</a> |
 	<a href="#!nonexistent">Error</a><br>
 </div>
 <div id="app">
@@ -39,9 +40,11 @@
 			);
 		?>
 	</div>
+	<div id="api"></div>
 	<div id="not_found">
 		<h1>Page not found!</h1>
 	</div>
 </div>
 <script><?php readfile(__DIR__.'/main.js'); ?></script>
+<script><?php readfile(TK_LIB.'/getJson.js'); ?></script>
 <?php php_debugbar::get_page_content(); ?>

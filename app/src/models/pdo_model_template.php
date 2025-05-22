@@ -4,13 +4,15 @@
 	//use pdo_instance;
 	//use pdo_crud_builder;
 	//use pdo_cheat;
+	//use php_debugbar;
 
 	class pdo_model_template
 	{
 		//protected $database='sqlite';
 		protected $database=null; // default
 
-		protected $model_params=null;
+		protected $model_params;
+		protected $table_name;
 		protected $connected=false;
 		protected $pdo_handle=null;
 		//protected $query_builder=null;
@@ -19,6 +21,7 @@
 		public function __construct($model_params)
 		{
 			$this->model_params=$model_params;
+			$this->table_name=$model_params['table_name'];
 
 			//
 		}
@@ -44,6 +47,9 @@
 					// $error->getMessage();
 				}
 			);
+
+			// alternative if you use dependency injection
+			//$this->pdo_handle=app_ioc('PDO');
 
 			php_debugbar::get_collector('pdo')->addConnection($this->pdo_handle);
 

@@ -8,6 +8,56 @@
 	header('X-XSS-Protection: 0');
 	header('X-Content-Type-Options: nosniff');
 
+	/*
+	 * Compatibility bridge
+	 * for app_template class
+	 */
+
+	if(PHP_VERSION_ID < 80000)
+	{
+		trait app_template_arrayaccess
+		{
+			public function offsetExists($offset)
+			{
+				return $this->_offsetExists($offset);
+			}
+			public function offsetGet($offset)
+			{
+				return $this->_offsetGet($offset);
+			}
+			public function offsetSet($offset, $value)
+			{
+				$this->_offsetSet($offset, $value);
+			}
+			public function offsetUnset($offset)
+			{
+				$this->_offsetUnset($offset);
+			}
+		}
+	}
+	else
+	{
+		trait app_template_arrayaccess
+		{
+			public function offsetExists(mixed $offset): bool
+			{
+				return $this->_offsetExists($offset);
+			}
+			public function offsetGet(mixed $offset): mixed
+			{
+				return $this->_offsetGet($offset);
+			}
+			public function offsetSet(mixed $offset, mixed $value): void
+			{
+				$this->_offsetSet($offset, $value);
+			}
+			public function offsetUnset(mixed $offset): void
+			{
+				$this->_offsetUnset($offset);
+			}
+		}
+	}
+
 	class app_template implements ArrayAccess
 	{
 		/*
@@ -24,10 +74,13 @@
 		 *
 		 * Warning:
 		 *  basic_template component is required
+		 *  app_template_arrayaccess trait is required
 		 *
 		 * Required $_SERVER variables:
 		 *  $_SERVER['SCRIPT_NAME']
 		 */
+
+		use app_template_arrayaccess;
 
 		protected static $public_dir=null;
 
@@ -122,25 +175,25 @@
 			->	__set($key, $value);
 		}
 
-		public function offsetSet($key, $value)
+		protected function _offsetSet($key, $value)
 		{
 			return $this
 			->	instance
 			->	__set($key, $value);
 		}
-		public function offsetExists($key)
+		protected function _offsetExists($key)
 		{
 			return $this
 			->	instance
 			->	offsetExists($key);
 		}
-		public function offsetGet($key)
+		protected function _offsetGet($key)
 		{
 			return $this
 			->	instance
 			->	__get($key);
 		}
-		public function offsetUnset($key)
+		protected function _offsetUnset($key)
 		{
 			return $this
 			->	instance
@@ -154,7 +207,7 @@
 				$page_content
 			);
 
-			if(!$this->do_return_content)
+			if(!$this->return_content)
 				static::finish_request();
 
 			return $output;

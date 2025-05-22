@@ -1,7 +1,7 @@
 # Application assets - new method
 Run in parent directory:
 ```
-php ./app/bin/build-app.php
+php ./app/bin/samples/build-app.php
 ```
 and serve:
 ```
@@ -11,7 +11,7 @@ php ./tk/bin/serve.php
 # Application assets - old method
 1. To install assets for example project, run in parent directory:
 
-		php ./app/bin/install-assets.php
+		php ./app/bin/samples/install-assets.php
 
 	and follow the prompts  
 	or you can use inline assets (but this is not recommended)
@@ -185,11 +185,12 @@ REDIS_SOCKET=/var/run/redis/redis.sock
 ### Libraries
 * `app_db_migrate.php` - `pdo_migrate.php` library integration with `pdo-connect.php` tool
 * `app_params.php` - app input parameter manipulation library
+* `app_root_path.php` - print path/URL to application root directory
 * `app_session.php` - modular session backend
 * `app_template.php` - default http headers and a basic_template overlay that saves typing
 * `basic_template_config.php` - configuration interface
 * `clickalicious_memcached.php` - Memcached polyfill - memcached.php proxy
-* `maximebf_debugbar.php` - facade for DebugBar
+* `maximebf_debugbar.php` - Facade for Maxime Bouroumeau-Fuseau's DebugBar
 * `ob_adapter.php` - modular output buffer
 * `ob_cache.php` - a modular overlay for functions from the `ob_cache.php` library
 * `pdo_instance.php` - get PDO handle
@@ -212,9 +213,11 @@ REDIS_SOCKET=/var/run/redis/redis.sock
 
 ### Tools
 * `app-down.php` - show board "road works"
-* `build-app.php` - application builder
-* `install-assets.php`
-* `remove-samples.php`
 * `replace-public-index-with-link.php`
 * `run-php-tests.php`
 * `session-clean.php` - remove stale sessions (if the application stores the session content in files)
+
+### Sample tools
+* `build-app.php` - sample application builder
+* `install-assets.php`
+* `remove-samples.php`

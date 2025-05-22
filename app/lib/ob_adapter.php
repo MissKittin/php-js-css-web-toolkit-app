@@ -120,9 +120,13 @@
 	class ob_adapter_filecache implements ob_adapter_module
 	{
 		protected $output_file;
+		protected $create_headers_cache=true;
 
 		public static function invalidate(string $output_file)
 		{
+			if(file_exists($output_file.'__headers__'))
+				unlink($output_file.'__headers__');
+
 			if(file_exists($output_file))
 				unlink($output_file);
 		}
@@ -133,6 +137,15 @@
 		){
 			if(file_exists($output_file))
 			{
+				if(file_exists($output_file.'__headers__'))
+					foreach(json_decode(
+						file_get_contents(
+							$output_file.'__headers__'
+						),
+						true
+					) as $header)
+						header($header);
+
 				if(
 					(!isset($_SERVER['HTTP_ACCEPT_ENCODING'])) ||
 					(strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') === false)
@@ -160,7 +173,28 @@
 
 		public function exec($buffer)
 		{
-			file_put_contents($this->output_file, $buffer, FILE_APPEND);
+			if($this->create_headers_cache)
+			{
+				file_put_contents(
+					$this->output_file.'__headers__',
+					json_encode(
+						array_diff(
+							headers_list(),
+							['Content-Encoding: gzip']
+						),
+						JSON_UNESCAPED_UNICODE
+					)
+				);
+
+				$this->create_headers_cache=false;
+			}
+
+			file_put_contents(
+				$this->output_file,
+				$buffer,
+				FILE_APPEND
+			);
+
 			return $buffer;
 		}
 	}

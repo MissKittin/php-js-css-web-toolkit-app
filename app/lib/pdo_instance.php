@@ -66,6 +66,20 @@
 			if(!function_exists('pdo_connect'))
 				require TK_LIB.'/pdo_connect.php';
 
+			// PDO low level debugging (disable php_debugbar::get_collector('pdo')->addConnection() in model)
+			//pdo_connect_bridge::set_class('PDO', function(...$arguments){
+			//	return new class(...$arguments) extends PDO
+			//	{
+			//		public function __construct(...$arguments)
+			//		{
+			//			parent::__construct(...$arguments);
+			//			php_debugbar
+			//			::	get_collector('pdo')
+			//			->	addConnection($this);
+			//		}
+			//	};
+			//});
+
 			if(!is_dir(APP_DB.'/'.$db))
 				throw new pdo_instance_exception(
 					APP_DB.'/'.$db.' not exists'

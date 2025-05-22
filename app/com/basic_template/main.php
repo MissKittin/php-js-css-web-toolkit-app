@@ -31,6 +31,7 @@
 			'' // style nonce
 		];
 		protected static $templating_engine=null;
+		protected static $csp_in_headers=false;
 
 		protected $do_return_content;
 
@@ -53,7 +54,9 @@
 				return;
 			}
 
-			throw new basic_template_exception($library.' library not found');
+			throw new basic_template_exception(
+				$library.' library not found'
+			);
 		}
 		protected static function default_csp_header()
 		{
@@ -67,32 +70,62 @@
 				'form-action'=>['\'self\'']
 			];
 		}
+		protected static function parse_headers_csp($view)
+		{
+			if(static::$inline_assets[0])
+			{
+				static::load_function('rand_str_secure', 'rand_str.php');
+
+				static::$inline_assets[1]=rand_str_secure(32);
+				static::$inline_assets[2]=rand_str_secure(32);
+
+				$view['_csp_header']['script-src'][]='\'nonce-'.static::$inline_assets[1].'\'';
+				$view['_csp_header']['style-src'][]='\'nonce-'.static::$inline_assets[2].'\'';
+			}
+
+			if(static::$csp_in_headers)
+			{
+				$csp_header='';
+
+				foreach($view['_csp_header'] as $csp_param=>$csp_values)
+				{
+					$csp_header.=$csp_param;
+
+					foreach($csp_values as $csp_value)
+						$csp_header.=' '.$csp_value;
+
+					$csp_header.=';';
+				}
+
+				if($csp_header !== '')
+					header(''
+					.	'Content-Security-Policy: '
+					.	$csp_header
+					);
+
+				return;
+			}
+		}
 		protected static function parse_headers_top($view)
 		{
 			if(isset($view['_csp_header']))
 			{
-				if(static::$inline_assets[0])
+				static::parse_headers_csp($view);
+
+				if(!static::$csp_in_headers)
 				{
-					static::load_function('rand_str_secure', 'rand_str.php');
+					?><meta http-equiv="Content-Security-Policy" content="<?php
+						foreach($view['_csp_header'] as $csp_param=>$csp_values)
+						{
+							echo $csp_param;
 
-					static::$inline_assets[1]=rand_str_secure(32);
-					static::$inline_assets[2]=rand_str_secure(32);
+							foreach($csp_values as $csp_value)
+								echo ' '.$csp_value;
 
-					$view['_csp_header']['script-src'][]='\'nonce-'.static::$inline_assets[1].'\'';
-					$view['_csp_header']['style-src'][]='\'nonce-'.static::$inline_assets[2].'\'';
+							echo ';';
+						}
+					?>"><?php
 				}
-
-				?><meta http-equiv="Content-Security-Policy" content="<?php
-					foreach($view['_csp_header'] as $csp_param=>$csp_values)
-					{
-						echo $csp_param;
-
-						foreach($csp_values as $csp_value)
-							echo ' '.$csp_value;
-
-						echo ';';
-					}
-				?>"><?php
 			}
 
 			if(isset($view['_html_headers']))
@@ -160,15 +193,13 @@
 			{
 				if(static::$inline_assets[0])
 				{
+					if(!function_exists('assets_compiler'))
+						require TK_LIB.'/assets_compiler.php';
+
 					?><style nonce="<?php echo static::$inline_assets[2]; ?>"><?php
-						foreach(
-							array_diff(
-								scandir(__DIR__.'/assets/basic-template.css'),
-								['.', '..']
-							)
-							as $inline_style
-						)
-							readfile(__DIR__.'/assets/basic-template.css/'.$inline_style);
+						echo assets_compiler(
+							__DIR__.'/assets/basic-template.css'
+						);
 					?></style><?php
 				}
 				else
@@ -197,10 +228,15 @@
 		{
 			if(!static::$disable_default_assets[1])
 			{
+				if(!function_exists('assets_compiler'))
+					require TK_LIB.'/assets_compiler.php';
+
 				if(static::$inline_assets[0])
 				{
 					?><script nonce="<?php echo static::$inline_assets[1]; ?>"><?php
-						require __DIR__.'/assets/basic-template.js/main.php';
+						echo assets_compiler(
+							__DIR__.'/assets/basic-template.js'
+						);
 					?></script><?php
 				}
 				else
@@ -259,12 +295,22 @@
 			static::$templating_engine[0]=$callback;
 			return static::class;
 		}
-		public static function quick_view(string $view_path, string $page_content='page_content.php')
+		public static function set_csp_in_headers(bool $value)
 		{
+			static::$csp_in_headers=$value;
+			return static::class;
+		}
+		public static function quick_view(
+			string $view_path,
+			string $page_content='page_content.php'
+		){
 			$view['_csp_header']=static::default_csp_header();
 
 			if(file_exists($view_path.'/template_config.php'))
 				include $view_path.'/template_config.php';
+
+			if(isset($view['_csp_header']))
+				static::parse_headers_csp($view);
 
 			require __DIR__.'/view.php';
 		}
@@ -304,11 +350,19 @@
 			$this->add_html_header('<link');
 
 			foreach($params as $param=>$value)
+			{
+				if($value === null)
+				{
+					$this->add_html_header(' '.$param);
+					continue;
+				}
+
 				$this->add_html_header(' '
 				.	$param
 				.	'='
 				.	'"'.$value.'"'
 				);
+			}
 
 			$this->add_html_header('>');
 
@@ -428,8 +482,10 @@
 
 			return $this;
 		}
-		public function view(string $view_path, string $page_content='page_content.php')
-		{
+		public function view(
+			string $view_path,
+			string $page_content='page_content.php'
+		){
 			if($this->disable_registry_reference)
 				$view=$this->registry;
 			else
@@ -443,6 +499,9 @@
 
 			if(file_exists($view_path.'/template_config.php'))
 				include $view_path.'/template_config.php';
+
+			if(isset($view['_csp_header']))
+				static::parse_headers_csp($view);
 
 			require __DIR__.'/view.php';
 

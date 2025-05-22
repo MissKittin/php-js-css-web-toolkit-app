@@ -1,6 +1,6 @@
 <?php
 	/*
-	 * Application builder
+	 * Sample application builder
 	 *
 	 * Warning:
 	 *  install-assets.php app tool is required
@@ -10,9 +10,9 @@
 	 *  matthiasmullie-minify.php tool is required
 	 */
 
-	if(file_exists(__DIR__.'/replace-public-index-with-link.php'))
+	if(file_exists(__DIR__.'/../replace-public-index-with-link.php'))
 		system('"'.PHP_BINARY.'" '
-		.	'"'.__DIR__.'/replace-public-index-with-link.php"'
+		.	'"'.__DIR__.'/../replace-public-index-with-link.php"'
 		);
 
 	if(strtoupper(substr(PHP_OS, 0, 3)) === 'WIN')
@@ -27,32 +27,32 @@
 		);
 
 	system('"'.PHP_BINARY.'" '
-	.	'"'.__DIR__.'/../../tk/bin/assets-compiler.php" '
-	.	'"'.__DIR__.'/../assets" '
-	.	'"'.__DIR__.'/../../public/assets"'
+	.	'"'.__DIR__.'/../../../tk/bin/assets-compiler.php" '
+	.	'"'.__DIR__.'/../../assets" '
+	.	'"'.__DIR__.'/../../../public/assets"'
 	);
 
-	if(!file_exists(__DIR__.'/../../tk/bin/composer.phar'))
+	if(!file_exists(__DIR__.'/../../../tk/bin/composer.phar'))
 		system('"'.PHP_BINARY.'" '
-		.	'"'.__DIR__.'/../../tk/bin/get-composer.php"'
+		.	'"'.__DIR__.'/../../../tk/bin/get-composer.php"'
 		);
 
-	if(!file_exists(__DIR__.'/../../tk/bin/composer'))
+	if(!file_exists(__DIR__.'/../../../tk/bin/composer'))
 	{
-		mkdir(__DIR__.'/../../tk/bin/composer');
+		mkdir(__DIR__.'/../../../tk/bin/composer');
 		system('"'.PHP_BINARY.'" '
-		.	'"'.__DIR__.'/../../tk/bin/composer.phar" '
+		.	'"'.__DIR__.'/../../../tk/bin/composer.phar" '
 		.	'--optimize-autoloader '
 		.	'--no-cache '
-		.	'"--working-dir='.__DIR__.'/../../tk/bin/composer" '
+		.	'"--working-dir='.__DIR__.'/../../../tk/bin/composer" '
 		.	'require matthiasmullie/minify'
 		);
 	}
 
 	system('"'.PHP_BINARY.'" '
-	.	'"'.__DIR__.'/../../tk/bin/matthiasmullie-minify.php" '
-	.	'--dir "'.__DIR__.'/../../public/assets"'
+	.	'"'.__DIR__.'/../../../tk/bin/matthiasmullie-minify.php" '
+	.	'--dir "'.__DIR__.'/../../../public/assets"'
 	);
 
-	@unlink(__DIR__.'/git-init.php');
+	@unlink(__DIR__.'/../git-init.php');
 ?>

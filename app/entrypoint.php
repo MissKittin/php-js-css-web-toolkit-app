@@ -76,6 +76,21 @@
 		error_log('Executed in '.$exec_time.' seconds, '.memory_get_peak_usage().' bytes used, '.count(get_included_files()).' scripts included');
 	});
 
+	//app_ioc()
+	//->	set('PDO', function($container){
+	//		if(!class_exists('pdo_instance'))
+	//			require APP_LIB.'/pdo_instance.php';
+
+	//		return pdo_instance::get(
+	//			'sqlite',
+	//			function($error)
+	//			{
+	//				// $error->getMessage();
+	//			}
+	//		);
+	//	})
+	//->	register_constructor_arg('class_name', 'parameter_name', parameter_value);
+
 	require APP_LIB.'/app_params.php';
 	//require TK_LIB.'/uri_router.php';
 	//require TK_COM.'/superclosure_router/main.php';
@@ -83,14 +98,26 @@
 	require APP_LIB.'/maximebf_debugbar.php';
 	if(php_debugbar
 	::	enable((app_env('APP_ENV') === 'dev'))
+	::	custom_debug_bar(function(){
+			return new DebugBar\StandardDebugBar();
+		})
 	::	set_vendor_dir('phar://'
 		.	APP_ROOT.'/vendor.phar'
 		.	'/vendor'
 		)
 	::	set_vendor_dir(APP_ROOT.'/vendor')
+	::	set_storage(
+			(class_exists('\DebugBar\Storage\FileStorage')) ?
+			new DebugBar\Storage\FileStorage(
+				VAR_LOG.'/maximebf_debugbar'
+			) :
+			new php_debugbar_dummy()
+		)
 	::	collectors([
-			'pdo'=>(class_exists('\DebugBar\DataCollector\PDO\PDOCollector'))? new DebugBar\DataCollector\PDO\PDOCollector() : new php_debugbar_dummy()
+			'pdo'=>(class_exists('\DebugBar\DataCollector\PDO\PDOCollector')) ? new DebugBar\DataCollector\PDO\PDOCollector() : new php_debugbar_dummy()
 		])
+	::	set_csp_nonce('phpdebugbar')
+	::	set_base_url('/__PHPDEBUGBAR__')
 	::	route('/'.app_params()))
 		exit();
 
@@ -113,6 +140,7 @@
 	//	})
 	//::	add(['route-b', 'route-b/(01|02|03|10)'], function($matches){
 	//		// $matches[1] can be not set, 01, 02, 03 or 10
+	//		// return true to abandon the action and jump to the next rule
 	//	}, true)
 	//::	route();
 
@@ -138,6 +166,7 @@
 	//		})
 	//	::	add(['route-b', 'route-b/(01|02|03|10)'], function($matches){
 	//			// $matches[1] can be not set, 01, 02, 03 or 10
+	//			// return true to abandon the action and jump to the next rule
 	//		}, true)
 
 	//	::	set_source_variable('app_params()')

@@ -4,17 +4,22 @@
 	require APP_LIB.'/basic_template_config.php';
 	basic_template_config($view, static::class)
 
+	// Add to cache
+	::	cache('host_url', (empty($_SERVER['HTTPS']) ? 'http' : 'https').'://'.$_SERVER['HTTP_HOST'])
+	::	cache('canonical', basic_template_cache('host_url').$_SERVER['REQUEST_URI'])
+
 //	::	csp('script-src', '\'sha256-something\'')
 
 	::	lang('en')
 	::	title('Page title')
 	::	meta_description('Page description')
 	::	meta_robots('index,follow')
+	::	link_canonical(basic_template_cache('canonical')) // get from cache
 
-	::	og('url', (empty($_SERVER['HTTPS']) ? 'http' : 'https').'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'])
+	::	og('url', basic_template_cache('canonical'))
 	::	og('type', 'website')
 	::	og('site_name', 'My Awesome Website')
-//	::	og('image', (empty($_SERVER['HTTPS']) ? 'http' : 'https').'://'.$_SERVER['HTTP_HOST'].app_template::get_public_dir_url().'/assets/website-logo.jpg')
+//	::	og('image', basic_template_cache('host_url').app_template::get_public_dir_url().'/assets/website-logo.jpg')
 //	::	og('image:type', 'image/jpeg')
 //	::	og('image:width', '400')
 //	::	og('image:height', '300')
@@ -30,7 +35,7 @@
 //	::	scripts(app_template::get_public_dir_url().'/assets/script.js') // or scripts('https://another.server/script.js', 'sha384-hash', 'anonymous')
 //	::	modules(app_template::get_public_dir_url().'/assets/module.js') // or modules('https://another.server/module.js', 'sha384-hash', 'anonymous')
 //	::	scripts_top(app_template::get_public_dir_url().'/assets/script.js') // or scripts_top('https://another.server/script.js', 'sha384-hash', 'anonymous')
-//	::	scripts_top_op(app_template::get_public_dir_url().'/assets/script.js', 'defer') // or scripts_top('https://another.server/script.js', 'defer', 'sha384-hash', 'anonymous')
+//	::	scripts_top_op(app_template::get_public_dir_url().'/assets/script.js', 'defer') // or scripts_top_op('https://another.server/script.js', 'defer', 'sha384-hash', 'anonymous')
 //	::	modules_top(app_template::get_public_dir_url().'/assets/module.js') // or modules_top('https://another.server/module.js', 'sha384-hash', 'anonymous')
 
 	// Bootstrap integration - cdn.jsdelivr.net
@@ -51,7 +56,7 @@
 //	::	scripts(app_template::get_public_dir_url().'/assets/bootstrap.bundle.min.js')
 
 	::	my_function(function($text){
-			return '<span style="color: red;">'.$text.'</span>';
+			return '<code>'.$text.'</code>';
 		})
 
 	::	my_variable('my variables value')

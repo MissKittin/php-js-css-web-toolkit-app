@@ -112,14 +112,20 @@
 		 *  sec_lv_encrypter.php library is required
 		 *  app_session_mod_lv_encrypter trait is required
 		 *
-		 * Required $_SERVER variables:
-		 *  HTTP_HOST
-		 *
 		 * Usage:
 			app_session::add(new app_session_mod_cookie());
 			app_session::add(new app_session_mod_cookie(
 				// use key from env variable (does not save key to file)
 				getenv('SESSION_COOKIE_KEY')
+			));
+			app_session::add(new app_session_mod_cookie(
+				// use key from env variable (does not save key to file)
+				// and define additional parameters for the handler
+				getenv('SESSION_COOKIE_KEY'),
+				[
+					// for more info see sec_lv_encrypter.php library
+					'cookie_domain'=>strtok($_SERVER['HTTP_HOST'], ':')
+				]
 			));
 		 */
 
@@ -127,13 +133,17 @@
 
 		protected $lv_encrypter_key;
 		protected $use_lv_encrypter=false;
+		protected $session_handler_params;
 
-		public function __construct($lv_encrypter_key=null)
-		{
+		public function __construct(
+			$lv_encrypter_key=null,
+			array $session_handler_params=[]
+		){
 			if($this->lv_encrypter_construct(null))
 				return;
 
 			$this->lv_encrypter_key=$lv_encrypter_key;
+			$this->session_handler_params=$session_handler_params;
 		}
 
 		public function boot(): bool
@@ -174,11 +184,13 @@
 					VAR_LIB.'/session_start/session_cookie_key'
 				);
 
-			lv_cookie_session_handler::register_handler([
-				'key'=>$this->lv_encrypter_key,
-				'cipher'=>'aes-256-gcm',
-				'cookie_domain'=>strtok($_SERVER['HTTP_HOST'], ':')
-			]);
+			lv_cookie_session_handler::register_handler(array_merge(
+				$this->session_handler_params,
+				[
+					'key'=>$this->lv_encrypter_key,
+					'cipher'=>'aes-256-gcm'
+				]
+			));
 
 			return lv_cookie_session_handler::session_start();
 		}

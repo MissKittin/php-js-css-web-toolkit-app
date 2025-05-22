@@ -5,6 +5,7 @@ Skeleton of the page
 * `generate_csp_hash.php`
 * `rand_str.php`
 * `registry.php`
+* `assets_compiler.php` (if `set_inline_assets(true)` was used)
 
 ## Note
 Throws an `basic_template_exception` on error
@@ -17,7 +18,8 @@ Throws an `basic_template_exception` on error
 * `add_html_header(string_header)` [returns self]  
 	eg `<my-header-tag content="my-content">`
 * `add_link_header([string_param=>string_value])` [returns self]  
-	adds eg `<link string_param="string_value">` to the `<head>`
+	adds eg `<link string_param="string_value">` to the `<head>`  
+	**note:** if the `string_value` is null (`add_link_header([string_param=>null])`) it will be ignored, eg `<link string_param>`
 * `add_meta_name_header(string_name, string_content)` [returns self]  
 	`<meta name="string_name" content="string_content">`
 * `add_meta_property_header(string_property, string_content)` [returns self]  
@@ -69,6 +71,9 @@ Throws an `basic_template_exception` on error
 	default: `false`
 * **[static]** `set_templating_engine(callable_callback)` [returns self]  
 	use the provided callback instead of the default `require`/`readfile`
+* **[static]** `set_csp_in_headers(bool_value)` [returns self]  
+	set CSP in HTTP header instead of `<meta>` tag  
+	default: `false`
 * `set_variable(string_variable, value)` [returns self]  
 	add value to registry  
 	see [Variables](#variables)
@@ -125,6 +130,7 @@ Create a new directory, e.g. `my_view` and add the required files to it.
 	$view['_title']='Page title';
 	$view['_meta_description']='Page description';
 	$view['_meta_robots']='index,follow';
+	$view['_html_headers'].='<link rel="canonical" href="'.(empty($_SERVER['HTTPS']) ? 'http' : 'https').'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].'">';
 
 	// additional settings
 	$view['_meta_name']['my_meta_name']='my_meta_content';
@@ -266,13 +272,12 @@ basic_template::set_templating_engine(function($file, $view){
 	// $file is the full path to the file from the view or quick_view method
 	// and $view comes from template_config.php
 
-	echo lv_hlp_view
-	::	set_cache_path(VAR_CACHE.'/lv_hlp_view')
-	::	set_view_path(dirname($file))
-	::	view(
-			basename($file, '.php'),
-			$view
-		);
+	echo lv_hlp_view(
+		basename($file, '.php'),
+		$view,
+		dirname($file),
+		VAR_CACHE.'/lv_hlp_view'
+	);
 });
 ```
 `page_content.blade.php` (not `page_content.php`) file will look like this:

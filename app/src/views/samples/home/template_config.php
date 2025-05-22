@@ -4,6 +4,8 @@
 	require APP_LIB.'/basic_template_config.php';
 	basic_template_config($view, static::class)
 
+	::	cache('canonical', (empty($_SERVER['HTTPS']) ? 'http' : 'https').'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'])
+
 	::	csp('img-src', 'data:')
 	::	csp('style-src', '\'sha256-7RVXSGMKV/qUEAumoIuxc24YyJuEx0WkvzWG3GCeTvQ=\'')
 	::	csp('style-src', '\'sha256-CCRU8y0C0FCtxUKmrcBZEZ9CMybYX9owafow9yrdZ0Y=\'') // minified
@@ -14,9 +16,10 @@
 	::	title('Main page')
 	::	meta_description('PHP-JS-CSS web toolkit - a set of tools and libraries that you can use in your project')
 	::	meta_robots('index,follow')
+	::	link_canonical(basic_template_cache('canonical'))
 	::	scripts(app_template::get_public_dir_url().'/assets/sendNotification.js')
 
-	::	og('url', (empty($_SERVER['HTTPS']) ? 'http' : 'https').'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'])
+	::	og('url', basic_template_cache('canonical'))
 	::	og('type', 'website')
 	::	og('site_name', 'PHP JS CSS Web Toolkit App')
 

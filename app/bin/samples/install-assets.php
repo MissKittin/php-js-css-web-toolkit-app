@@ -19,7 +19,7 @@
 	}
 
 	if(!defined('APP_STDLIB'))
-		require __DIR__.'/../lib/stdlib.php';
+		require __DIR__.'/../../lib/stdlib.php';
 
 	echo ' -> Including copy_recursive.php';
 		if(@(include TK_LIB.'/copy_recursive.php') === false)
@@ -57,9 +57,11 @@
 		$fc[0][1].'/login/templates/default/assets/login_default_bright.css',
 		$fc[0][1].'/login/templates/default/assets/login_default_dark.css',
 		$fc[0][1].'/login/templates/materialized/assets/login_materialized.css',
+		$fc[0][1].'/login/templates/materialized/assets/login_materialized_dark.css',
 		$fc[0][1].'/middleware_form/templates/default/assets/middleware_form_default_bright.css',
 		$fc[0][1].'/middleware_form/templates/default/assets/middleware_form_default_dark.css',
 		$fc[0][1].'/middleware_form/templates/materialized/assets/middleware_form_materialized.css',
+		$fc[0][1].'/middleware_form/templates/materialized/assets/middleware_form_materialized_dark.css',
 		$fc[0][2].'/simpleblog_materialized.css'
 	];
 	$files_nix=[
@@ -70,9 +72,11 @@
 		$fc[1][1].'/login/templates/default/assets/login_default_bright.css',
 		$fc[1][1].'/login/templates/default/assets/login_default_dark.css',
 		$fc[1][1].'/login/templates/materialized/assets/login_materialized.css',
+		$fc[1][1].'/login/templates/materialized/assets/login_materialized_dark.css',
 		$fc[1][1].'/middleware_form/templates/default/assets/middleware_form_default_bright.css',
 		$fc[1][1].'/middleware_form/templates/default/assets/middleware_form_default_dark.css',
 		$fc[1][1].'/middleware_form/templates/materialized/assets/middleware_form_materialized.css',
+		$fc[1][1].'/middleware_form/templates/materialized/assets/middleware_form_materialized_dark.css',
 		$fc[1][2].'/simpleblog_materialized.css'
 	];
 	$files_win=[
@@ -83,9 +87,11 @@
 		$fc[2][1].'\\login\\templates\\default\\assets\\login_default_bright.css',
 		$fc[2][1].'\\login\\templates\\default\\assets\\login_default_dark.css',
 		$fc[2][1].'\\login\\templates\\materialized\\assets\\login_materialized.css',
+		$fc[2][1].'\\login\\templates\\materialized\\assets\\login_materialized_dark.css',
 		$fc[2][1].'\\middleware_form\\templates\\default\\assets\\middleware_form_default_bright.css',
 		$fc[2][1].'\\middleware_form\\templates\\default\\assets\\middleware_form_default_dark.css',
 		$fc[2][1].'\\middleware_form\\templates\\materialized\\assets\\middleware_form_materialized.css',
+		$fc[2][1].'\\middleware_form\\templates\\materialized\\assets\\middleware_form_materialized_dark.css',
 		$fc[2][2].'\\simpleblog_materialized.css'
 	];
 
@@ -99,16 +105,16 @@
 			}
 		break;
 		case 'ln':
-			@symlink(basename(__FILE__), './bin/install-assets-test');
+			@symlink(basename(__FILE__), './bin/samples/install-assets-test');
 
-			if(@readlink('./bin/install-assets-test') === false)
+			if(@readlink('./bin/samples/install-assets-test') === false)
 			{
 				echo 'Cannot create symlink'.PHP_EOL;
-				@unlink('./bin/install-assets-test');
+				@unlink('./bin/samples/install-assets-test');
 				exit(1);
 			}
 
-			unlink('./bin/install-assets-test');
+			unlink('./bin/samples/install-assets-test');
 
 			foreach($files_nix as $target)
 			{
@@ -123,14 +129,14 @@
 				exit(1);
 			}
 
-			if(@exec('mklink bin\\install-assets-test '.basename(__FILE__)) !== 'symbolic link created for bin\install-assets-test <<===>> install-assets.php')
+			if(@exec('mklink bin\\samples\\install-assets-test '.basename(__FILE__)) !== 'symbolic link created for bin\samples\install-assets-test <<===>> install-assets.php')
 			{
 				echo 'mklink failed'.PHP_EOL;
-				@unlink('bin\\install-assets-test');
+				@unlink('bin\\samples\'install-assets-test');
 				exit(1);
 			}
 
-			unlink('bin\\install-assets-test');
+			unlink('bin\\samples\\install-assets-test');
 
 			foreach($files_win as $target)
 			{

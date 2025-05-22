@@ -4,6 +4,7 @@
 	* [Application standard library](#application-standard-library)
 	* [Removing unused toolkit libraries](#removing-unused-toolkit-libraries)
 	* [Upload tmp directory](#upload-tmp-directory)
+* [Upgrading](#upgrading)
 * [Creating The project](#creating-the-project)
 	* [Toolkit libraries used by extra tools](#toolkit-libraries-used-by-extra-tools)
 	* [GNU GPL](#gnu-gpl)
@@ -20,14 +21,19 @@
 		* [The application](#the-application)
 		* [The Composer](#the-composer)
 	* [Installing Composer](#installing-composer)
+	* [`mbstring` and `iconv` polyfills](#mbstring-and-iconv-polyfills)
 	* [Installing Predis](#installing-predis)
 	* [Memcached without PECL](#memcached-without-pecl)
+	* [PSR-3 (logger interface)](#psr-3-logger-interface)
+	* [PSR-11 (dependency injection containers)](#psr-11-dependency-injection-containers)
 * [How to create application](#how-to-create-application)
+	* [.env](#env)
 	* [Debug Bar](#debug-bar)
 	* [Symfony error handler](#symfony-error-handler)
 	* [Templates](#templates)
 	* [Tests](#tests)
-	* [Autoloading](#autoloading)
+	* [Autoloading (toolkit and application)](#autoloading-toolkit-and-application)
+	* [PSR-4 autoloading (application only)](#psr-4-autoloading-application-only)
 	* [Configuring URL routing](#configuring-url-routing)
 	* [Creating assets](#creating-assets)
 	* [Sass von der Less](#sass-von-der-less)
@@ -50,141 +56,9 @@
 * [nginx configuration](#nginx-configuration)
 
 # Toolkit as a composer package
-**Hint:** to simplify this step significantly, see the `php-js-css-web-toolkit-pkg` repository.  
-Toolkit was not intended as a Composer package, but such usage is possible, e.g.:
-```
-{
-    "repositories": [
-        {
-            "type": "package",
-            "package": {
-                "name": "misskittin/php-js-css-web-toolkit",
-                "description": "MissKittin web toolkit",
-                "homepage": "https://github.com/MissKittin/php-js-css-web-toolkit/",
-                "authors": [
-                    {
-                        "name": "MissKittin@GitHub",
-                        "homepage": "https://github.com/MissKittin"
-                    }
-                ],
-                "type": "library",
-                "license": "LGPL-3.0-only",
-                "version": "1",
-                "autoload": {
-                    "files": [
-                        "com/php_polyfill/main.php",
-                        "autoload.php"
-                    ]
-                },
-                "dist": {
-                    "url": "https://github.com/MissKittin/php-js-css-web-toolkit/archive/refs/tags/stable.zip",
-                    "type": "zip"
-                },
-                "require": {
-                    "php": "^7.1 || ^8.0"
-                }
-            }
-        }
-    ],
-    "scripts": {
-        "pre-autoload-dump": [
-            "@mktk remove-gpl -- --yes",
-            "@mktk strip-php-files -- ./vendor/misskittin/php-js-css-web-toolkit --remove-tests --remove-md",
-            "@mktkc php_polyfill mkcache",
-            "@mktk autoloader-generator --in ./vendor/misskittin/php-js-css-web-toolkit/com --in ./vendor/misskittin/php-js-css-web-toolkit/lib --ignore bin/ --out ./vendor/misskittin/php-js-css-web-toolkit/autoload.php"
-        ],
-        "mktk": "@php -r \"array_shift($argv); if(is_file('./vendor/misskittin/php-js-css-web-toolkit/bin/'.$argv[0].'.php')) require './vendor/misskittin/php-js-css-web-toolkit/bin/'.$argv[0].'.php'; else exit(1);\"",
-        "mktkc": "@php -r \"$_com=$argv[1]; array_shift($argv); array_shift($argv); if(is_file('./vendor/misskittin/php-js-css-web-toolkit/com/'.$_com.'/bin/'.$argv[0].'.php')) require './vendor/misskittin/php-js-css-web-toolkit/com/'.$_com.'/bin/'.$argv[0].'.php'; else exit(1);\""
-    },
-    "require": {
-        "misskittin/php-js-css-web-toolkit": "*"
-    }
-}
-
-```
-or if you also want extras:
-```
-{
-    "repositories": [
-        {
-            "type": "package",
-            "package": {
-                "name": "misskittin/php-js-css-web-toolkit",
-                "description": "MissKittin web toolkit",
-                "homepage": "https://github.com/MissKittin/php-js-css-web-toolkit/",
-                "authors": [
-                    {
-                        "name": "MissKittin@GitHub",
-                        "homepage": "https://github.com/MissKittin"
-                    }
-                ],
-                "license": "LGPL-3.0-only",
-                "version": "1",
-                "autoload": {
-                    "files": [
-                        "com/php_polyfill/main.php",
-                        "autoload.php"
-                    ]
-                },
-                "dist": {
-                    "url": "https://github.com/MissKittin/php-js-css-web-toolkit/archive/refs/tags/stable.zip",
-                    "type": "zip"
-                },
-                "require": {
-                    "php": "^7.1 || ^8.0"
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "misskittin/php-js-css-web-toolkit-extras",
-                "description": "MissKittin web toolkit extras",
-                "homepage": "https://github.com/MissKittin/php-js-css-web-toolkit-extras/",
-                "authors": [
-                    {
-                        "name": "MissKittin@GitHub",
-                        "homepage": "https://github.com/MissKittin"
-                    }
-                ],
-                "license": "LGPL-3.0-only",
-                "version": "1",
-                "dist": {
-                    "url": "https://github.com/MissKittin/php-js-css-web-toolkit-extras/archive/refs/tags/stable.zip",
-                    "type": "zip"
-                },
-                "require": {
-                    "php": "^7.1 || ^8.0"
-                }
-            }
-        }
-    ],
-    "scripts": {
-        "pre-autoload-dump": [
-            "@mktk remove-gpl -- --yes",
-            "@mktk strip-php-files -- ./vendor/misskittin/php-js-css-web-toolkit --remove-tests --remove-md",
-            "@mktk strip-php-files -- ./vendor/misskittin/php-js-css-web-toolkit-extras --remove-tests --remove-md",
-            "@mktkc php_polyfill mkcache",
-            "@mktk autoloader-generator --in ./vendor/misskittin/php-js-css-web-toolkit/com --in ./vendor/misskittin/php-js-css-web-toolkit/lib --in ./vendor/misskittin/php-js-css-web-toolkit-extras/lib --ignore bin/ --out ./vendor/misskittin/php-js-css-web-toolkit/autoload.php"
-        ],
-        "mktk": "@php -r \"putenv('TK_LIB=./vendor/misskittin/php-js-css-web-toolkit/lib'); array_shift($argv); if(is_file('./vendor/misskittin/php-js-css-web-toolkit/bin/'.$argv[0].'.php')) require './vendor/misskittin/php-js-css-web-toolkit/bin/'.$argv[0].'.php'; else if(is_file('./vendor/misskittin/php-js-css-web-toolkit-extras/bin/'.$argv[0].'.php')) require './vendor/misskittin/php-js-css-web-toolkit-extras/bin/'.$argv[0].'.php'; else exit(1);\"",
-        "mktkc": "@php -r \"$_com=$argv[1]; array_shift($argv); array_shift($argv); if(is_file('./vendor/misskittin/php-js-css-web-toolkit/com/'.$_com.'/bin/'.$argv[0].'.php')) require './vendor/misskittin/php-js-css-web-toolkit/com/'.$_com.'/bin/'.$argv[0].'.php'; else if(is_file('./vendor/misskittin/php-js-css-web-toolkit-extras/com/'.$_com.'/bin/'.$argv[0].'.php')) require './vendor/misskittin/php-js-css-web-toolkit-extras/com/'.$_com.'/bin/'.$argv[0].'.php'; else exit(1);\""
-    },
-    "require": {
-        "misskittin/php-js-css-web-toolkit": "*",
-        "misskittin/php-js-css-web-toolkit-extras": "*"
-    }
-}
-
-```
-If your project is GPL licensed, you can remove the first line in the `scripts` section.  
-PHP does not have an autoloader for functions, so you have to load the function manually:
-```
-<?php
-	load_function('copy_recursive'); // invoke this once
-	copy_recursive($src, $dest);
-?>
-```
+It is possible to install the toolkit as a composer package. The toolkit itself is not integrated with it - the `misskittin/php-js-css-web-toolkit-pkg` plugin is used for this purpose.  
+**Note:** the necessary packages are not available in packagist.org - composer repositories are in the `repo/` branches.  
+You can find more information on this topic in the `php-js-css-web-toolkit-pkg` git repository.
 
 # A few words about design
 The application design does not define the paradigm in which individual parts of the application will be written.  
@@ -251,6 +125,16 @@ Additionally, it provides:
 		$env_var=app_env('ENV_VAR_NAME');
 		$env_var=app_env('ENV_VAR_NAME', 'default_value');
 
+* `app_ioc` function  
+	which provides `ioc_autowired_container`  
+	for more info see `ioc_container.php` library
+
+		app_ioc()
+		->	set('my_class', function($container){
+				return new my_class();
+			});
+		$my_class_instance=app_ioc('my_class');
+
 
 ### Removing unused toolkit libraries
 The standard library will set the `TK_COM`, `TK_LIB`, `TKE_COM` and `TKE_LIB` constants to the `com` and `lib` directories in the project root if it finds them.  
@@ -269,6 +153,19 @@ You can set this path to the application temporary directory:
 upload_tmp_dir = /absolute/path/to/php-js-css-web-toolkit-app/var/tmp
 ```
 You have to do it manually because PHP allows changing this value only in the system `php.ini` file
+
+# Upgrading
+First, review the changes documented in the toolkit's `CHANGELOG.md` (`tk/CHANGELOG.md`) (if you use extras, read their changelog too).  
+Each component has its own changelog - read the ones you use.  
+Then update git submodules:
+```
+git -C tk pull origin stable
+git -C tke pull origin stable
+```
+and modernize the application relying on changelogs and documentation.  
+At the very end you can update the application tools (`app/bin`), components (`app/com`) and libraries (`app/lib`) - the changes are described in the `CHANGELOG.md` file in this directory.  
+**Note:** the method of upgrading application tools, components and libraries is up to you  
+**Note:** application components also have their own changelogs
 
 # Creating The project
 **Hint:** to automate this process, use the `create-php-toolkit-app.php` tool from the `php-js-css-web-toolkit-extras` repository
@@ -352,6 +249,7 @@ export TEST_MYSQL_USER=root # default
 export TEST_MYSQL_PASSWORD=mypassword # not set by default
 
 export TEST_REDIS=yes # default: no
+export TEST_REDIS_PREDIS=yes # connect to redis via predis_connect.php library
 export TEST_REDIS_HOST=127.0.0.1 # default
 export TEST_REDIS_SOCKET=/var/run/redis/redis.sock # has priority over the HOST
 export TEST_REDIS_PORT=6379 # default
@@ -360,6 +258,7 @@ export TEST_REDIS_USER=myuser # not set by default
 export TEST_REDIS_PASSWORD=mypass # not set by default
 
 export TEST_MEMCACHED=yes # default: no
+export TEST_MEMCACHED_CM=yes # use polyfill from clickalicious_memcached.php library
 export TEST_MEMCACHED_HOST=127.0.0.1 # default
 export TEST_MEMCACHED_SOCKET=/var/run/memcached/memcached.sock # has priority over the HOST
 export TEST_MEMCACHED_PORT=11211 # default
@@ -394,7 +293,7 @@ If you want to create your own app, read on.
 All example application code is in `samples` dirs.  
 Remove samples and start developing application: run:
 ```
-php ./app/bin/remove-samples.php
+php ./app/bin/samples/remove-samples.php
 ```
 
 ### Removing documentation
@@ -511,6 +410,18 @@ php ./tk/bin/get-composer.php
 ```
 Composer will be installed in `./tk/bin/composer.phar`
 
+### `mbstring` and `iconv` polyfills
+Due to the fact that some libraries require the `mbstring` extension which is a non-default, you can install the `polyfill-mbstring` package:
+```
+php ./tk/bin/composer.phar require symfony/polyfill-mbstring
+```
+The above package uses the `iconv` extension.  
+If you don't have the ability to enable this extension, you can install the `polyfill-iconv` package:
+```
+php ./tk/bin/composer.phar require symfony/polyfill-iconv
+```
+**Note:** both packages do not conflict with the `php-polyfill` component
+
 ### Installing Predis
 Predis is supported but not directly - the PHPRedis API (`redis` PHP extension) is used by default.  
 For Predis, a `predis_phpredis_proxy` class from the `predis_connect.php` library is needed.  
@@ -534,25 +445,80 @@ php ./tk/bin/composer.phar require clickalicious/memcached.php
 ```
 Then include the `clickalicious_memcached.php` library:
 ```
-if(!class_exists('Memcached'))
-	require APP_LIB.'/clickalicious_memcached.php';
+if(
+	(!class_exists('Memcached'))
+	class_exists('\Clickalicious\Memcached\Client')
+)
+	require TK_LIB.'/clickalicious_memcached.php';
 ```
-This library works with the `memcached_connect.php` and `cache_container.php`.
+This library works with the `memcached_connect.php` and other libraries.
+
+### PSR-3 (logger interface)
+The implementation is relatively simple, an example adapter is provided in the library documentation.  
+For more info, see `logger.php` library and visit [PHP-FIG](https://www.php-fig.org/psr/psr-3/) website.
+
+### PSR-11 (dependency injection containers)
+Implementation of interfaces is possible by inheriting a selected class from the `ioc_container.php` library.  
+However, due to package changes (type hints) I could not adapt this library to support so many PHP versions and at the same time implement the `ContainerInterface`.  
+Therefore, you need to write the adapter yourself and optionally edit the `app_ioc` function in the `app/lib/stdlib.php` library.  
+For more info, see `ioc_container.php` library and visit [PHP-FIG](https://www.php-fig.org/psr/psr-11/) website.
 
 # How to create application
 
+### .env
+Create an `.env` file in the current directory.  
+The following options are available to start with:
+```
+APP_ENV=dev
+APP_PASSWD_HASH=bcrypt
+PGSQL_HOST=127.0.0.1
+PGSQL_PORT=5432
+PGSQL_DBNAME=mydatabasename
+PGSQL_CHARSET=UTF8
+PGSQL_USER=postgres
+PGSQL_PASSWORD=postgres
+MYSQL_HOST=[::1]
+MYSQL_PORT=3306
+MYSQL_DBNAME=mydatabasename
+MYSQL_CHARSET=utf8mb4
+MYSQL_USER=root
+MYSQL_PASSWORD=root
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+REDIS_DBINDEX=0
+MEMCACHED_HOST=127.0.0.1
+MEMCACHED_PORT=11211
+```
+where `APP_ENV` can be `dev` (enables developer tools) or whatever  
+and `APP_PASSWD_HASH` (`setup_login_library.php` library) can be `bcrypt` (default), `argon2i`, `argon2id` or `plaintext` (for debugging purposes only).  
+
+Additionally, the following options are available:
+```
+APP_SESSION_COOKIE_KEY=string-key
+PGSQL_SOCKET=/var/run/postgresql
+MYSQL_SOCKET=/var/run/mysqld/mysqld.sock
+SQLITE_PATH=path/to/database.sqlite3
+REDIS_SOCKET=/var/run/redis/redis.sock
+MEMCACHED_SOCKET=/var/run/memcached/memcached.sock
+```
+
 ### Debug Bar
 A useful function that allows you to have insight into what is happening inside the application.  
-The `app/lib/maximebf_debugbar.php` library provides support for the package and if it is not active it uses a dummy class - there is no need to remove the debugging code.  
+The `tk/lib/maximebf_debugbar.php` and `app/lib/maximebf_debugbar.php` libraries provides support for the package and if it is not active it uses a dummy class - there is no need to remove the debugging code.  
 You just need to install the package:
 ```
-php ./tk/bin/composer.phar require --dev maximebf/debugbar
+php ./tk/bin/composer.phar require --dev php-debugbar/php-debugbar
+```
+For PHP 7.1.0 use version 1.18.1:
+```
+php ./tk/bin/composer.phar require --dev php-debugbar/php-debugbar:1.18.1
 ```
 DebugBar will only be activated if the `APP_ENV` variable is set appropriately:
 ```
 export APP_ENV=dev
 ```
-For more info see the `app/lib/maximebf_debugbar.php` library, [the package's test page](http://phpdebugbar.com/) and its [documentation](http://phpdebugbar.com/docs/).
+**Warning:** the library requires a package version 1.17.0 or newer  
+For more info see `tk/lib/maximebf_debugbar.php` and `app/lib/maximebf_debugbar.php` libraries, [the package's test page](http://phpdebugbar.com/) and its [documentation](http://phpdebugbar.com/docs/).
 
 ### Symfony error handler
 To make exceptions more readable, you can install the error handler from Symfony.  
@@ -577,7 +543,9 @@ Copy them and start creating
 * `app/src/controllers/controller_template.php`
 * `app/src/databases` - default configurations for `pdo connect.php` library
 * `app/src/models/cache_model_template.php`
+* `app/src/models/json_model_template.php`
 * `app/src/models/pdo_model_template.php`
+* `app/src/models/session_model_template.php`
 * `app/src/routes/route_template.php`
 * `app/src/views/view_template`  
 	`template_config_ng.php` file contains configuration template via `app/lib/basic_template_config.php` library  
@@ -592,12 +560,38 @@ If you need a mock built-in function or class, use the `ns_test_template.php` te
 Then edit `$stdlib_path`, add required libraries and put testing code in `// test body` section.  
 To run all tests at once use the `app/bin/run-php-tests.php` tool.
 
-### Autoloading
-You can use the `autoloader-generator.php` tool to generate an autoloader script for functions and classes.  
+### Autoloading (toolkit and application)
+You can generate an autoloader script for toolkit libraries (functions and classes), application, or both using the `autoloader-generator.php` tool.  
 For more info, run:
 ```
 php ./tk/bin/autoloader-generator.php
 ```
+**Warning:** don't forget to include the generated file in the `app/entrypoint.php`
+
+### PSR-4 autoloading (application only)
+The routing, controller and model templates have a namespace (`app/src`) defined in their header.  
+Just uncomment them along with the necessary `use` directives and add the namespace to `composer.json`:
+```
+{
+    "autoload": {
+        "psr-4": {
+            "app\\": "app/"
+        }
+    }
+}
+```
+Then run:
+```
+php ./tk/bin/composer.phar dump-autoload
+```
+In the `routing_template.php` there is a `require` directive for the controller and model:
+```
+require APP_CTRL.'/controller_template.php';
+require APP_MODEL.'/pdo_model_template.php';
+require APP_MODEL.'/cache_model_template.php';
+```
+you don't need this anymore - Composer will take care of it from now on.  
+**Note:** `routing_template.php` is procedural, but there is no objection to converting it to OOP.
 
 ### Configuring URL routing
 Edit `app/entrypoint.php`  
@@ -674,6 +668,7 @@ For more info, run:
 php ./tk/bin/assets-compiler.php 
 php ./tk/bin/file-watch.php
 ```
+**Hint:** preprocessed assets with `.php` extension can be semi-processed assets - use `readfile(__DIR__.'/filename.php');` in `main.php` :)
 
 ### Minifying assets - webdev.sh client
 **Note:** before using it you need to add the extras submodule, see [here](#creating-the-project)
@@ -705,6 +700,7 @@ I can give you a hint: the magic is all in the bundler configuration.
 For example, for VITE you need to add to the `vite.config.js`:
 ```
 import { fileURLToPath, URL } from 'node:url'
+import { defineConfig } from 'vite'
 
 //
 

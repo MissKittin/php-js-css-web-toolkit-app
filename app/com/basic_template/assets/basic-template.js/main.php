@@ -7,7 +7,8 @@ document.addEventListener('DOMContentLoaded', function(){
 			else
 				require __DIR__.'/../../lib/stdlib.php';
 		}
+
+		include TK_LIB.'/getCookie.js';
+		include __DIR__.'/appTheme.js';
 	?>
-	<?php include TK_LIB.'/getCookie.js'; ?>
-	<?php include __DIR__.'/darkTheme.js'; ?>
 });

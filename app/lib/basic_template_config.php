@@ -29,6 +29,84 @@
 	 *  html_headers
 			basic_template_config::html_headers('<my-header tag>')
 			$view['_html_headers'].='<my-header tag>'
+	 *  link
+			basic_template_config::link('REL', [
+				'opt1'=>'val1',
+				'opt2'=>'null'
+			])
+			$view['_html_headers'].='<link rel="REL" opt1="val1" opt2>'
+	 *  link_href
+			basic_template_config::link_rel('stylesheet', 'https://my.server/style.css')
+			$view['_html_headers'].='<link rel="stylesheet" href="https://my.server/style.css">'
+	 *  link_alternate
+			basic_template_config::link_alternate('en', 'https://en.my.server/page')
+			$view['_html_headers'].='<link rel="alternate" hreflang="en" href="https://en.my.server/page">'
+	 *  link_author
+			basic_template_config::link_author('https://my.server/author')
+			$view['_html_headers'].='<link rel="author" href="https://my.server/author">'
+	 *  link_canonical
+			basic_template_config::link_canonical('https://my.server/page')
+			$view['_html_headers'].='<link rel="canonical" href="https://my.server/page">'
+	 *  link_dns_prefetch
+			basic_template_config::link_dns_prefetch('https://another.server/')
+			$view['_html_headers'].='<link rel="dns-prefetch" href="https://another.server/">'
+
+			basic_template_config::link_dns_prefetch('https://another.server/', null)
+			$view['_html_headers'].='<link rel="dns-prefetch" href="https://another.server/" crossorigin>'
+
+			basic_template_config::link_dns_prefetch('https://another.server/', 'anonymous')
+			$view['_html_headers'].='<link rel="dns-prefetch" href="https://another.server/" crossorigin="anonymous">'
+	 *  link_help
+			basic_template_config::link_help('https://my.server/help')
+			$view['_html_headers'].='<link rel="help" href="https://my.server/help">'
+	 *  link_license
+			basic_template_config::link_license('https://my.server/license')
+			$view['_html_headers'].='<link rel="license" href="https://my.server/license">'
+	 *  link_manifest
+			basic_template_config::link_manifest('https://my.server/manifest.json')
+			$view['_html_headers'].='<link rel="manifest" href="https://my.server/manifest.json">'
+	 *  link_modulepreload
+			basic_template_config::link_modulepreload('https://my.server/module.js')
+			$view['_html_headers'].='<link rel="modulepreload" href="https://my.server/module.js">'
+	 *  link_next
+			basic_template_config::link_next('https://my.server/page2')
+			$view['_html_headers'].='<link rel="next" href="https://my.server/page2">'
+	 *  link_pingback
+			basic_template_config::link_pingback('https://my.server/pingback')
+			$view['_html_headers'].='<link rel="pingback" href="https://my.server/pingback">'
+	 *  link_preconnect
+			basic_template_config::link_preconnect('https://another.server/')
+			$view['_html_headers'].='<link rel="preconnect" href="https://another.server/">'
+
+			basic_template_config::link_preconnect('https://another.server/', null)
+			$view['_html_headers'].='<link rel="preconnect" href="https://another.server/" crossorigin>'
+
+			basic_template_config::link_preconnect('https://another.server/', 'anonymous')
+			$view['_html_headers'].='<link rel="preconnect" href="https://another.server/" crossorigin="anonymous">'
+	 *  link_prefetch
+			basic_template_config::link_prefetch('https://my.server/resource.js')
+			$view['_html_headers'].='<link rel="prefetch" href="https://my.server/resource.js">'
+	 *  link_preload
+			basic_template_config::link_preload('https://my.server/resource.webp')
+			$view['_html_headers'].='<link rel="preload" href="https://my.server/resource.webp">'
+
+			basic_template_config::link_preload('https://my.server/resource.css', 'style')
+			$view['_html_headers'].='<link rel="preload" href="https://my.server/resource.css" as="style">'
+
+			basic_template_config::link_preload('https://my.server/resource.webp', null, 'image/webp')
+			$view['_html_headers'].='<link rel="preload" href="https://my.server/resource.webp" type="image/webp">'
+	 *  link_prev
+			basic_template_config::link_prev('https://my.server/page1')
+			$view['_html_headers'].='<link rel="prev" href="https://my.server/page1">'
+	 *  link_privacy_policy
+			basic_template_config::link_privacy_policy('https://my.server/privacy-policy')
+			$view['_html_headers'].='<link rel="privacy-policy" href="https://my.server/privacy-policy">'
+	 *  link_search
+			basic_template_config::link_search('https://my.server/search')
+			$view['_html_headers'].='<link rel="search" href="https://my.server/search">'
+	 *  link_tos
+			basic_template_config::link_tos('https://my.server/terms-of-service')
+			$view['_html_headers'].='<link rel="terms-of-service" href="https://my.server/terms-of-service">'
 	 *  meta_name
 			basic_template_config::meta_name('name', 'value')
 			$view['_meta_name']['name']='value'
@@ -92,9 +170,17 @@
 	 *
 	 * Usage (in template_config.php):
 		basic_template_config($view, static::class) // initialize class
-		::	i_dont_want_this_variable('i_dont_want_this_value')
+
+		::	cache('name', 'cached value') // add to cache
+
+		::	i_dont_want_this_variable('i_dont_want_this_value') // $view['i_dont_want_this_variable']='i_dont_want_this_value'
 		::	my_variable('my value') // $view['my_variable']='my value'
-		::	i_dont_want_this_variable(); // unset($view['i_dont_want_this_variable'])
+		::	i_dont_want_this_variable() // unset($view['i_dont_want_this_variable'])
+
+		::	my_second_variable(basic_template_cache('name', 'defaultvalue')) // fetch from cache and assign (the second argument is optional) ($view['my_second_variable']='cached value')
+		::	my_third_variable(basic_template_config::cache_get('name', 'defaultvalue')); // alternative (the second argument is optional) ($view['my_third_variable']='cached value')
+		::	my_fourth_variable(basic_template_cache('not-cached', 'this is defaultvalue')); // this is not in cache - assign default value ($view['my_fourth_variable']='this is defaultvalue')
+		::	my_fifth_variable(basic_template_cache('not-cached')); // this is not in cache - assign null ($view['my_fourth_variable']=null)
 
 		// some code
 
@@ -106,6 +192,7 @@
 	{
 		protected static $view;
 		protected static $basic_template_class;
+		protected static $cache=[];
 
 		public static function __callStatic($name, $arguments)
 		{
@@ -138,6 +225,21 @@
 			static::$basic_template_class=$basic_template_class;
 
 			return static::class;
+		}
+
+		public static function cache(string $key, $value)
+		{
+			static::$cache[$key]=$value;
+			return static::class;
+		}
+		public static function cache_get(
+			string $key,
+			$default_value=null
+		){
+			if(isset(static::$cache[$key]))
+				return static::$cache[$key];
+
+			return $default_value;
 		}
 
 		public static function csp(string $section, string $parameter)
@@ -177,6 +279,145 @@
 			static::$view['_html_headers'].=$content;
 
 			return static::class;
+		}
+		public static function link(
+			string $rel,
+			array $params
+		){
+			if(!isset(static::$view['_html_headers']))
+				static::$view['_html_headers']='';
+
+			static::$view['_html_headers'].='<link rel="'.$rel.'"';
+
+			foreach($params as $param=>$value)
+			{
+				if($value === null)
+				{
+					static::$view['_html_headers'].=' '.$param;
+					continue;
+				}
+
+				static::$view['_html_headers'].=' '
+				.	$param
+				.	'='
+				.	'"'.$value.'"';
+			}
+
+			static::$view['_html_headers'].='>';
+
+			return static::class;
+		}
+		public static function link_href(
+			string $rel,
+			string $href
+		){
+			return static::link($rel, [
+				'href'=>$href
+			]);
+		}
+		public static function link_alternate(
+			string $hreflang,
+			string $href
+		){
+			return static::link('alternate', [
+				'hreflang'=>$hreflang,
+				'href'=>$href
+			]);
+		}
+		public static function link_author(string $href)
+		{
+			return static::link_href('author', $href);
+		}
+		public static function link_canonical(string $href)
+		{
+			return static::link_href('canonical', $href);
+		}
+		public static function link_dns_prefetch(
+			string $href,
+			$crossorigin=false
+		){
+			if($crossorigin === false)
+				return static::link('dns-prefetch', [
+					'href'=>$href
+				]);
+
+			return static::link('dns-prefetch', [
+				'href'=>$href,
+				'crossorigin'=>$crossorigin
+			]);
+		}
+		public static function link_help(string $href)
+		{
+			return static::link_href('help', $href);
+		}
+		public static function link_license(string $href)
+		{
+			return static::link_href('license', $href);
+		}
+		public static function link_manifest(string $href)
+		{
+			return static::link_href('manifest', $href);
+		}
+		public static function link_modulepreload(string $href)
+		{
+			return static::link_href('modulepreload', $href);
+		}
+		public static function link_next(string $href)
+		{
+			return static::link_href('next', $href);
+		}
+		public static function link_pingback(string $href)
+		{
+			return static::link_href('pingback', $href);
+		}
+		public static function link_preconnect(
+			string $href,
+			$crossorigin=false
+		){
+			if($crossorigin === false)
+				return static::link('preconnect', [
+					'href'=>$href
+				]);
+
+			return static::link('preconnect', [
+				'href'=>$href,
+				'crossorigin'=>$crossorigin
+			]);
+		}
+		public static function link_prefetch(string $href)
+		{
+			return static::link_href('prefetch', $href);
+		}
+		public static function link_preload(
+			string $href,
+			?string $as=null,
+			?string $type=null
+		){
+			$params=['href'=>$href];
+
+			if($as !== null)
+				$params['as']=$as;
+
+			if($type !== null)
+				$params['type']=$type;
+
+			return static::link('preload', $params);
+		}
+		public static function link_prev(string $href)
+		{
+			return static::link_href('prev', $href);
+		}
+		public static function link_privacy_policy(string $href)
+		{
+			return static::link_href('privacy-policy', $href);
+		}
+		public static function link_search(string $href)
+		{
+			return static::link_href('search', $href);
+		}
+		public static function link_tos(string $href)
+		{
+			return static::link_href('terms-of-service', $href);
 		}
 		public static function meta_name(
 			string $name,
@@ -289,10 +530,18 @@
 		&$view,
 		$basic_template_class
 	){
-		return basic_template_config
-		::	_set_view(
-				$view,
-				$basic_template_class
-			);
+		return basic_template_config::_set_view(
+			$view,
+			$basic_template_class
+		);
+	}
+	function basic_template_cache(
+		string $key,
+		$default_value=null
+	){
+		return basic_template_config::cache_get(
+			$key,
+			$default_value
+		);
 	}
 ?>

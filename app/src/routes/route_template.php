@@ -64,9 +64,15 @@
 	//)
 	//	ob_start('ob_gzhandler');
 
+	//require APP_LIB.'/app_session.php';
+	//require APP_LIB.'/app_root_path.php';
 	//if(!app_session
 	//::	add(new app_session_mod_cookie(
-	//		app_env('APP_SESSION_COOKIE_KEY', null)
+	//		app_env('APP_SESSION_COOKIE_KEY', null),
+	//		[
+	//			'cookie_domain'=>strtok($_SERVER['HTTP_HOST'], ':')//,
+	//			//'cookie_path'=>app_root_path('/')
+	//		]
 	//	))
 	//::	add(new app_session_mod_files())
 	//::	session_start())
@@ -92,11 +98,11 @@
 		new pdo_model_template(
 			controller_template::model_params()
 		),
-		new app_template(),
+		new app_template(/*true*/), // true if you use request-response in your controller
 		new cache_model_template(
 			controller_template::cache_params()
 		)
-	)->view('view_template');
+	)->view('view_template'/*, 'page_content.html'*/); // remove if you use request-response in your controller
 
 	//app_template::quick_view('view_template');
 

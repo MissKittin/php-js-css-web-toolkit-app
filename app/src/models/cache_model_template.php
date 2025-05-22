@@ -10,6 +10,7 @@
 	//use cache_driver_redis;
 	//use cache_driver_memcached;
 	//use cache_driver_apcu;
+	//use php_debugbar;
 
 	class cache_model_template
 	{
@@ -44,6 +45,9 @@
 				}
 			);
 
+			// alternative if you use dependency injection
+			//$this->pdo_handle=app_ioc('PDO');
+
 			php_debugbar::get_collector('pdo')->addConnection($this->pdo_handle);
 		}
 		protected function connect_redis()
@@ -51,24 +55,33 @@
 			if(!function_exists('redis_connect'))
 				require TK_LIB.'/redis_connect.php';
 
-			$this->redis_handle=redis_connect($this->database);
+			$this->redis_handle=redis_connect(
+				$this->database
+			);
 		}
 		protected function connect_predis()
 		{
 			if(!function_exists('predis_connect'))
 				require TK_LIB.'/predis_connect.php';
 
-			$this->redis_handle=predis_connect_proxy($this->database);
+			$this->redis_handle=predis_connect_proxy(
+				$this->database
+			);
 		}
 		protected function connect_memcached()
 		{
 			if(!function_exists('memcached_connect'))
 				require TK_LIB.'/memcached_connect.php';
 
-			if(!class_exists('Memcached'))
-				require APP_LIB.'/clickalicious_memcached.php';
+			if(
+				(!class_exists('Memcached')) &&
+				class_exists('\Clickalicious\Memcached\Client')
+			)
+				require TK_LIB.'/clickalicious_memcached.php';
 
-			$this->memcached_handle=memcached_connect($this->database);
+			$this->memcached_handle=memcached_connect(
+				$this->database
+			);
 		}
 
 		protected function connect()

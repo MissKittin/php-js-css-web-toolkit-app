@@ -61,7 +61,7 @@
 
 		return $cache;
 	}
-	function app_params_explode(int $element)
+	function app_params_explode(?int $element=null)
 	{
 		/*
 		 * An app_params() wrapper that converts a string to an array
@@ -74,6 +74,7 @@
 		 *  app_params function is required
 		 *
 		 * Usage:
+			$elements=app_params_explode(); // returns array
 			switch(app_params_explode(0))
 			{
 				case 'arg1': // eg: 'arg1/arg2/arg3' from app_params()
@@ -95,6 +96,9 @@
 
 		if($cache === null)
 			$cache=explode('/', app_params());
+
+		if($element === null)
+			return $cache;
 
 		if(isset($cache[$element]))
 			return $cache[$element];

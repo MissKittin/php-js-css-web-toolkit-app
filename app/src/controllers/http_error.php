@@ -16,10 +16,10 @@
 				if(str_starts_with($_SERVER['HTTP_ACCEPT_LANGUAGE'], $lang))
 					break;
 
-		// this cookie is from app/com/basic_template/assets/basic-template.js/darkTheme.js
+		// this cookie is from app/com/basic_template/assets/basic-template.js/appTheme.js
 			if(
-				isset($_COOKIE['app_dark_theme']) &&
-				($_COOKIE['app_dark_theme'] === 'true')
+				isset($_COOKIE['app_theme']) &&
+				($_COOKIE['app_theme'] === 'dark')
 			){
 				$theme='dark';
 				$dark_theme=true;
