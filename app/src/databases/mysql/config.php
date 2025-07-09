@@ -1,4 +1,7 @@
 <?php
+	if(!defined('APP_STDLIB'))
+		require __DIR__.'/../../../lib/stdlib.php';
+
 	$_cache=basename(__DIR__);
 
 	if(!defined('APP_STDLIB'))

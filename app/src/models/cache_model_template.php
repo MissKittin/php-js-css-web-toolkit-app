@@ -2,8 +2,7 @@
 	//namespace app\src\models;
 
 	//use pdo_instance;
-	//use redis_connect;
-	//use predis_connect;
+	//use redis_instance;
 	//use memcached_connect;
 	//use cache_container;
 	//use cache_driver_pdo;
@@ -14,14 +13,16 @@
 
 	class cache_model_template
 	{
-		//protected $database='sqlite'; // PDO
-		//protected $database=null; // PDO default
-		protected $database=APP_DB.'/redis';
+		//protected $database='sqlite'; // PDO (connect_pdo())
+		//protected $database=null; // PDO/Redis default (connect_pdo())
+		protected $database='redis'; // connect_redis()
+		protected $database_predis='predis'; // connect_redis()
+		//protected $database=APP_DB.'/memcached'; // connect_memcached()
 
 		protected $model_params=null;
 		protected $connected=false;
 		//protected $pdo_handle=null;
-		//protected $redis_handle=null;
+		protected $redis_handle=null;
 		//protected $memcached_handle=null;
 		//protected $cache_container=null;
 
@@ -53,19 +54,15 @@
 		protected function connect_redis()
 		{
 			if(!function_exists('redis_connect'))
-				require TK_LIB.'/redis_connect.php';
+				require APP_LIB.'/redis_instance.php';
 
-			$this->redis_handle=redis_connect(
-				$this->database
-			);
-		}
-		protected function connect_predis()
-		{
-			if(!function_exists('predis_connect'))
-				require TK_LIB.'/predis_connect.php';
-
-			$this->redis_handle=predis_connect_proxy(
-				$this->database
+			$this->redis_handle=redis_instance::get(
+				$this->database,
+				$this->database_predis,
+				function($error)
+				{
+					// $error->getMessage();
+				}
 			);
 		}
 		protected function connect_memcached()
@@ -91,7 +88,6 @@
 
 			//$this->connect_pdo();
 			//$this->connect_redis();
-			//$this->connect_predis();
 			//$this->connect_memcached();
 
 			//if(!class_exists('cache_container'))
@@ -130,6 +126,7 @@
 			//$this->memcached_handle=null;
 
 			//pdo_instance::close();
+			//redis_instance::close();
 
 			$this->connected=false;
 		}

@@ -187,13 +187,14 @@ REDIS_SOCKET=/var/run/redis/redis.sock
 * `app_params.php` - app input parameter manipulation library
 * `app_root_path.php` - print path/URL to application root directory
 * `app_session.php` - modular session backend
-* `app_template.php` - default http headers and a basic_template overlay that saves typing
+* `app_template.php` - default http headers and a `basic_template` overlay that saves typing
 * `basic_template_config.php` - configuration interface
 * `clickalicious_memcached.php` - Memcached polyfill - memcached.php proxy
-* `maximebf_debugbar.php` - Facade for Maxime Bouroumeau-Fuseau's DebugBar
+* `maximebf_debugbar.php` - facade for Maxime Bouroumeau-Fuseau's DebugBar
 * `ob_adapter.php` - modular output buffer
 * `ob_cache.php` - a modular overlay for functions from the `ob_cache.php` library
 * `pdo_instance.php` - get PDO handle
+* `redis_instance.php` - combine `redis_connect.php` and `predis_connect.php` libraries
 * `setup_login_library.php` - includes `sec_login.php` library and sets hashing algorithm
 * `stdlib.php` - application standard library
 
@@ -213,6 +214,7 @@ REDIS_SOCKET=/var/run/redis/redis.sock
 
 ### Tools
 * `app-down.php` - show board "road works"
+* `mkmigration.php` - create new migration from template
 * `replace-public-index-with-link.php`
 * `run-php-tests.php`
 * `session-clean.php` - remove stale sessions (if the application stores the session content in files)

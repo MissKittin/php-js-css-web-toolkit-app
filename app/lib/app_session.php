@@ -44,8 +44,8 @@
 				return true;
 
 			if(
-				(!extension_loaded('openssl')) ||
-				(!extension_loaded('mbstring'))
+				(!function_exists('openssl_random_pseudo_bytes')) ||
+				(!function_exists('mb_strlen'))
 			)
 				return true;
 

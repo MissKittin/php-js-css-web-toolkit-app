@@ -16,8 +16,19 @@
 	 * Quick start (with app_params.php library):
 		if(php_debugbar
 		::	enable((getenv('APP_ENV') === 'dev'))
+		::	custom_debug_bar(function(){ // optional, replace DebugBar\DebugBar with another one, must be after enable()
+				return new DebugBar\StandardDebugBar();
+			})
 		::	set_vendor_dir('./vendor') // must be after enable()
 		::	set_vendor_dir('phar://./vendor.phar/vendor') // you can hit and miss, the one above has priority if hit
+		::	add_resources_dir('my-vendor/my-package', 'src/MyPackage/Resources') // optional, use if you want to route to assets from another package, here: VENDOR_DIR.'/my-vendor/my-package/src/MyPackage/Resources'; must be after enable() and set_vendor_dir()
+		::	set_storage( // optional, see https://php-debugbar.com/docs/storage/
+				(class_exists('\DebugBar\Storage\FileStorage')) ?
+				new DebugBar\Storage\FileStorage(
+					VAR_LOG.'/maximebf_debugbar'
+				) :
+				new maximebf_debugbar_dummy()
+			)
 		::	collectors([ // optional
 				'pdo'=>(class_exists('\DebugBar\DataCollector\PDO\PDOCollector')) ? new DebugBar\DataCollector\PDO\PDOCollector() : new php_debugbar_dummy()
 			])

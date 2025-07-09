@@ -1,4 +1,7 @@
 <?php
+	if(!defined('APP_STDLIB'))
+		require __DIR__.'/../../../lib/stdlib.php';
+
 	$_cache['app_env']=app_env(
 		'SQLITE_PATH',
 		VAR_DB.'/'.basename(__DIR__).'/database.sqlite3'

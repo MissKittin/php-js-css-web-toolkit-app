@@ -19,7 +19,7 @@
 		'port'=>$db_getenv('PGSQL_PORT', '5432'),
 		//'socket'=>'/var/run/postgresql',
 		'db_name'=>$db_getenv('PGSQL_DBNAME', 'sampledb'),
-		'charset'=>$db_getenv('PGSQL_CHARSET', 'UTF8');
+		'charset'=>$db_getenv('PGSQL_CHARSET', 'UTF8'),
 		'user'=>$db_getenv('PGSQL_USER', 'postgres'),
 		'password'=>$db_getenv('PGSQL_PASSWORD', 'postgres'),
 		//'seeded_path'=>$db

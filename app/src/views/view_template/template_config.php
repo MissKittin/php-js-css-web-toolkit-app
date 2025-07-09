@@ -1,62 +1,63 @@
 <?php
 	php_debugbar::get_template_config($view);
 
-	$cache['host_url']=(empty($_SERVER['HTTPS']) ? 'http' : 'https').'://'.$_SERVER['HTTP_HOST'];
-	$cache['canonical']=$cache['host_url'].$_SERVER['REQUEST_URI'];
+	require APP_LIB.'/basic_template_config.php';
+	basic_template_config($view, static::class)
 
-	//$view['_csp_header']['script-src'][]='\'sha256-something\'';
+	// Add to cache
+	::	cache('host_url', (empty($_SERVER['HTTPS']) ? 'http' : 'https').'://'.$_SERVER['HTTP_HOST'])
+	::	cache('canonical', basic_template_cache('host_url').$_SERVER['REQUEST_URI'])
 
-	$view['_lang']='en';
-	$view['_title']='Page title';
-	$view['_meta_description']='Page description';
-	$view['_meta_robots']='index,follow';
-	if(!isset($view['_html_headers'])) $view['_html_headers']=''; $view['_html_headers'].='<link rel="canonical" href="'.$cache['canonical'].'">';
+//	::	csp('script-src', '\'sha256-something\'')
 
-	$view['_opengraph_headers'][]=['url', $cache['canonical']];
-	$view['_opengraph_headers'][]=['type', 'website'];
-	$view['_opengraph_headers'][]=['site_name', 'My Awesome Website'];
-	//$view['_opengraph_headers'][]=['image', $cache['host_url'].app_template::get_public_dir_url().'/assets/website-logo.jpg'];
-	//$view['_opengraph_headers'][]=['image:type', 'image/jpeg'];
-	//$view['_opengraph_headers'][]=['image:width', '400'];
-	//$view['_opengraph_headers'][]=['image:height', '300'];
-	//$view['_opengraph_headers'][]=['image:alt', 'Red Bone'];
-	//$view['_opengraph_headers'][]=['locale:alternate', 'fr_FR'];
+	::	lang('en')
+	::	title('Page title')
+	::	meta_description('Page description')
+	::	meta_robots('index,follow')
+	::	link_canonical(basic_template_cache('canonical')) // get from cache
 
-	//$view['_meta_name']['name']='value';
-	//$view['_meta_property']['property']='value';
-	//$view['_html_headers'].='<my-header tag>'; // note: .= can "PHP Notice:  Undefined variable $view['_html_headers']"
-	//static::$favicon=__DIR__.'/favicon.html';
+	::	og('url', basic_template_cache('canonical'))
+	::	og('type', 'website')
+	::	og('site_name', 'My Awesome Website')
+//	::	og('image', basic_template_cache('host_url').app_template::get_public_dir_url().'/assets/website-logo.jpg')
+//	::	og('image:type', 'image/jpeg')
+//	::	og('image:width', '400')
+//	::	og('image:height', '300')
+//	::	og('image:alt', 'Red Bone')
+//	::	og('locale:alternate', 'fr_FR')
 
-	//$view['_styles'][]=[app_template::get_public_dir_url().'/assets/style.css']; // or ['https://another.server/style.css', 'sha384-hash', 'anonymous']
-	//$view['_scripts'][]=[app_template::get_public_dir_url().'/assets/script.js']; // or ['https://another.server/script.js', 'sha384-hash', 'anonymous']
-	//$view['_scripts'][]=[app_template::get_public_dir_url().'/assets/module.js', null, null, 'module']; // or ['https://another.server/module.js', 'sha384-hash', 'anonymous', 'module']
-	//$view['_scripts_top'][]=[app_template::get_public_dir_url().'/assets/script.js']; // or ['https://another.server/script.js', 'sha384-hash', 'anonymous']
-	//$view['_scripts_top'][]=[app_template::get_public_dir_url().'/assets/script.js', null, null, null, 'defer']; // or ['https://another.server/script.js', 'sha384-hash', 'anonymous', null, 'defer']
-	//$view['_scripts_top'][]=[app_template::get_public_dir_url().'/assets/module.js', null, null, 'module']; // or ['https://another.server/module.js', 'sha384-hash', 'anonymous', 'module']
+//	::	meta_name('name', 'value')
+//	::	meta_property('property', 'value')
+//	::	html_headers('<my-header tag>')
+//	::	favicon(__DIR__.'/favicon.html')
+
+//	::	styles(app_template::get_public_dir_url().'/assets/style.css') // or styles('https://another.server/style.css', 'sha384-hash', 'anonymous')
+//	::	scripts(app_template::get_public_dir_url().'/assets/script.js') // or scripts('https://another.server/script.js', 'sha384-hash', 'anonymous')
+//	::	modules(app_template::get_public_dir_url().'/assets/module.js') // or modules('https://another.server/module.js', 'sha384-hash', 'anonymous')
+//	::	scripts_top(app_template::get_public_dir_url().'/assets/script.js') // or scripts_top('https://another.server/script.js', 'sha384-hash', 'anonymous')
+//	::	scripts_top_op(app_template::get_public_dir_url().'/assets/script.js', 'defer') // or scripts_top_op('https://another.server/script.js', 'defer', 'sha384-hash', 'anonymous')
+//	::	modules_top(app_template::get_public_dir_url().'/assets/module.js') // or modules_top('https://another.server/module.js', 'sha384-hash', 'anonymous')
 
 	// Bootstrap integration - cdn.jsdelivr.net
-		//$view['_csp_header']['style-src'][]='https://cdn.jsdelivr.net';
-		//$view['_csp_header']['script-src'][]='https://cdn.jsdelivr.net';
+//	::	csp('style-src', 'https://cdn.jsdelivr.net')
+//	::	csp('script-src', 'https://cdn.jsdelivr.net')
 
-		//static
-		//::	disable_default_styles()
-		//::	disable_default_scripts();
+//	::	disable_default_styles()
+//	::	disable_default_scripts()
 
-		//$view['_styles'][]=['https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css', 'sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65', 'anonymous'];
-		//$view['_scripts'][]=['https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js', 'sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4', 'anonymous'];
+//	::	styles('https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css', 'sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65', 'anonymous')
+//	::	scripts('https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js', 'sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4', 'anonymous')
 
 	// Bootstrap integration - local assets
-		//static
-		//::	disable_default_styles()
-		//::	disable_default_scripts();
+//	::	disable_default_styles()
+//	::	disable_default_scripts()
 
-		//$view['_styles'][]=[app_template::get_public_dir_url().'/assets/bootstrap.min.css', null, null];
-		//$view['_scripts'][]=[app_template::get_public_dir_url().'/assets/bootstrap.bundle.min.js', null, null];
+//	::	styles(app_template::get_public_dir_url().'/assets/bootstrap.min.css')
+//	::	scripts(app_template::get_public_dir_url().'/assets/bootstrap.bundle.min.js')
 
-	$view['my_function']=function($text)
-	{
-		return '<code>'.$text.'</code>';
-	};
+	::	my_function(function($text){
+			return '<code>'.$text.'</code>';
+		})
 
-	$view['my_variable']='my variables value';
-?>
+	::	my_variable('my variables value')
+; ?>

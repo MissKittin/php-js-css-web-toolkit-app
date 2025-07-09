@@ -36,8 +36,11 @@
 	* [PSR-4 autoloading (application only)](#psr-4-autoloading-application-only)
 	* [Configuring URL routing](#configuring-url-routing)
 	* [Creating assets](#creating-assets)
+	* [JavaScript modules](#javascript-modules)
 	* [Sass von der Less](#sass-von-der-less)
 	* [Creating database configuration for pdo_connect()](#creating-database-configuration-for-pdo_connect)
+	* [Creating database configuration for redis_connect()](#creating-database-configuration-for-redis_connect)
+	* [Creating database configuration for memcached_connect()](#creating-database-configuration-for-memcached_connect)
 	* [Queue worker](#queue-worker)
 	* [WebSockets](#websockets)
 	* [Compiling assets](#compiling-assets)
@@ -548,8 +551,9 @@ Copy them and start creating
 * `app/src/models/session_model_template.php`
 * `app/src/routes/route_template.php`
 * `app/src/views/view_template`  
-	`template_config_ng.php` file contains configuration template via `app/lib/basic_template_config.php` library  
-	to apply, rename `template_config_ng.php` to `template_config.php`
+	`template_config.php` file contains configuration template via `app/lib/basic_template_config.php` library  
+	and the `template_config_og.php` contains an example configuration without it  
+	if you need, you can use both configuration methods
 * `app/tests/ns_test_template.php` - allows you to create mock PHP functions and classes
 * `app/tests/test_template.php`
 
@@ -600,12 +604,36 @@ You can use eg. `uri_router.php` library or `superclosure_router` component.
 ### Creating assets
 See `assets_compiler.php` library.
 
+### JavaScript modules
+First see `assets_compiler.php` library.  
+JavaScript libraries are not modules. You need to add an `export` declaration to them.  
+Use the preprocessed asset: in `main.php`
+```
+<?php
+	if(!defined('APP_STDLIB'))
+	{
+		if(file_exists(__DIR__.'/../../../../lib/stdlib.php'))
+			require __DIR__.'/../../../../lib/stdlib.php';
+		else
+			require __DIR__.'/../../lib/stdlib.php';
+	}
+
+	include TK_LIB.'/beautify.js';
+	include TK_LIB.'/convertBytes.js';
+?>
+
+export {
+	beautify,
+	convertBytes
+};
+```
+
 ### Sass von der Less
 First see `assets_compiler.php` library.  
 You can use any tool you want, in this example we will use node.js:
 ```
-npm install sass
-npm install less
+npm install sass --save-dev
+npm install less --save-dev
 ```
 Use the preprocessed asset: in `main.php`
 ```
@@ -633,6 +661,12 @@ Use the preprocessed asset: in `main.php`
 
 ### Creating database configuration for pdo_connect()
 See `pdo_connect.php` library.
+
+### Creating database configuration for redis_connect()
+See `redis_connect.php` library.
+
+### Creating database configuration for memcached_connect()
+See `memcached_connect.php` library.
 
 ### Queue worker
 It is better to do more time-consuming tasks outside the main application.  
@@ -756,7 +790,7 @@ To offline seed database, run:
 ```
 php ./tk/bin/pdo-connect.php --db ./app/src/databases/database-name
 ```
-If you need a more advanced system, you can use the `pdo_migrate.php` library.  
+If you need a more advanced system, you can use the `pdo_migrate.php` library and `mkmigration.php` app tool.  
 **Note:** database can be seeded automatically on first start (see [app README Debug mode](app/README.md#debug-mode)).
 
 ### Running dev server

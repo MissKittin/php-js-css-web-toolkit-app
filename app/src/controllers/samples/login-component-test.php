@@ -140,7 +140,7 @@
 	{
 		// credentials are valid, check if gd extension is installed for sec_captcha.php
 
-		if(!extension_loaded('gd'))
+		if(!function_exists('imagecreate'))
 		{
 			log_fails()->warn(
 				'gd extension not installed - CAPTCHA test disabled'

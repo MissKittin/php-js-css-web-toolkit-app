@@ -92,9 +92,13 @@
 			);
 
 			if(static::$pdo_handle === false)
+			{
+				static::$pdo_handle=null;
+
 				throw new pdo_instance_exception(
 					'Connection to the database failed'
 				);
+			}
 
 			if(static::$pdo_exceptions)
 			{
